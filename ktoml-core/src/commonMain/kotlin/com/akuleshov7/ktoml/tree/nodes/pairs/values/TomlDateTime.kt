@@ -114,8 +114,14 @@ internal constructor(
             }
         } catch (e: IllegalArgumentException) {
             try {
-                // Local date-time
-                LocalDateTime.parse(this)
+                // Local date-time.
+                // TOML allows a space (or a lowercase `t`) between the date and time parts;
+                // `LocalDateTime.parse` only accepts the canonical `T`, so normalize first.
+                LocalDateTime.parse(
+                    this
+                        .replaceFirst(' ', 'T')
+                        .replaceFirst('t', 'T')
+                )
             } catch (e: IllegalArgumentException) {
                 try {
                     // Local date

@@ -2,6 +2,9 @@ package com.akuleshov7.ktoml.compliance
 
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.parsers.TomlParser
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -18,6 +21,8 @@ import java.util.stream.Stream
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.fail
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Runs the [toml-lang/toml-test](https://github.com/toml-lang/toml-test) compliance suite
@@ -131,6 +136,11 @@ class TomlTestSuite {
                     return
                 }
 
+                if (expected.isTaggedDateTime() && actual.isTaggedDateTime()) {
+                    assertTaggedDateTimeEquals(expected, actual, testPath, jsonPath)
+                    return
+                }
+
                 assertEquals(expected.keys, actual.keys, "Mismatch for $testPath at $jsonPath")
                 expected.keys.forEach { key ->
                     assertJsonEqualsWithFloatTolerance(
@@ -183,6 +193,60 @@ class TomlTestSuite {
     private fun JsonObject.isTaggedFloat(): Boolean =
         (this["type"] as? JsonPrimitive)?.content == "float" && containsKey("value")
 
+    private fun JsonObject.isTaggedDateTime(): Boolean =
+        (this["type"] as? JsonPrimitive)?.content in DATETIME_TYPES && containsKey("value")
+
+    /**
+     * Compares two tagged date-time values semantically rather than textually.
+     *
+     * toml-test's reference comparator decodes date-time values and compares the parsed instants,
+     * not their textual form. This tolerates representation differences that are all equally valid,
+     * e.g. fractional-second precision (`.5` vs `.500`) and offset spelling (`Z` vs `+00:00`).
+     * Without this, valid files disagree with each other (`common-27` keeps `.5`, `milliseconds`
+     * normalizes `.6` to `.600`), which no single textual emitter could satisfy at once.
+     */
+    @OptIn(ExperimentalTime::class)
+    private fun assertTaggedDateTimeEquals(
+        expected: JsonObject,
+        actual: JsonObject,
+        testPath: String,
+        jsonPath: String,
+    ) {
+        assertEquals(expected.keys, actual.keys, "Mismatch for $testPath at $jsonPath")
+        assertEquals(expected["type"], actual["type"], "Mismatch for $testPath at $jsonPath.type")
+
+        val type = (expected["type"] as JsonPrimitive).content
+        val expectedValue = expected["value"]?.jsonPrimitive?.content
+            ?: fail("Missing datetime value for $testPath at $jsonPath")
+        val actualValue = actual["value"]?.jsonPrimitive?.content
+            ?: fail("Missing datetime value for $testPath at $jsonPath")
+
+        val expectedKey = canonicalDateTime(type, expectedValue)
+        val actualKey = canonicalDateTime(type, actualValue)
+        if (expectedKey == null || actualKey == null || expectedKey != actualKey) {
+            assertEquals(
+                expectedValue,
+                actualValue,
+                "Datetime mismatch for $testPath at $jsonPath.value",
+            )
+        }
+    }
+
+    /**
+     * Normalizes a tagged date-time [value] of the given [type] to a canonical comparable string.
+     * Returns `null` if the value cannot be parsed, so the caller can fall back to a textual compare.
+     */
+    @OptIn(ExperimentalTime::class)
+    private fun canonicalDateTime(type: String, value: String): String? = runCatching {
+        when (type) {
+            "datetime" -> Instant.parse(value).toString()
+            "datetime-local" -> LocalDateTime.parse(value).toString()
+            "date-local" -> LocalDate.parse(value).toString()
+            "time-local" -> LocalTime.parse(value).toString()
+            else -> null
+        }
+    }.getOrNull()
+
     private fun floatValuesMatch(expected: String, actual: String): Boolean {
         if (expected.isTomlTestNaN() && actual.isTomlTestNaN()) {
             return true
@@ -201,6 +265,10 @@ class TomlTestSuite {
         "inf", "+inf" -> Double.POSITIVE_INFINITY
         "-inf" -> Double.NEGATIVE_INFINITY
         else -> value.toDoubleOrNull()
+    }
+
+    private companion object {
+        private val DATETIME_TYPES = setOf("datetime", "datetime-local", "date-local", "time-local")
     }
 }
 
