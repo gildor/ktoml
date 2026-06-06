@@ -98,14 +98,17 @@ internal constructor(
         @OptIn(ExperimentalTime::class)
         private fun String.parseToDateTime(): Any = try {
             // Offset date-time
-            // TOML spec allows a space instead of the T, try replacing the first space by a T
+            // TOML spec allows a space instead of the T, try replacing the first space by a T.
+            // TOML 1.1 makes the seconds component optional, so pad an omitted `:SS` with `:00`
+            // before delegating to the stricter `Instant.parse`.
             val normalized = this
                 .replaceFirst(' ', 'T')
                 .replaceFirst('t', 'T')
                 .replaceFirst('z', 'Z')
+                .padOffsetSeconds()
             val instant = Instant.parse(normalized)
             if (normalized.hasExplicitOffset()) {
-                TomlOffsetDateTime(this, instant)
+                TomlOffsetDateTime(normalized, instant)
             } else {
                 instant
             }
@@ -130,6 +133,26 @@ internal constructor(
                 return false
             }
             return indexOfAny(charArrayOf('+', '-'), startIndex = timeStart + 1) != -1
+        }
+
+        /**
+         * Inserts the seconds component (`:00`) into the time part of an offset date-time when it
+         * is omitted (TOML 1.1 allows `HH:MM`). Strings without a `T` time component, or whose time
+         * already carries seconds, are returned unchanged.
+         */
+        private fun String.padOffsetSeconds(): String {
+            val timeStart = indexOf('T')
+            if (timeStart == -1) {
+                return this
+            }
+            val offsetStart = indexOfAny(charArrayOf('Z', '+', '-'), startIndex = timeStart + 1)
+            val timeEnd = if (offsetStart == -1) length else offsetStart
+            val timePart = substring(timeStart + 1, timeEnd)
+            // `HH:MM` has a single colon; `HH:MM:SS` (optionally with a fraction) has two.
+            if (timePart.count { it == ':' } != 1) {
+                return this
+            }
+            return substring(0, timeEnd) + ":00" + substring(timeEnd)
         }
     }
 }
