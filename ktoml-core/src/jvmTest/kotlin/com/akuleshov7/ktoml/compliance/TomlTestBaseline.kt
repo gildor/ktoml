@@ -12,7 +12,6 @@ package com.akuleshov7.ktoml.compliance
  * | Category | Issue |
  * |----------|-------|
  * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
- * | Array-of-tables structure | [#378](https://github.com/orchestr7/ktoml/issues/378) |
  * | Key names not unquoted | [#379](https://github.com/orchestr7/ktoml/issues/379) |
  * | Parser rejects valid TOML | [#380](https://github.com/orchestr7/ktoml/issues/380) |
  * | Stack overflow on deep nesting | [#381](https://github.com/orchestr7/ktoml/issues/381) |
@@ -37,27 +36,11 @@ sealed interface KnownFailure {
 data object DottedKeyExpansion : KnownFailure {
     override val issue = 377
     override val tests = listOf(
-        "valid/inline-table/key-dotted-01.toml",
         "valid/inline-table/key-dotted-02.toml",
-        "valid/inline-table/key-dotted-04.toml",
         "valid/inline-table/key-dotted-06.toml",
         "valid/key/dotted-01.toml",
         "valid/key/dotted-02.toml",
-        "valid/key/dotted-04.toml",
-        "valid/key/dotted-empty.toml",
         "valid/key/quoted-dots.toml",
-    )
-}
-
-/** Array-of-tables produces wrong AST structure in edge cases */
-data object ArrayOfTablesStructure : KnownFailure {
-    override val issue = 378
-    override val tests = listOf(
-        "valid/array/open-parent-table.toml",
-        "valid/table/array-empty-name.toml",
-        "valid/table/array-implicit.toml",
-        "valid/table/array-implicit-and-explicit-after.toml",
-        "valid/table/array-table-array.toml",
     )
 }
 
@@ -66,11 +49,8 @@ data object KeyNameQuoting : KnownFailure {
     override val issue = 379
     override val tests = listOf(
         "valid/key/space.toml",
-        "valid/multibyte.toml",
         "valid/spec-1.0.0/table-3.toml",
         "valid/table/empty-name.toml",
-        "valid/table/with-literal-string.toml",
-        "valid/table/with-single-quotes.toml",
     )
 }
 
@@ -375,7 +355,6 @@ data object TomlOneOneValidFeatures : KnownFailure {
         "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-29.toml",
         "valid/spec-1.1.0/common-35.toml",
-        "valid/spec-1.1.0/common-40.toml",
     )
 }
 
@@ -395,7 +374,6 @@ data object TomlOneOneMissingValidation : KnownFailure {
  */
 val allKnownFailures: List<KnownFailure> = listOf(
     DottedKeyExpansion,
-    ArrayOfTablesStructure,
     KeyNameQuoting,
     ValidTomlRejected,
     StackOverflowOnNesting,
