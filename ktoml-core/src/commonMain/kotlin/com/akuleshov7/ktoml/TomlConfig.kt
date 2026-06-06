@@ -10,6 +10,10 @@ package com.akuleshov7.ktoml
  * @property allowEmptyToml Whether empty toml can be processed, if false - will throw an exception
  * @property allowEscapedQuotesInLiteralStrings Whether to allow/prohibit escaping of single quotes in literal strings
  * @property ignoreDefaultValues Whether to ignore default values
+ * @property allowTableRedefinition Whether to allow redefining/duplicating tables and keys (e.g.
+ *   declaring `[table]` twice or extending an already-defined table with dotted keys). The TOML
+ *   spec forbids this, but ktoml has historically accepted it; set to `false` (as [compliant] does)
+ *   for spec-conformant rejection.
  */
 public data class TomlInputConfig(
     public val ignoreUnknownNames: Boolean = false,
@@ -18,6 +22,7 @@ public data class TomlInputConfig(
     public val allowEmptyToml: Boolean = true,
     public val allowEscapedQuotesInLiteralStrings: Boolean = true,
     public val ignoreDefaultValues: Boolean = false,
+    public val allowTableRedefinition: Boolean = true,
 ) {
     public companion object {
         /**
@@ -36,7 +41,8 @@ public data class TomlInputConfig(
                 allowEmptyValues = false,
                 allowNullValues = false,
                 allowEmptyToml,
-                allowEscapedQuotesInLiteralStrings = false
+                allowEscapedQuotesInLiteralStrings = false,
+                allowTableRedefinition = false,
             )
     }
 }

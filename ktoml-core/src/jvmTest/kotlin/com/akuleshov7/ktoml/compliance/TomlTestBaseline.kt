@@ -86,41 +86,22 @@ data object MissingValidationEncoding : KnownFailure {
     )
 }
 
-/** Missing validation — table redefinition and duplicate keys not rejected */
+/**
+ * Missing validation — table redefinition and duplicate keys not rejected.
+ *
+ * The redefinition / duplicate-key / overwrite / append-with-dotted-keys family is now rejected.
+ * What remains here is purely invalid *table-name syntax* (empty key segments and multiline-string
+ * keys in headers), which belongs to key-name parsing validation rather than table redefinition.
+ */
 data object MissingValidationTableRedefinition : KnownFailure {
     override val issue = 383
     override val tests = listOf(
-        "invalid/table/append-with-dotted-keys-01.toml",
-        "invalid/table/append-with-dotted-keys-02.toml",
-        "invalid/table/append-with-dotted-keys-03.toml",
-        "invalid/table/append-with-dotted-keys-04.toml",
-        "invalid/table/append-with-dotted-keys-05.toml",
-        "invalid/table/append-with-dotted-keys-06.toml",
         "invalid/table/append-with-dotted-keys-07.toml",
-        "invalid/table/append-with-dotted-keys-08.toml",
-        "invalid/table/array-implicit.toml",
         "invalid/table/dot.toml",
         "invalid/table/dotdot.toml",
-        "invalid/table/duplicate-key-01.toml",
-        "invalid/table/duplicate-key-02.toml",
-        "invalid/table/duplicate-key-03.toml",
-        "invalid/table/duplicate-key-04.toml",
-        "invalid/table/duplicate-key-05.toml",
-        "invalid/table/duplicate-key-06.toml",
-        "invalid/table/duplicate-key-07.toml",
-        "invalid/table/duplicate-key-08.toml",
-        "invalid/table/duplicate-key-09.toml",
-        "invalid/table/duplicate-key-10.toml",
         "invalid/table/empty-implicit-table.toml",
         "invalid/table/multiline-key-01.toml",
         "invalid/table/multiline-key-02.toml",
-        "invalid/table/overwrite-array-in-parent.toml",
-        "invalid/table/overwrite-bool-with-array.toml",
-        "invalid/table/overwrite-with-deep-table.toml",
-        "invalid/table/redefine-01.toml",
-        "invalid/table/redefine-02.toml",
-        "invalid/table/redefine-03.toml",
-        "invalid/table/super-twice.toml",
         "invalid/table/trailing-dot.toml",
     )
 }
@@ -178,8 +159,6 @@ data object MissingValidationKeys : KnownFailure {
     override val tests = listOf(
         "invalid/key/dot.toml",
         "invalid/key/dotdot.toml",
-        "invalid/key/dotted-redefine-table-01.toml",
-        "invalid/key/dotted-redefine-table-02.toml",
         "invalid/key/duplicate-keys-01.toml",
         "invalid/key/duplicate-keys-02.toml",
         "invalid/key/duplicate-keys-03.toml",
@@ -205,16 +184,8 @@ data object MissingValidationInlineTable : KnownFailure {
         "invalid/inline-table/duplicate-key-01.toml",
         "invalid/inline-table/duplicate-key-02.toml",
         "invalid/inline-table/duplicate-key-03.toml",
-        "invalid/inline-table/duplicate-key-04.toml",
-        "invalid/inline-table/overwrite-01.toml",
-        "invalid/inline-table/overwrite-02.toml",
-        "invalid/inline-table/overwrite-03.toml",
-        "invalid/inline-table/overwrite-04.toml",
-        "invalid/inline-table/overwrite-05.toml",
         "invalid/inline-table/overwrite-06.toml",
-        "invalid/inline-table/overwrite-07.toml",
         "invalid/inline-table/overwrite-08.toml",
-        "invalid/inline-table/overwrite-09.toml",
         "invalid/inline-table/overwrite-10.toml",
         "invalid/spec-1.0.0/inline-table-2-0.toml",
         "invalid/spec-1.0.0/inline-table-3-0.toml",
@@ -251,22 +222,7 @@ data object MissingValidationDatetime : KnownFailure {
 data object MissingValidationArrays : KnownFailure {
     override val issue = 383
     override val tests = listOf(
-        "invalid/array/extend-defined-aot.toml",
-        "invalid/array/extending-table.toml",
         "invalid/array/only-comma-01.toml",
-        "invalid/array/tables-01.toml",
-        "invalid/array/tables-02.toml",
-    )
-}
-
-/** Missing validation — TOML 1.1 invalid spec examples that ktoml accepts. Tracked under #373/#383. */
-data object TomlOneOneMissingValidation : KnownFailure {
-    override val issue = 373
-    override val tests = listOf(
-        "invalid/spec-1.1.0/common-46-0.toml",
-        "invalid/spec-1.1.0/common-46-1.toml",
-        "invalid/spec-1.1.0/common-49-0.toml",
-        "invalid/spec-1.1.0/common-50-0.toml",
     )
 }
 
@@ -285,7 +241,6 @@ val allKnownFailures: List<KnownFailure> = listOf(
     MissingValidationStringEscape,
     MissingValidationDatetime,
     MissingValidationArrays,
-    TomlOneOneMissingValidation,
 )
 
 /**
