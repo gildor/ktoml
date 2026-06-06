@@ -8,6 +8,7 @@ import com.akuleshov7.ktoml.utils.newLineChar
 import com.akuleshov7.ktoml.writers.IntegerRepresentation.DECIMAL
 import com.akuleshov7.ktoml.writers.IntegerRepresentation.GROUPED
 
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlOffsetDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -290,6 +291,14 @@ public abstract class TomlEmitter(config: TomlOutputConfig) {
      */
     @OptIn(ExperimentalTime::class)
     public fun emitValue(instant: Instant): TomlEmitter = emit(instant.toString())
+
+    /**
+     * Emits an offset date-time value while preserving its original offset.
+     *
+     * @param offsetDateTime
+     * @return this instance
+     */
+    public fun emitValue(offsetDateTime: TomlOffsetDateTime): TomlEmitter = emit(offsetDateTime.toString())
 
     /**
      * Emits a [LocalDateTime] value.
