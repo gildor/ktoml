@@ -131,6 +131,50 @@ class StringDecoderTest {
     }
 
     @Test
+    fun hexAndEscEscapesInBasicStrings() {
+        // \xHH (TOML 1.1 hex escape, equivalent to \u00HH) and \e (ESC, U+001B)
+        val test = """
+            winpath  = "\xE9"
+            winpath2 = "S\xf8rmirb\xe6ren"
+            quoted   = "\e There is no escape! \e"
+            regex    = "Name\tJos\xE9\nSF."
+        """
+
+        val decoded = Toml.decodeFromString<Literals>(test)
+        assertEquals(
+            Literals(
+                "é",
+                "Sørmirbæren",
+                "\u001B There is no escape! \u001B",
+                "Name\tJosé\nSF."
+            ),
+            decoded
+        )
+    }
+
+    @Test
+    fun hexAndEscEscapesNotAppliedInLiteralStrings() {
+        // literal strings must keep \x and \e verbatim
+        val test = """
+            winpath  = '\xE9'
+            winpath2 = '\e'
+            quoted   = '\x20 \x09'
+            regex    = '\e\xFF'
+        """
+
+        val decoded = Toml.decodeFromString<Literals>(test)
+        assertEquals(
+            Literals(
+                "\\xE9",
+                "\\e",
+                "\\x20 \\x09",
+                "\\e\\xFF"
+            ),
+            decoded
+        )
+    }
+
+    @Test
     fun emptyStringTest() {
         var test = """
                 winpath  = 
