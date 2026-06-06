@@ -250,8 +250,13 @@ public fun String.parseTomlKeyValue(
     config: TomlInputConfig
 ): TomlNode {
     val keyValuePair = this.splitKeyValue(lineNo, config)
+    val value = keyValuePair.second
+    // [{..}, {..}] — a pure array of inline tables is modelled as an array-of-tables.
+    // A mixed array that only starts with an inline table ([{..}, "b", 1]) is a normal array.
+    val isArrayOfInlineTables = value.startsWithIgnoreAllWhitespaces("[{") &&
+            with(TomlInlineTable.Companion) { value.isArrayOfInlineTables() }
     return when {
-        keyValuePair.second.startsWithIgnoreAllWhitespaces("[{") ->
+        isArrayOfInlineTables ->
             TomlInlineTable(
                 keyValuePair, lineNo, comments, inlineComment, config
             )

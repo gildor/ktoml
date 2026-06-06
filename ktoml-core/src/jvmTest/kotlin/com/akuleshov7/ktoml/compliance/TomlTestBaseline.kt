@@ -29,43 +29,11 @@ sealed interface KnownFailure {
     val issueUrl: String get() = "https://github.com/orchestr7/ktoml/issues/$issue"
 }
 
-/** Dotted keys don't always create correct synthetic nested tables */
-data object DottedKeyExpansion : KnownFailure {
-    override val issue = 377
-    override val tests = listOf(
-        "valid/inline-table/key-dotted-02.toml",
-        "valid/inline-table/key-dotted-06.toml",
-    )
-}
-
 /** ktoml rejects valid TOML with ParseException */
 data object ValidTomlRejected : KnownFailure {
     override val issue = 380
     override val tests = listOf(
-        "valid/array/mixed-string-table.toml",
-        "valid/inline-table/key-dotted-05.toml",
-        "valid/inline-table/nest.toml",
         "valid/spec-1.0.0/array-0.toml",
-    )
-}
-
-/**
- * Multiline inline tables crash with "character count -1".
- *
- * Fixed for the common cases (newlines between pairs, trailing commas, nested arrays / multiline
- * strings, ordinary comments, and comments directly after a multiline-string close such as
- * `"""#comment` — comment stripping now tracks multiline-string state across lines).
- *
- * One case remains:
- * - `key-dotted-07`: the crash is fixed (nested `{}`/`[]` no longer break array-of-tables
- *   splitting), but the result is still wrong because dotted keys inside inline tables nested in an
- *   array are not expanded into nested tables. That is dotted-key expansion
- *   ([#377](https://github.com/orchestr7/ktoml/issues/377)), not the multiline-inline-table crash.
- */
-data object MultilineInlineTableCrash : KnownFailure {
-    override val issue = 374
-    override val tests = listOf(
-        "valid/inline-table/key-dotted-07.toml",
     )
 }
 
@@ -291,18 +259,6 @@ data object MissingValidationArrays : KnownFailure {
     )
 }
 
-/**
- * TOML 1.1 valid features ktoml does not yet support (parser rejects or mis-represents them).
- * Tracked under the TOML 1.1 umbrella [#373](https://github.com/orchestr7/ktoml/issues/373):
- * `\x` / `\e` string escapes, seconds-less datetimes, and assorted 1.1 spec examples.
- */
-data object TomlOneOneValidFeatures : KnownFailure {
-    override val issue = 373
-    override val tests = listOf(
-        "valid/spec-1.1.0/common-35.toml",
-    )
-}
-
 /** Missing validation — TOML 1.1 invalid spec examples that ktoml accepts. Tracked under #373/#383. */
 data object TomlOneOneMissingValidation : KnownFailure {
     override val issue = 373
@@ -318,9 +274,7 @@ data object TomlOneOneMissingValidation : KnownFailure {
  * All known failure groups. Used by [TomlTestSuite] to build the lookup map.
  */
 val allKnownFailures: List<KnownFailure> = listOf(
-    DottedKeyExpansion,
     ValidTomlRejected,
-    MultilineInlineTableCrash,
     MissingValidationControlChars,
     MissingValidationEncoding,
     MissingValidationTableRedefinition,
@@ -331,7 +285,6 @@ val allKnownFailures: List<KnownFailure> = listOf(
     MissingValidationStringEscape,
     MissingValidationDatetime,
     MissingValidationArrays,
-    TomlOneOneValidFeatures,
     TomlOneOneMissingValidation,
 )
 
