@@ -5,6 +5,7 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.writers.TomlEmitter
 import kotlin.time.ExperimentalTime
@@ -74,7 +75,7 @@ public class TomlDateTime
 internal constructor(
     override var content: Any
 ) : TomlValue() {
-    public constructor(content: String, lineNo: Int) : this(content.trim().parseToDateTime())
+    public constructor(content: String, lineNo: Int) : this(content.trim().parseToDateTime(lineNo))
 
     override fun write(
         emitter: TomlEmitter,
@@ -95,40 +96,56 @@ internal constructor(
     }
 
     public companion object {
+        private val dateTimeLikeRegex = Regex("""^(?:\d{4}-\d{2}-\d{2}.*|\d{2}:\d{2}.*)$""")
+        private val localDateRegex = Regex("""^\d{4}-\d{2}-\d{2}$""")
+        private val localTimeRegex = Regex("""^\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$""")
+        private val localDateTimeRegex = Regex(
+            """^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$"""
+        )
+        private val offsetDateTimeRegex = Regex(
+            """^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[Zz]|[+-]\d{2}:\d{2})$"""
+        )
+
         @OptIn(ExperimentalTime::class)
-        private fun String.parseToDateTime(): Any = try {
-            // Offset date-time
-            // TOML spec allows a space instead of the T, try replacing the first space by a T.
-            // TOML 1.1 makes the seconds component optional, so pad an omitted `:SS` with `:00`
-            // before delegating to the stricter `Instant.parse`.
-            val normalized = this
-                .replaceFirst(' ', 'T')
-                .replaceFirst('t', 'T')
-                .replaceFirst('z', 'Z')
-                .padOffsetSeconds()
-            val instant = Instant.parse(normalized)
-            if (normalized.hasExplicitOffset()) {
-                TomlOffsetDateTime(normalized, instant)
-            } else {
-                instant
+        private fun String.parseToDateTime(lineNo: Int): Any {
+            if (isDateTimeLike() && !hasValidDateTimeSyntax()) {
+                throw ParseException("Invalid TOML date-time literal: <$this>", lineNo)
             }
-        } catch (e: IllegalArgumentException) {
-            try {
-                // Local date-time.
-                // TOML allows a space (or a lowercase `t`) between the date and time parts;
-                // `LocalDateTime.parse` only accepts the canonical `T`, so normalize first.
-                LocalDateTime.parse(
-                    this
-                        .replaceFirst(' ', 'T')
-                        .replaceFirst('t', 'T')
-                )
+
+            return try {
+                // Offset date-time
+                // TOML spec allows a space instead of the T, try replacing the first space by a T.
+                // TOML 1.1 makes the seconds component optional, so pad an omitted `:SS` with `:00`
+                // before delegating to the stricter `Instant.parse`.
+                val normalized = this
+                    .replaceFirst(' ', 'T')
+                    .replaceFirst('t', 'T')
+                    .replaceFirst('z', 'Z')
+                    .padOffsetSeconds()
+                val instant = Instant.parse(normalized)
+                if (normalized.hasExplicitOffset()) {
+                    TomlOffsetDateTime(normalized, instant)
+                } else {
+                    instant
+                }
             } catch (e: IllegalArgumentException) {
                 try {
-                    // Local date
-                    LocalDate.parse(this)
+                    // Local date-time.
+                    // TOML allows a space (or a lowercase `t`) between the date and time parts;
+                    // `LocalDateTime.parse` only accepts the canonical `T`, so normalize first.
+                    LocalDateTime.parse(
+                        this
+                            .replaceFirst(' ', 'T')
+                            .replaceFirst('t', 'T')
+                    )
                 } catch (e: IllegalArgumentException) {
-                    // Local time
-                    LocalTime.parse(this)
+                    try {
+                        // Local date
+                        LocalDate.parse(this)
+                    } catch (e: IllegalArgumentException) {
+                        // Local time
+                        LocalTime.parse(this)
+                    }
                 }
             }
         }
@@ -140,6 +157,13 @@ internal constructor(
             }
             return indexOfAny(charArrayOf('+', '-'), startIndex = timeStart + 1) != -1
         }
+
+        private fun String.isDateTimeLike(): Boolean = dateTimeLikeRegex.matches(this)
+
+        private fun String.hasValidDateTimeSyntax(): Boolean = offsetDateTimeRegex.matches(this) ||
+                localDateTimeRegex.matches(this) ||
+                localDateRegex.matches(this) ||
+                localTimeRegex.matches(this)
 
         /**
          * Inserts the seconds component (`:00`) into the time part of an offset date-time when it

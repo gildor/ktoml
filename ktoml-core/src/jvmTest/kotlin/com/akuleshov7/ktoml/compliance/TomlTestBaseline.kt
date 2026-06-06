@@ -82,7 +82,6 @@ data object MissingValidationEncoding : KnownFailure {
         "invalid/encoding/bad-utf8-in-multiline-literal.toml",
         "invalid/encoding/bad-utf8-in-string.toml",
         "invalid/encoding/bad-utf8-in-string-literal.toml",
-        "invalid/encoding/ideographic-space.toml",
     )
 }
 
@@ -199,8 +198,6 @@ data object MissingValidationStringEscape : KnownFailure {
     override val issue = 383
     override val tests = listOf(
         "invalid/string/bad-escape-03.toml",
-        "invalid/string/bad-uni-esc-06.toml",
-        "invalid/string/bad-uni-esc-ml-06.toml",
         "invalid/string/multiline-bad-escape-04.toml",
     )
 }
@@ -209,11 +206,7 @@ data object MissingValidationStringEscape : KnownFailure {
 data object MissingValidationDatetime : KnownFailure {
     override val issue = 383
     override val tests = listOf(
-        "invalid/datetime/offset-minus-no-minute.toml",
-        "invalid/datetime/offset-plus-no-minute.toml",
-        "invalid/datetime/second-trailing-dot.toml",
         "invalid/local-time/no-secs.toml",
-        "invalid/local-time/trailing-dot.toml",
         "invalid/local-datetime/no-secs.toml",
     )
 }

@@ -3,6 +3,7 @@ package com.akuleshov7.ktoml.decoders.primitives
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.exceptions.ParseException
+import com.akuleshov7.ktoml.parsers.TomlParser
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.Serializable
 import kotlin.test.Test
@@ -172,6 +173,28 @@ class StringDecoderTest {
             ),
             decoded
         )
+    }
+
+    @Test
+    fun nonScalarUnicodeEscapesAreRejectedDuringParse() {
+        listOf(
+            "bad = \"\\uD800\"",
+            "bad = \"\\U00110000\"",
+            "bad = \"\"\"\\uD801\"\"\"",
+        ).forEach { toml ->
+            assertFailsWith<ParseException> {
+                TomlParser(TomlInputConfig.compliant()).parseString(toml)
+            }
+        }
+    }
+
+    @Test
+    fun ideographicSpaceIsNotTomlWhitespace() {
+        val parser = TomlParser(TomlInputConfig.compliant())
+        assertFailsWith<ParseException> {
+            parser.parseString("\u3000foo = \"bar\"")
+        }
+        parser.parseString("foo = \"bar\u3000baz\"")
     }
 
     @Test
