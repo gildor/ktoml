@@ -45,13 +45,7 @@ data object ValidTomlRejected : KnownFailure {
         "valid/array/mixed-string-table.toml",
         "valid/inline-table/key-dotted-05.toml",
         "valid/inline-table/nest.toml",
-        "valid/key/escapes.toml",
-        "valid/key/quoted-unicode.toml",
-        "valid/key/special-chars.toml",
         "valid/spec-1.0.0/array-0.toml",
-        "valid/spec-1.0.0/keys-1.toml",
-        "valid/table/names.toml",
-        "valid/table/names-with-values.toml",
     )
 }
 
@@ -223,6 +217,7 @@ data object MissingValidationKeys : KnownFailure {
         "invalid/key/duplicate-keys-03.toml",
         "invalid/key/duplicate-keys-04.toml",
         "invalid/key/duplicate-keys-05.toml",
+        "invalid/key/duplicate-keys-06.toml",
         "invalid/key/duplicate-keys-07.toml",
         "invalid/key/duplicate-keys-08.toml",
         "invalid/key/duplicate-keys-09.toml",
@@ -304,7 +299,6 @@ data object MissingValidationArrays : KnownFailure {
 data object TomlOneOneValidFeatures : KnownFailure {
     override val issue = 373
     override val tests = listOf(
-        "valid/spec-1.1.0/common-4.toml",
         "valid/spec-1.1.0/common-35.toml",
     )
 }

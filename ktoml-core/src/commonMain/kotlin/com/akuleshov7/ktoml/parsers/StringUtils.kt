@@ -11,6 +11,12 @@ import com.akuleshov7.ktoml.utils.newLineChar
 private const val MULTILINE_STRING_QUOTE_LENGTH = 3
 
 /**
+ * Callback invoked for every character while scanning a key string: receives the character and
+ * whether it lies inside a quoted segment.
+ */
+private typealias KeyCharAction = (ch: Char, insideQuotes: Boolean) -> Unit
+
+/**
  * Splitting dot-separated string to the list of tokens:
  * a.b.c -> [a, b, c]; a."b.c".d -> [a, "b.c", d];
  *
@@ -21,29 +27,16 @@ internal fun String.splitKeyToTokens(lineNo: Int): List<String> {
     this.validateQuotes(lineNo)
     this.validateSymbols(lineNo)
 
-    var singleQuoteIsClosed = true
-    var doubleQuoteIsClosed = true
-    val dotSeparatedParts: MutableList<String> = mutableListOf()
-    var currentPart = StringBuilder()
     // simple split() method won't work here, because in such case we could break following keys:
     // a."b.c.d".e (here only three tables: a/"b.c.d"/and e)
-    this.forEach { ch ->
-        when (ch) {
-            '\'' -> {
-                singleQuoteIsClosed = !singleQuoteIsClosed
-                currentPart.append(ch)
-            }
-            '\"' -> {
-                doubleQuoteIsClosed = !doubleQuoteIsClosed
-                currentPart.append(ch)
-            }
-            '.' -> if (singleQuoteIsClosed && doubleQuoteIsClosed) {
-                dotSeparatedParts.add(currentPart.toString().trim())
-                currentPart = StringBuilder()
-            } else {
-                currentPart.append(ch)
-            }
-            else -> currentPart.append(ch)
+    val dotSeparatedParts: MutableList<String> = mutableListOf()
+    var currentPart = StringBuilder()
+    scanKeyChars { ch, insideQuotes ->
+        if (ch == '.' && !insideQuotes) {
+            dotSeparatedParts.add(currentPart.toString().trim())
+            currentPart = StringBuilder()
+        } else {
+            currentPart.append(ch)
         }
     }
 
@@ -369,10 +362,13 @@ private fun String.validateSpaces(lineNo: Int, fullKey: String) {
 }
 
 /**
- * small validation for quotes: each quote should be closed in a key
+ * Validation for quotes: every opening quote in a key must be closed. The scan is quote-aware,
+ * so a single quote that appears inside a basic-quoted key (and vice versa) is treated as content
+ * rather than a delimiter, and an escaped quote (`\"`) inside a basic-quoted key does not count.
  */
 private fun String.validateQuotes(lineNo: Int) {
-    if (this.count { it == '\"' } % 2 != 0 || this.count { it == '\'' } % 2 != 0) {
+    val allQuotesClosed = scanKeyChars { _, _ -> }
+    if (!allQuotesClosed) {
         throw ParseException(
             "Not able to parse the key: [$this] as it does not have closing quote." +
                     " Please note, that you cannot use even escaped quotes in the bare keys.",
@@ -383,34 +379,73 @@ private fun String.validateQuotes(lineNo: Int) {
 
 /**
  * validate that bare key parts (not quoted) contain only valid symbols A..Z, a..z, 0..9, -, _
+ *
+ * The scan is quote-aware: characters inside basic (`"`) or literal (`'`) quoted parts are not
+ * validated, and a backslash escape (e.g. `\"`) inside a basic-quoted part is skipped so the
+ * escaped quote is not mistaken for a closing delimiter.
  */
 private fun String.validateSymbols(lineNo: Int) {
-    var singleQuoteIsClosed = true
-    var doubleQuoteIsClosed = true
-    this.trim().forEach { ch ->
-        when (ch) {
-            '\'' -> singleQuoteIsClosed = !singleQuoteIsClosed
-            '\"' -> doubleQuoteIsClosed = !doubleQuoteIsClosed
-            else -> if (doubleQuoteIsClosed && singleQuoteIsClosed &&
-                    // FixMe: isLetterOrDigit is not supported in Kotlin 1.4, but 1.5 is not compiling right now
-                    !setOf('_', '-', '.', '"', '\'', ' ', '\t').contains(ch) && !ch.isLetterOrDigit()
-            ) {
-                throw ParseException(
-                    "Not able to parse the key: [$this] as it contains invalid symbols." +
-                            " In case you would like to use special symbols - use quotes as" +
-                            " it is required by TOML standard: \"My key with special (%, ±) symbols\" = \"value\"",
-                    lineNo
-                )
-            }
+    this.trim().scanKeyChars { ch, insideQuotes ->
+        if (!insideQuotes &&
+                // FixMe: isLetterOrDigit is not supported in Kotlin 1.4, but 1.5 is not compiling right now
+                !setOf('_', '-', '.', ' ', '\t').contains(ch) && !ch.isLetterOrDigit()
+        ) {
+            throw ParseException(
+                "Not able to parse the key: [$this] as it contains invalid symbols." +
+                        " In case you would like to use special symbols - use quotes as" +
+                        " it is required by TOML standard: \"My key with special (%, ±) symbols\" = \"value\"",
+                lineNo
+            )
         }
     }
+}
+
+/**
+ * Walks a (possibly dotted) key string left to right, calling [action] for every character with a
+ * flag telling whether it is currently inside a quoted segment.
+ *
+ * The scan is quote-aware: a literal string (`'...'`) is taken verbatim while a basic string (`"..."`)
+ * honors `\` escapes, so an escaped quote (`\"`) inside a basic string is reported as quoted content
+ * and never mistaken for a closing delimiter. Quote characters themselves and the escaped pair are
+ * reported with `insideQuotes = true`; only bare characters outside any quotes get `false`.
+ *
+ * @param action receives each character and whether it lies inside a quoted segment
+ * @return `true` if every opened quote was closed, `false` if a quote was left open
+ */
+@Suppress("FUNCTION_BOOLEAN_PREFIX")
+private inline fun String.scanKeyChars(action: KeyCharAction): Boolean {
+    var inBasic = false
+    var inLiteral = false
+    var index = 0
+    while (index < length) {
+        val ch = this[index]
+        when {
+            inBasic && ch == '\\' && index + 1 < length -> {
+                action(ch, true)
+                action(this[index + 1], true)
+                index++
+            }
+            ch == '\'' && !inBasic -> {
+                inLiteral = !inLiteral
+                action(ch, true)
+            }
+            ch == '\"' && !inLiteral -> {
+                inBasic = !inBasic
+                action(ch, true)
+            }
+            else -> action(ch, inBasic || inLiteral)
+        }
+        index++
+    }
+    return !inBasic && !inLiteral
 }
 
 private fun Char.isLetterOrDigit() = CharRange('A', 'Z').contains(this) ||
         CharRange('a', 'z').contains(this) ||
         CharRange('0', '9').contains(this)
 
-private fun String.isNotQuoted() = !(this.startsWith("\"") && this.endsWith("\""))
+private fun String.isNotQuoted() = !(this.startsWith("\"") && this.endsWith("\"")) &&
+        !(this.startsWith("'") && this.endsWith("'"))
 
 private fun String.lineBreakLengthAt(index: Int): Int = when {
     index >= length -> 0
