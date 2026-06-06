@@ -141,15 +141,20 @@ data object MultilineStringEscape : KnownFailure {
     )
 }
 
-/** Multiline inline tables crash with "character count -1" */
+/**
+ * Multiline inline tables crash with "character count -1".
+ *
+ * Fixed for the common cases (newlines between pairs, trailing commas, nested arrays / multiline
+ * strings, and ordinary comments). Two edge cases remain:
+ * - `newline-comment`: a comment directly after a multiline-string close (`"""#comment`) is not
+ *   stripped, because comment removal is per-line and cannot tell a closing `"""` from an opening one.
+ * - `key-dotted-07`: dotted keys inside inline tables nested in an array — overlaps dotted-key
+ *   expansion ([#377](https://github.com/orchestr7/ktoml/issues/377)).
+ */
 data object MultilineInlineTableCrash : KnownFailure {
     override val issue = 374
     override val tests = listOf(
-        "valid/inline-table/array-02.toml",
-        "valid/inline-table/array-03.toml",
         "valid/inline-table/key-dotted-07.toml",
-        "valid/inline-table/multiline.toml",
-        "valid/inline-table/newline.toml",
         "valid/inline-table/newline-comment.toml",
     )
 }
@@ -396,7 +401,6 @@ data object TomlOneOneValidFeatures : KnownFailure {
         "valid/spec-1.1.0/common-29.toml",
         "valid/spec-1.1.0/common-35.toml",
         "valid/spec-1.1.0/common-40.toml",
-        "valid/spec-1.1.0/common-47.toml",
     )
 }
 

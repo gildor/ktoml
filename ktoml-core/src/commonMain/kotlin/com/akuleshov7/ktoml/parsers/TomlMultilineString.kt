@@ -6,6 +6,8 @@ import com.akuleshov7.ktoml.parsers.enums.MultilineType
 import com.akuleshov7.ktoml.utils.LinesIteratorWrapper
 import com.akuleshov7.ktoml.utils.newLineChar
 
+private const val TRIPLE_QUOTE_LENGTH = 3
+
 /**
  * @param config
  * @param linesIteratorWrapper - iterator with the rest of the toml data
@@ -35,7 +37,7 @@ internal class TomlMultilineString(
         parseMultiline()
     }
 
-    fun getLine(): String = if (multilineType == MultilineType.ARRAY) {
+    fun getLine(): String = if (multilineType == MultilineType.ARRAY || multilineType == MultilineType.INLINE_TABLE) {
         lines.joinToString(newLineChar().toString()) {
             it.takeBeforeComment(config.allowEscapedQuotesInLiteralStrings)
         }
@@ -114,6 +116,11 @@ internal class TomlMultilineString(
      * @return true if string is a last line of multiline value declaration
      */
     private fun isEndOfMultilineValue(multilineType: MultilineType): Boolean {
+        if (multilineType == MultilineType.INLINE_TABLE) {
+            // An inline table is complete once its braces are balanced. Brace counting ignores
+            // braces inside quotes/strings, so nested arrays and multiline strings are handled.
+            return getLine().inlineTableBraceDepth(config.allowEscapedQuotesInLiteralStrings) <= 0
+        }
         isNested ?: run {
             isNested = hasTwoConsecutiveSymbolsIgnoreWhitespaces(getLine(), multilineType.openSymbols[0])
         }
@@ -189,6 +196,14 @@ internal class TomlMultilineString(
                 return MultilineType.ARRAY
             }
 
+            // TOML 1.1: an inline table whose braces are still open on this line continues onto
+            // the next ones (newline between pairs, trailing comma, or a value that spans lines).
+            if (value.startsWith(MultilineType.INLINE_TABLE.openSymbols) &&
+                    value.inlineTableBraceDepth(config.allowEscapedQuotesInLiteralStrings) > 0
+            ) {
+                return MultilineType.INLINE_TABLE
+            }
+
             // If we have more than 1 combination of (""") - it means that
             // multi-line is declared in one line, and we can handle it as not a multi-line
             if (value.startsWith(MultilineType.BASIC_STRING.openSymbols) && value.getCountOfOccurrencesOfSubstring(MultilineType.BASIC_STRING.openSymbols) == 1
@@ -205,3 +220,43 @@ internal class TomlMultilineString(
         }
     }
 }
+
+/**
+ * Net brace depth (`{` minus `}`) counted outside of quotes and comments. Single, literal and
+ * triple-quoted (multiline) strings are skipped, as is any text after a `#`. A positive result
+ * means a multiline inline table is still open; `<= 0` means its braces are balanced.
+ *
+ * @param allowEscapedQuotesInLiteralStrings value from TomlInputConfig
+ * @return the net brace depth
+ */
+@Suppress("NESTED_BLOCK")
+private fun String.inlineTableBraceDepth(allowEscapedQuotesInLiteralStrings: Boolean): Int {
+    val chars = this.replaceEscaped(allowEscapedQuotesInLiteralStrings)
+    var depth = 0
+    var quote: String? = null
+    var idx = 0
+    while (idx < chars.length) {
+        val symbol = chars[idx]
+        when {
+            quote != null -> if (chars.startsWith(quote, idx)) {
+                idx += quote.lastIndex
+                quote = null
+            }
+            symbol == '#' -> idx = (chars.indexOf(newLineChar(), idx).takeIf { it != -1 } ?: chars.length) - 1
+            symbol == '\"' || symbol == '\'' -> quote = chars.openingQuoteAt(idx, symbol)
+            symbol == '{' -> depth += 1
+            symbol == '}' -> depth -= 1
+            else -> {}
+        }
+        idx += 1
+    }
+    return depth
+}
+
+/** The quote token opening at [idx]: a triple quote if three [symbol]s appear, otherwise a single one. */
+private fun String.openingQuoteAt(idx: Int, symbol: Char): String =
+    if (idx + 2 < length && this[idx + 1] == symbol && this[idx + 2] == symbol) {
+        symbol.toString().repeat(TRIPLE_QUOTE_LENGTH)
+    } else {
+        symbol.toString()
+    }
