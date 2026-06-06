@@ -46,15 +46,12 @@ data object ValidTomlRejected : KnownFailure {
         "valid/datetime/edge.toml",
         "valid/datetime/leap-year.toml",
         "valid/datetime/local.toml",
-        "valid/float/max-int.toml",
-        "valid/float/underscore.toml",
         "valid/inline-table/key-dotted-05.toml",
         "valid/inline-table/nest.toml",
         "valid/key/escapes.toml",
         "valid/key/quoted-unicode.toml",
         "valid/key/special-chars.toml",
         "valid/spec-1.0.0/array-0.toml",
-        "valid/spec-1.0.0/float-1.toml",
         "valid/spec-1.0.0/keys-1.toml",
         "valid/table/names.toml",
         "valid/table/names-with-values.toml",
@@ -311,7 +308,6 @@ data object TomlOneOneValidFeatures : KnownFailure {
     override val issue = 373
     override val tests = listOf(
         "valid/spec-1.1.0/common-4.toml",
-        "valid/spec-1.1.0/common-24.toml",
         "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-35.toml",
     )
