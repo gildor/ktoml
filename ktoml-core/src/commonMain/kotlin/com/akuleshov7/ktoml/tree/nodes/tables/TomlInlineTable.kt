@@ -167,18 +167,16 @@ public class TomlInlineTable internal constructor(
                 return parseInlineArrayOfTables(keyValuePair, lineNo, config)
             }
 
-            val inlineTableValueString = this.trimCurlyBraces().trim()
-            val parsedList = inlineTableValueString
-                .also {
-                    if (it.isEmpty()) {
-                        return listOf(TomlStubEmptyNode(lineNo))
-                    }
-                    if (it.endsWith(",")) {
-                        throw ParseException(
-                            "Trailing commas are not permitted in inline tables: [$this] ", lineNo
-                        )
-                    }
-                }
+            val inlineTableContent = this.trimCurlyBraces().trim()
+            // An empty inline table `{}` is valid, but a lone comma `{,}` is not — so only treat a
+            // truly empty body as the empty table, before stripping the (TOML 1.1) trailing comma.
+            // A stray comma elsewhere (e.g. `x=3,,y=4`) still leaves an empty element that fails.
+            if (inlineTableContent.isEmpty()) {
+                return listOf(TomlStubEmptyNode(lineNo))
+            }
+            val parsedList = inlineTableContent
+                .removeTrailingComma()
+                .trim()
                 .splitInlineTableToKeyValue(config.allowEscapedQuotesInLiteralStrings, lineNo)
                 .map {
                     it.parseTomlKeyValue(lineNo, comments = emptyList(), inlineComment = "", config)
