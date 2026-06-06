@@ -43,24 +43,24 @@ public data class TomlOffsetDateTime(
             return normalized
         }
 
-        val timePart = normalized.substring(timeStart + 1, offsetStart)
+        var timePart = normalized.substring(timeStart + 1, offsetStart)
+
+        // Pad seconds if omitted (TOML 1.1 allows HH:MM without seconds)
+        if (timePart.count { it == ':' } == 1) {
+            timePart += ":00"
+        }
+
         val dotIndex = timePart.indexOf('.')
-        if (dotIndex == -1) {
-            return normalized
+        if (dotIndex != -1) {
+            val fraction = timePart.substring(dotIndex + 1)
+            if (fraction.length < FRACTIONAL_SECOND_PRECISION) {
+                timePart = timePart.substring(0, dotIndex + 1) + fraction.padEnd(FRACTIONAL_SECOND_PRECISION, '0')
+            }
         }
 
-        val fraction = timePart.substring(dotIndex + 1)
-        if (fraction.length >= FRACTIONAL_SECOND_PRECISION) {
-            return normalized
-        }
-
-        val paddedTime = buildString {
-            append(timePart.substring(0, dotIndex + 1))
-            append(fraction.padEnd(FRACTIONAL_SECOND_PRECISION, '0'))
-        }
         return buildString {
             append(normalized.substring(0, timeStart + 1))
-            append(paddedTime)
+            append(timePart)
             append(normalized.substring(offsetStart))
         }
     }
@@ -96,33 +96,34 @@ internal constructor(
 
     public companion object {
         @OptIn(ExperimentalTime::class)
-        private fun String.parseToDateTime(): Any = try {
-            // Offset date-time
-            // TOML spec allows a space instead of the T, try replacing the first space by a T.
-            // TOML 1.1 makes the seconds component optional, so pad an omitted `:SS` with `:00`
-            // before delegating to the stricter `Instant.parse`.
+        private fun String.parseToDateTime(): Any {
+            // TOML spec allows a space instead of the T, and case-insensitive t/z.
+            // TOML 1.1 makes the seconds component optional, so pad an omitted `:SS` with `:00`.
             val normalized = this
                 .replaceFirst(' ', 'T')
                 .replaceFirst('t', 'T')
                 .replaceFirst('z', 'Z')
                 .padOffsetSeconds()
-            val instant = Instant.parse(normalized)
-            if (normalized.hasExplicitOffset()) {
-                TomlOffsetDateTime(normalized, instant)
-            } else {
-                instant
-            }
-        } catch (e: IllegalArgumentException) {
-            try {
-                // Local date-time
-                LocalDateTime.parse(this)
+            return try {
+                // Offset date-time
+                val instant = Instant.parse(normalized)
+                if (normalized.hasExplicitOffset()) {
+                    TomlOffsetDateTime(this, instant)
+                } else {
+                    instant
+                }
             } catch (e: IllegalArgumentException) {
                 try {
-                    // Local date
-                    LocalDate.parse(this)
+                    // Local date-time
+                    LocalDateTime.parse(normalized)
                 } catch (e: IllegalArgumentException) {
-                    // Local time
-                    LocalTime.parse(this)
+                    try {
+                        // Local date
+                        LocalDate.parse(normalized)
+                    } catch (e: IllegalArgumentException) {
+                        // Local time
+                        LocalTime.parse(normalized)
+                    }
                 }
             }
         }
@@ -132,7 +133,7 @@ internal constructor(
             if (timeStart == -1) {
                 return false
             }
-            return indexOfAny(charArrayOf('+', '-'), startIndex = timeStart + 1) != -1
+            return indexOfAny(charArrayOf('+', '-', 'Z'), startIndex = timeStart + 1) != -1
         }
 
         /**

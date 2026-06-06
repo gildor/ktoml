@@ -13,7 +13,7 @@ public class TomlDouble
 internal constructor(
     override var content: Any
 ) : TomlValue() {
-    public constructor(content: String, lineNo: Int) : this(content.toDouble())
+    public constructor(content: String, lineNo: Int) : this(content.validateUnderscores().toDouble())
 
     public constructor(content: Double, lineNo: Int) : this(content)
 
@@ -22,5 +22,29 @@ internal constructor(
         config: TomlOutputConfig
     ) {
         emitter.emitValue(content as Double)
+    }
+
+    private companion object {
+        /**
+         * Validates TOML underscore rules and strips underscores.
+         * Underscores must be surrounded by digits on both sides.
+         */
+        private fun String.validateUnderscores(): String {
+            if ('_' !in this) return this
+            val len = length
+            for (i in indices) {
+                if (this[i] == '_') {
+                    if (i == 0 || i == len - 1) {
+                        throw NumberFormatException("Invalid underscore in float: $this")
+                    }
+                    val prev = this[i - 1]
+                    val next = this[i + 1]
+                    if (!prev.isDigit() || !next.isDigit()) {
+                        throw NumberFormatException("Invalid underscore in float: $this")
+                    }
+                }
+            }
+            return replace("_", "")
+        }
     }
 }

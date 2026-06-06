@@ -27,24 +27,33 @@ internal fun String.splitKeyToTokens(lineNo: Int): List<String> {
     var currentPart = StringBuilder()
     // simple split() method won't work here, because in such case we could break following keys:
     // a."b.c.d".e (here only three tables: a/"b.c.d"/and e)
-    this.forEach { ch ->
-        when (ch) {
-            '\'' -> {
+    var i = 0
+    while (i < this.length) {
+        val ch = this[i]
+        when {
+            ch == '\'' && doubleQuoteIsClosed -> {
                 singleQuoteIsClosed = !singleQuoteIsClosed
                 currentPart.append(ch)
             }
-            '\"' -> {
+            ch == '\"' && singleQuoteIsClosed -> {
                 doubleQuoteIsClosed = !doubleQuoteIsClosed
                 currentPart.append(ch)
             }
-            '.' -> if (singleQuoteIsClosed && doubleQuoteIsClosed) {
+            !doubleQuoteIsClosed && ch == '\\' -> {
+                // escape sequence inside basic-quoted key — append both chars
+                currentPart.append(ch)
+                i++
+                if (i < this.length) {
+                    currentPart.append(this[i])
+                }
+            }
+            ch == '.' && singleQuoteIsClosed && doubleQuoteIsClosed -> {
                 dotSeparatedParts.add(currentPart.toString().trim())
                 currentPart = StringBuilder()
-            } else {
-                currentPart.append(ch)
             }
             else -> currentPart.append(ch)
         }
+        i++
     }
 
     val keyPart = currentPart.toString().trim()
@@ -372,7 +381,24 @@ private fun String.validateSpaces(lineNo: Int, fullKey: String) {
  * small validation for quotes: each quote should be closed in a key
  */
 private fun String.validateQuotes(lineNo: Int) {
-    if (this.count { it == '\"' } % 2 != 0 || this.count { it == '\'' } % 2 != 0) {
+    // Walk through the key string tracking quote context.
+    // A quote character inside the other quote type doesn't count.
+    // Escaped quotes (\") inside basic-quoted sections don't count either.
+    var inDouble = false
+    var inSingle = false
+    var i = 0
+    while (i < length) {
+        val ch = this[i]
+        when {
+            !inSingle && !inDouble && ch == '"' -> inDouble = true
+            !inSingle && !inDouble && ch == '\'' -> inSingle = true
+            inDouble && ch == '\\' -> i++ // skip escaped char
+            inDouble && ch == '"' -> inDouble = false
+            inSingle && ch == '\'' -> inSingle = false
+        }
+        i++
+    }
+    if (inDouble || inSingle) {
         throw ParseException(
             "Not able to parse the key: [$this] as it does not have closing quote." +
                     " Please note, that you cannot use even escaped quotes in the bare keys.",
@@ -387,14 +413,16 @@ private fun String.validateQuotes(lineNo: Int) {
 private fun String.validateSymbols(lineNo: Int) {
     var singleQuoteIsClosed = true
     var doubleQuoteIsClosed = true
-    this.trim().forEach { ch ->
-        when (ch) {
-            '\'' -> singleQuoteIsClosed = !singleQuoteIsClosed
-            '\"' -> doubleQuoteIsClosed = !doubleQuoteIsClosed
-            else -> if (doubleQuoteIsClosed && singleQuoteIsClosed &&
-                    // FixMe: isLetterOrDigit is not supported in Kotlin 1.4, but 1.5 is not compiling right now
-                    !setOf('_', '-', '.', '"', '\'', ' ', '\t').contains(ch) && !ch.isLetterOrDigit()
-            ) {
+    var i = 0
+    val trimmed = this.trim()
+    while (i < trimmed.length) {
+        val ch = trimmed[i]
+        when {
+            ch == '\'' && doubleQuoteIsClosed -> singleQuoteIsClosed = !singleQuoteIsClosed
+            ch == '\"' && singleQuoteIsClosed -> doubleQuoteIsClosed = !doubleQuoteIsClosed
+            !doubleQuoteIsClosed && ch == '\\' -> i++ // skip escaped char in basic-quoted key
+            doubleQuoteIsClosed && singleQuoteIsClosed &&
+                    !setOf('_', '-', '.', '"', '\'', ' ', '\t').contains(ch) && !ch.isLetterOrDigit() -> {
                 throw ParseException(
                     "Not able to parse the key: [$this] as it contains invalid symbols." +
                             " In case you would like to use special symbols - use quotes as" +
@@ -403,6 +431,7 @@ private fun String.validateSymbols(lineNo: Int) {
                 )
             }
         }
+        i++
     }
 }
 
@@ -410,7 +439,9 @@ private fun Char.isLetterOrDigit() = CharRange('A', 'Z').contains(this) ||
         CharRange('a', 'z').contains(this) ||
         CharRange('0', '9').contains(this)
 
-private fun String.isNotQuoted() = !(this.startsWith("\"") && this.endsWith("\""))
+private fun String.isNotQuoted() =
+    !(this.startsWith("\"") && this.endsWith("\"")) &&
+    !(this.startsWith("'") && this.endsWith("'"))
 
 private fun String.lineBreakLengthAt(index: Int): Int = when {
     index >= length -> 0
