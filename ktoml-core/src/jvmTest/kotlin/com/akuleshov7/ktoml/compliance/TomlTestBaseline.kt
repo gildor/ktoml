@@ -106,53 +106,6 @@ data object MissingValidationTableRedefinition : KnownFailure {
     )
 }
 
-/** Missing validation — malformed integer literals not rejected */
-data object MissingValidationIntegerFormat : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/integer/double-us.toml",
-        "invalid/integer/invalid-hex-03.toml",
-        "invalid/integer/leading-us.toml",
-        "invalid/integer/leading-us-bin.toml",
-        "invalid/integer/leading-us-hex.toml",
-        "invalid/integer/leading-us-oct.toml",
-        "invalid/integer/leading-zero-01.toml",
-        "invalid/integer/leading-zero-02.toml",
-        "invalid/integer/leading-zero-03.toml",
-        "invalid/integer/leading-zero-sign-01.toml",
-        "invalid/integer/leading-zero-sign-02.toml",
-        "invalid/integer/leading-zero-sign-03.toml",
-        "invalid/integer/trailing-us.toml",
-        "invalid/integer/trailing-us-bin.toml",
-        "invalid/integer/trailing-us-hex.toml",
-        "invalid/integer/trailing-us-oct.toml",
-        "invalid/integer/us-after-bin.toml",
-        "invalid/integer/us-after-hex.toml",
-        "invalid/integer/us-after-oct.toml",
-    )
-}
-
-/** Missing validation — malformed float literals not rejected */
-data object MissingValidationFloatFormat : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/float/exp-dot-02.toml",
-        "invalid/float/exp-dot-03.toml",
-        "invalid/float/leading-dot.toml",
-        "invalid/float/leading-dot-neg.toml",
-        "invalid/float/leading-dot-plus.toml",
-        "invalid/float/leading-zero.toml",
-        "invalid/float/leading-zero-neg.toml",
-        "invalid/float/leading-zero-plus.toml",
-        "invalid/float/nan-capital.toml",
-        "invalid/float/trailing-dot.toml",
-        "invalid/float/trailing-dot-01.toml",
-        "invalid/float/trailing-dot-02.toml",
-        "invalid/float/trailing-dot-min.toml",
-        "invalid/float/trailing-dot-plus.toml",
-    )
-}
-
 /** Missing validation — invalid keys not rejected */
 data object MissingValidationKeys : KnownFailure {
     override val issue = 383
@@ -234,8 +187,6 @@ val allKnownFailures: List<KnownFailure> = listOf(
     MissingValidationControlChars,
     MissingValidationEncoding,
     MissingValidationTableRedefinition,
-    MissingValidationIntegerFormat,
-    MissingValidationFloatFormat,
     MissingValidationKeys,
     MissingValidationInlineTable,
     MissingValidationStringEscape,
