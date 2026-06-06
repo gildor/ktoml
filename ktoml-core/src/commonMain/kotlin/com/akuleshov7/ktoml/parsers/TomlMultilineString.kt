@@ -20,6 +20,12 @@ internal class TomlMultilineString(
 ) {
     private val comments: MutableList<String> = mutableListOf()
     private val lines: MutableList<String> = mutableListOf()
+
+    // For each stored line, the closing delimiter (`"""` or `'''`) of the multiline string it
+    // *begins* inside, or null if it does not begin inside one. A line that begins inside such a
+    // string carries its *closing* delimiter, so any `#` after that close is a real comment that
+    // naive per-line stripping (which would read the leading delimiter as an *opening* one) misses.
+    private val openMultilineStringDelimiterAtLineStart: MutableList<String?> = mutableListOf()
     private val startLineNo = linesIteratorWrapper.lineNo
     private val multilineType = getMultilineType(firstLine, config)
     private var isInMultilineBasic = false
@@ -32,15 +38,16 @@ internal class TomlMultilineString(
         if (multilineType == MultilineType.NOT_A_MULTILINE) {
             throw ParseException("Internal parse exception", startLineNo)
         }
+        openMultilineStringDelimiterAtLineStart.add(null)
         trackMultilineString(firstLine)
         lines.add(firstLine.takeBeforeComment(config.allowEscapedQuotesInLiteralStrings))
         parseMultiline()
     }
 
     fun getLine(): String = if (multilineType == MultilineType.ARRAY || multilineType == MultilineType.INLINE_TABLE) {
-        lines.joinToString(newLineChar().toString()) {
-            it.takeBeforeComment(config.allowEscapedQuotesInLiteralStrings)
-        }
+        lines.mapIndexed { index, line ->
+            line.takeBeforeCommentFrom(openMultilineStringDelimiterAtLineStart.getOrElse(index) { null })
+        }.joinToString(newLineChar().toString())
     } else {
         // we can't have comments inside multi-line basic/literal string
         lines.joinToString(newLineChar().toString())
@@ -53,12 +60,16 @@ internal class TomlMultilineString(
 
         while (linesIteratorWrapper.hasNext()) {
             val line = linesIteratorWrapper.next()
+            // State *before* this line is processed: the closing delimiter of the multiline string
+            // this line opens inside (or null), so we know its leading delimiter is a close.
+            val openDelimiter = openMultilineStringDelimiter()
+            openMultilineStringDelimiterAtLineStart.add(openDelimiter)
             trackMultilineString(line)
 
             if (!stringTypes.contains(multilineType)) {
                 if (!isInMultilineString()) {
-                    comments.add(line.trimComment(config.allowEscapedQuotesInLiteralStrings))
-                    lines.add(line.takeBeforeComment(config.allowEscapedQuotesInLiteralStrings))
+                    comments.add(line.trimCommentFrom(openDelimiter))
+                    lines.add(line.takeBeforeCommentFrom(openDelimiter))
                 } else {
                     // We're inside multiline basic/literal string element, so there's no comments
                     lines.add(line)
@@ -111,6 +122,54 @@ internal class TomlMultilineString(
     ): Boolean = line[index] == quote && line[index + 1] == quote && line[index + 2] == quote
 
     private fun isInMultilineString(): Boolean = isInMultilineBasic || isInMultilineLiteral
+
+    /**
+     * @return the closing delimiter (`"""` or `'''`) of the multiline string that is currently
+     *   open, or null when no multiline basic/literal string is open.
+     */
+    private fun openMultilineStringDelimiter(): String? = when {
+        isInMultilineBasic -> MultilineType.BASIC_STRING.closingSymbols
+        isInMultilineLiteral -> MultilineType.LITERAL_STRING.closingSymbols
+        else -> null
+    }
+
+    /**
+     * Like [takeBeforeComment], but aware of a multiline string left open by a previous line:
+     * when [openDelimiter] is non-null this line begins inside that string, so we first skip past
+     * its closing delimiter and only then look for the comment `#`.
+     *
+     * @param openDelimiter the closing delimiter of a string open at the start of this line, or null
+     * @return the text of this line before its comment (if any)
+     */
+    private fun String.takeBeforeCommentFrom(openDelimiter: String?): String {
+        val searchStart = commentSearchStart(openDelimiter) ?: return this
+        val commentIdx = indexOfNextOutsideQuotes(config.allowEscapedQuotesInLiteralStrings, '#', searchStart)
+        return if (commentIdx == -1) this else substring(0, commentIdx)
+    }
+
+    /**
+     * Like [trimComment], but aware of a multiline string left open by a previous line (see
+     * [takeBeforeCommentFrom]).
+     *
+     * @param openDelimiter the closing delimiter of a string open at the start of this line, or null
+     * @return the comment text of this line (without the `#`), or an empty string if there is none
+     */
+    private fun String.trimCommentFrom(openDelimiter: String?): String {
+        val searchStart = commentSearchStart(openDelimiter) ?: return ""
+        val commentIdx = indexOfNextOutsideQuotes(config.allowEscapedQuotesInLiteralStrings, '#', searchStart)
+        return if (commentIdx == -1) "" else drop(commentIdx + 1).trim()
+    }
+
+    /**
+     * The index from which to start scanning this line for a comment `#`. When [openDelimiter] is
+     * non-null, the line opens inside a multiline string, so scanning must start right after that
+     * string's closing delimiter; null means the close was not found on this line (no comment).
+     */
+    private fun String.commentSearchStart(openDelimiter: String?): Int? {
+        val delimiter = openDelimiter ?: return 0
+        val closeIdx = indexOf(delimiter)
+        return if (closeIdx == -1) null else closeIdx + delimiter.length
+    }
 
     /**
      * @return true if string is a last line of multiline value declaration

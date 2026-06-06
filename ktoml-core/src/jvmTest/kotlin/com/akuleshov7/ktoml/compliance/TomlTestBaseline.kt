@@ -43,7 +43,6 @@ data object ValidTomlRejected : KnownFailure {
     override val issue = 380
     override val tests = listOf(
         "valid/array/mixed-string-table.toml",
-        "valid/array/table-array-string-backslash.toml",
         "valid/datetime/edge.toml",
         "valid/datetime/leap-year.toml",
         "valid/datetime/local.toml",
@@ -66,17 +65,19 @@ data object ValidTomlRejected : KnownFailure {
  * Multiline inline tables crash with "character count -1".
  *
  * Fixed for the common cases (newlines between pairs, trailing commas, nested arrays / multiline
- * strings, and ordinary comments). Two edge cases remain:
- * - `newline-comment`: a comment directly after a multiline-string close (`"""#comment`) is not
- *   stripped, because comment removal is per-line and cannot tell a closing `"""` from an opening one.
- * - `key-dotted-07`: dotted keys inside inline tables nested in an array — overlaps dotted-key
- *   expansion ([#377](https://github.com/orchestr7/ktoml/issues/377)).
+ * strings, ordinary comments, and comments directly after a multiline-string close such as
+ * `"""#comment` — comment stripping now tracks multiline-string state across lines).
+ *
+ * One case remains:
+ * - `key-dotted-07`: the crash is fixed (nested `{}`/`[]` no longer break array-of-tables
+ *   splitting), but the result is still wrong because dotted keys inside inline tables nested in an
+ *   array are not expanded into nested tables. That is dotted-key expansion
+ *   ([#377](https://github.com/orchestr7/ktoml/issues/377)), not the multiline-inline-table crash.
  */
 data object MultilineInlineTableCrash : KnownFailure {
     override val issue = 374
     override val tests = listOf(
         "valid/inline-table/key-dotted-07.toml",
-        "valid/inline-table/newline-comment.toml",
     )
 }
 

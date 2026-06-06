@@ -208,10 +208,13 @@ public class TomlInlineTable internal constructor(
         }
 
         /**
-         *  Split by "}," - but skip all whitespaces between '}' and ','
-         *  Also ignore characters inside strings and keep closing '}' in each value
+         * Splits a `[ {..}, {..} ]` array of inline tables into its top-level `{..}` elements.
+         *
+         * A comma only separates elements when it sits at nesting depth zero (outside every `{}`,
+         * `[]` and string). This is depth-aware, so an element may itself contain nested arrays or
+         * inline tables (e.g. `{a.b = [{c.d = 1}]}`) without the inner `}`/`]` being mistaken for
+         * an element boundary.
          */
-        @Suppress("TOO_LONG_FUNCTION")
         private fun String.splitInlineArrayOfTables(): List<String> {
             val clearedString = this
                 .removePrefix("[")
@@ -219,48 +222,28 @@ public class TomlInlineTable internal constructor(
             val result: MutableList<String> = mutableListOf()
             val current = StringBuilder()
             var openQuoteChar: Char? = null
-            var isCurlyBracesFound = false
+            var depth = 0
 
             clearedString.forEach { currentChar ->
-                // currentChar is inside quotes, so just add it
-                if (openQuoteChar != null && currentChar != openQuoteChar) {
-                    current.append(currentChar)
-                    return@forEach
-                }
-
-                when (currentChar) {
-                    openQuoteChar -> {
+                when {
+                    openQuoteChar != null -> if (currentChar == openQuoteChar) {
                         openQuoteChar = null
-                        current.append(currentChar)
                     }
-
-                    '\"', '\'' -> {
-                        openQuoteChar = currentChar
-                        current.append(currentChar)
-                    }
-
-                    '}' -> {
-                        isCurlyBracesFound = true
-                        current.append(currentChar)
-                    }
-
-                    ',' -> if (isCurlyBracesFound) {
-                        // comma between inline tables
-                        isCurlyBracesFound = false
+                    currentChar == '\"' || currentChar == '\'' -> openQuoteChar = currentChar
+                    currentChar == '{' || currentChar == '[' -> depth++
+                    currentChar == '}' || currentChar == ']' -> depth--
+                    currentChar == ',' && depth == 0 -> {
+                        // comma between top-level inline tables: flush the current element
                         result.add(current.toString().trim())
                         current.clear()
-                    } else {
-                        // comma between inline table values
-                        current.append(currentChar)
+                        return@forEach
                     }
-
-                    else -> if (!isCurlyBracesFound) {
-                        current.append(currentChar)
-                    }
+                    else -> {}
                 }
+                current.append(currentChar)
             }
 
-            // 'current' is blank when array has trailing comma
+            // 'current' is blank when array has a trailing comma
             if (current.isNotBlank()) {
                 result.add(current.toString().trim())
             }
