@@ -20,6 +20,13 @@ internal const val HEX_RADIX = 16
 internal const val SIMPLE_UNICODE_LENGTH = 4
 internal const val SIMPLE_UNICODE_PREFIX = 'u'
 
+// TOML 1.1 hex escape (\xHH) — exactly two hex digits, equivalent to \u00HH
+internal const val HEX_ESCAPE_LENGTH = 2
+internal const val HEX_ESCAPE_PREFIX = 'x'
+
+// TOML 1.1 escape escape (\e) — the ESC control character (U+001B)
+internal const val ESCAPE_CHAR = '\u001B'
+
 /**
  * Converting special escaped symbols like newlines, tabs and unicode symbols to proper characters for decoding
  *
@@ -47,7 +54,8 @@ public fun String.convertSpecialCharacters(lineNo: Int): String {
                 '\\' -> resultString.append('\\')
                 '\'' -> resultString.append('\'')
                 '"' -> resultString.append('"')
-                SIMPLE_UNICODE_PREFIX, COMPLEX_UNICODE_PREFIX ->
+                'e' -> resultString.append(ESCAPE_CHAR)
+                SIMPLE_UNICODE_PREFIX, COMPLEX_UNICODE_PREFIX, HEX_ESCAPE_PREFIX ->
                     offset += resultString.appendEscapedUnicode(this, next, i + 2, lineNo)
 
                 else -> throw UnknownEscapeSymbolsException("\\$next", lineNo)
@@ -77,10 +85,10 @@ public fun StringBuilder.appendEscapedUnicode(
     codeStartIndex: Int,
     lineNo: Int
 ): Int {
-    val nbUnicodeChars = if (marker == SIMPLE_UNICODE_PREFIX) {
-        SIMPLE_UNICODE_LENGTH
-    } else {
-        COMPLEX_UNICODE_LENGTH
+    val nbUnicodeChars = when (marker) {
+        HEX_ESCAPE_PREFIX -> HEX_ESCAPE_LENGTH
+        SIMPLE_UNICODE_PREFIX -> SIMPLE_UNICODE_LENGTH
+        else -> COMPLEX_UNICODE_LENGTH
     }
     if (codeStartIndex + nbUnicodeChars > fullString.length) {
         val invalid = fullString.substring(codeStartIndex - 1)

@@ -311,11 +311,8 @@ data object MissingValidationArrays : KnownFailure {
 data object TomlOneOneValidFeatures : KnownFailure {
     override val issue = 373
     override val tests = listOf(
-        "valid/string/hex-escape.toml",
-        "valid/string/escape-esc.toml",
         "valid/datetime/no-seconds.toml",
         "valid/spec-1.1.0/common-4.toml",
-        "valid/spec-1.1.0/common-12.toml",
         "valid/spec-1.1.0/common-24.toml",
         "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-29.toml",
