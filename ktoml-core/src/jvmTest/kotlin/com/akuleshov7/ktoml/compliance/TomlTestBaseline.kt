@@ -12,7 +12,6 @@ package com.akuleshov7.ktoml.compliance
  * | Category | Issue |
  * |----------|-------|
  * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
- * | Key names not unquoted | [#379](https://github.com/orchestr7/ktoml/issues/379) |
  * | Parser rejects valid TOML | [#380](https://github.com/orchestr7/ktoml/issues/380) |
  * | Multiline string escape handling | [#382](https://github.com/orchestr7/ktoml/issues/382) |
  * | Multiline inline table crash | [#374](https://github.com/orchestr7/ktoml/issues/374) |
@@ -37,19 +36,6 @@ data object DottedKeyExpansion : KnownFailure {
     override val tests = listOf(
         "valid/inline-table/key-dotted-02.toml",
         "valid/inline-table/key-dotted-06.toml",
-        "valid/key/dotted-01.toml",
-        "valid/key/dotted-02.toml",
-        "valid/key/quoted-dots.toml",
-    )
-}
-
-/** Key names retain quote characters in AST name property */
-data object KeyNameQuoting : KnownFailure {
-    override val issue = 379
-    override val tests = listOf(
-        "valid/key/space.toml",
-        "valid/spec-1.0.0/table-3.toml",
-        "valid/table/empty-name.toml",
     )
 }
 
@@ -364,7 +350,6 @@ data object TomlOneOneMissingValidation : KnownFailure {
  */
 val allKnownFailures: List<KnownFailure> = listOf(
     DottedKeyExpansion,
-    KeyNameQuoting,
     ValidTomlRejected,
     MultilineStringEscape,
     MultilineInlineTableCrash,
