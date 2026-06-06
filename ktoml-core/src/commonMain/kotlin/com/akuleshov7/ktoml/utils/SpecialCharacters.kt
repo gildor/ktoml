@@ -9,6 +9,7 @@
 
 package com.akuleshov7.ktoml.utils
 
+import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.UnknownEscapeSymbolsException
 import com.akuleshov7.ktoml.parsers.isLineEndingBackslash
 
@@ -131,6 +132,28 @@ internal fun Char.isControlChar() = this in CharCategory.CONTROL && this != '\t'
  * terminators.
  */
 internal fun Char.isMultilineControlChar() = isControlChar() && this !in "\n\r"
+
+/**
+ * Rejects a bare carriage return inside string content. A `\r` is only allowed as part of a `\r\n`
+ * line ending; a `\r` that is not immediately followed by `\n` is an illegal control character.
+ * CRLF line endings are normalized to LF before parsing, so a surviving lone `\r` is always bare.
+ *
+ * @param lineNo line number of the string for error reporting
+ * @return the original string when it contains no bare carriage return
+ * @throws ParseException if a bare carriage return is found
+ */
+internal fun String.checkNoBareCarriageReturn(lineNo: Int): String {
+    forEachIndexed { index, char ->
+        if (char == '\r' && (index == lastIndex || this[index + 1] != '\n')) {
+            throw ParseException(
+                "A bare carriage return (\\r) is not allowed in a string; it is only permitted" +
+                        " as part of a \\r\\n line ending. Please check: <$this>",
+                lineNo
+            )
+        }
+    }
+    return this
+}
 
 private fun String.escapeControlChars(isMultiline: Boolean): String {
     val isControlChar = if (isMultiline) {
