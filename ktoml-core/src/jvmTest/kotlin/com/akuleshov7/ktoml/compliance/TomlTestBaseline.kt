@@ -37,9 +37,6 @@ data object DottedKeyExpansion : KnownFailure {
     override val tests = listOf(
         "valid/inline-table/key-dotted-02.toml",
         "valid/inline-table/key-dotted-06.toml",
-        "valid/key/dotted-01.toml",
-        "valid/key/dotted-02.toml",
-        "valid/key/quoted-dots.toml",
     )
 }
 
