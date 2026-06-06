@@ -4,7 +4,6 @@ import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
-import com.akuleshov7.ktoml.parsers.convertLineEndingBackslash
 import com.akuleshov7.ktoml.parsers.getCountOfOccurrencesOfSubstring
 import com.akuleshov7.ktoml.parsers.trimMultilineLiteralQuotes
 import com.akuleshov7.ktoml.parsers.trimSingleQuotes
@@ -55,7 +54,7 @@ public class TomlLiteralString internal constructor(
                     } else {
                         contentString
                     }
-                    rawContent.convertLineEndingBackslash()
+                    rawContent
                 }
                 // ====== basic literal string (') =======
                 startsWith("'") && endsWith("'") -> {
