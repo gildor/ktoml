@@ -11,7 +11,6 @@ package com.akuleshov7.ktoml.compliance
  *
  * | Category | Issue |
  * |----------|-------|
- * | Float representation lost | [#376](https://github.com/orchestr7/ktoml/issues/376) |
  * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
  * | Array-of-tables structure | [#378](https://github.com/orchestr7/ktoml/issues/378) |
  * | Key names not unquoted | [#379](https://github.com/orchestr7/ktoml/issues/379) |
@@ -32,15 +31,6 @@ sealed interface KnownFailure {
     val tests: List<String>
 
     val issueUrl: String get() = "https://github.com/orchestr7/ktoml/issues/$issue"
-}
-
-/** Scientific notation lost after parsing to Double */
-data object FloatRepresentationLoss : KnownFailure {
-    override val issue = 376
-    override val tests = listOf(
-        "valid/float/exponent.toml",
-        "valid/spec-1.0.0/float-0.toml",
-    )
 }
 
 /** Dotted keys don't always create correct synthetic nested tables */
@@ -127,15 +117,20 @@ data object MultilineStringEscape : KnownFailure {
     )
 }
 
-/** Multiline inline tables crash with "character count -1" */
+/**
+ * Multiline inline tables crash with "character count -1".
+ *
+ * Fixed for the common cases (newlines between pairs, trailing commas, nested arrays / multiline
+ * strings, and ordinary comments). Two edge cases remain:
+ * - `newline-comment`: a comment directly after a multiline-string close (`"""#comment`) is not
+ *   stripped, because comment removal is per-line and cannot tell a closing `"""` from an opening one.
+ * - `key-dotted-07`: dotted keys inside inline tables nested in an array — overlaps dotted-key
+ *   expansion ([#377](https://github.com/orchestr7/ktoml/issues/377)).
+ */
 data object MultilineInlineTableCrash : KnownFailure {
     override val issue = 374
     override val tests = listOf(
-        "valid/inline-table/array-02.toml",
-        "valid/inline-table/array-03.toml",
         "valid/inline-table/key-dotted-07.toml",
-        "valid/inline-table/multiline.toml",
-        "valid/inline-table/newline.toml",
         "valid/inline-table/newline-comment.toml",
     )
 }
@@ -376,13 +371,11 @@ data object TomlOneOneValidFeatures : KnownFailure {
         "valid/datetime/no-seconds.toml",
         "valid/spec-1.1.0/common-4.toml",
         "valid/spec-1.1.0/common-12.toml",
-        "valid/spec-1.1.0/common-23.toml",
         "valid/spec-1.1.0/common-24.toml",
         "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-29.toml",
         "valid/spec-1.1.0/common-35.toml",
         "valid/spec-1.1.0/common-40.toml",
-        "valid/spec-1.1.0/common-47.toml",
     )
 }
 
@@ -401,7 +394,6 @@ data object TomlOneOneMissingValidation : KnownFailure {
  * All known failure groups. Used by [TomlTestSuite] to build the lookup map.
  */
 val allKnownFailures: List<KnownFailure> = listOf(
-    FloatRepresentationLoss,
     DottedKeyExpansion,
     ArrayOfTablesStructure,
     KeyNameQuoting,
