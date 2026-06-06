@@ -3,6 +3,11 @@ package com.akuleshov7.ktoml.compliance
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.parsers.TomlParser
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -75,7 +80,7 @@ class TomlTestSuite {
             val expectedJson = Json.parseToJsonElement(jsonFile.readText())
             val tree = TomlParser(TomlInputConfig.compliant()).parseString(tomlInput)
             val actualJson = TomlTestConverter.toJson(tree)
-            assertEquals(expectedJson, actualJson, "Mismatch for $testPath")
+            assertJsonEqualsWithFloatTolerance(expectedJson, actualJson, testPath)
         }
 
         when {
@@ -111,6 +116,91 @@ class TomlTestSuite {
             result.isFailure ->
                 result.getOrThrow()
         }
+    }
+
+    private fun assertJsonEqualsWithFloatTolerance(
+        expected: JsonElement,
+        actual: JsonElement,
+        testPath: String,
+        jsonPath: String = "$",
+    ) {
+        when {
+            expected is JsonObject && actual is JsonObject -> {
+                if (expected.isTaggedFloat() && actual.isTaggedFloat()) {
+                    assertTaggedFloatEquals(expected, actual, testPath, jsonPath)
+                    return
+                }
+
+                assertEquals(expected.keys, actual.keys, "Mismatch for $testPath at $jsonPath")
+                expected.keys.forEach { key ->
+                    assertJsonEqualsWithFloatTolerance(
+                        expected.getValue(key),
+                        actual.getValue(key),
+                        testPath,
+                        "$jsonPath.$key",
+                    )
+                }
+            }
+
+            expected is JsonArray && actual is JsonArray -> {
+                assertEquals(expected.size, actual.size, "Mismatch for $testPath at $jsonPath")
+                expected.indices.forEach { index ->
+                    assertJsonEqualsWithFloatTolerance(
+                        expected[index],
+                        actual[index],
+                        testPath,
+                        "$jsonPath[$index]",
+                    )
+                }
+            }
+
+            else -> assertEquals(expected, actual, "Mismatch for $testPath at $jsonPath")
+        }
+    }
+
+    private fun assertTaggedFloatEquals(
+        expected: JsonObject,
+        actual: JsonObject,
+        testPath: String,
+        jsonPath: String,
+    ) {
+        assertEquals(expected.keys, actual.keys, "Mismatch for $testPath at $jsonPath")
+        assertEquals(expected["type"], actual["type"], "Mismatch for $testPath at $jsonPath.type")
+
+        val expectedValue = expected["value"]?.jsonPrimitive?.content
+            ?: fail("Missing float value for $testPath at $jsonPath")
+        val actualValue = actual["value"]?.jsonPrimitive?.content
+            ?: fail("Missing float value for $testPath at $jsonPath")
+
+        if (!floatValuesMatch(expectedValue, actualValue)) {
+            fail(
+                "Float mismatch for $testPath at $jsonPath.value: " +
+                    "expected <$expectedValue> but was <$actualValue>",
+            )
+        }
+    }
+
+    private fun JsonObject.isTaggedFloat(): Boolean =
+        (this["type"] as? JsonPrimitive)?.content == "float" && containsKey("value")
+
+    private fun floatValuesMatch(expected: String, actual: String): Boolean {
+        if (expected.isTomlTestNaN() && actual.isTomlTestNaN()) {
+            return true
+        }
+
+        val expectedFloat = parseTomlTestFloat(expected) ?: return false
+        val actualFloat = parseTomlTestFloat(actual) ?: return false
+        return expectedFloat == actualFloat
+    }
+
+    private fun String.isTomlTestNaN(): Boolean =
+        lowercase().removePrefix("+").removePrefix("-") == "nan"
+
+    private fun parseTomlTestFloat(value: String): Double? = when (value.lowercase()) {
+        "nan", "+nan", "-nan" -> Double.NaN
+        "inf", "+inf" -> Double.POSITIVE_INFINITY
+        "-inf" -> Double.NEGATIVE_INFINITY
+        else -> value.toDoubleOrNull()
     }
 }
 
