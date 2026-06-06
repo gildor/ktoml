@@ -78,6 +78,7 @@ internal fun String.trimMultilineLiteralQuotes(): String = trimMultilineQuotes("
  *
  * @return string with the result
  */
+@Suppress("TOO_LONG_FUNCTION")
 internal fun String.convertLineEndingBackslash(): String {
     val result = StringBuilder(length)
     var i = 0
@@ -148,13 +149,6 @@ internal fun String.isLineEndingBackslash(backslashIndex: Int): Boolean {
     }
 
     return lineBreakLengthAt(j) > 0 || (j == length && continuationStart == j)
-}
-
-private fun String.lineBreakLengthAt(index: Int): Int = when {
-    index >= length -> 0
-    this[index] == '\r' && index + 1 < length && this[index + 1] == '\n' -> 2
-    this[index] == '\r' || this[index] == '\n' -> 1
-    else -> 0
 }
 
 /**
@@ -401,6 +395,13 @@ private fun Char.isLetterOrDigit() = CharRange('A', 'Z').contains(this) ||
         CharRange('0', '9').contains(this)
 
 private fun String.isNotQuoted() = !(this.startsWith("\"") && this.endsWith("\""))
+
+private fun String.lineBreakLengthAt(index: Int): Int = when {
+    index >= length -> 0
+    this[index] == '\r' && index + 1 < length && this[index + 1] == '\n' -> 2
+    this[index] == '\r' || this[index] == '\n' -> 1
+    else -> 0
+}
 
 private fun String.trimMultilineQuotes(quotes: String): String {
     // if a suffix is a separator on a separate string, we need to trim whitespaces for a better user experience
