@@ -43,9 +43,6 @@ data object ValidTomlRejected : KnownFailure {
     override val issue = 380
     override val tests = listOf(
         "valid/array/mixed-string-table.toml",
-        "valid/datetime/edge.toml",
-        "valid/datetime/leap-year.toml",
-        "valid/datetime/local.toml",
         "valid/inline-table/key-dotted-05.toml",
         "valid/inline-table/nest.toml",
         "valid/key/escapes.toml",
@@ -308,7 +305,6 @@ data object TomlOneOneValidFeatures : KnownFailure {
     override val issue = 373
     override val tests = listOf(
         "valid/spec-1.1.0/common-4.toml",
-        "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-35.toml",
     )
 }
