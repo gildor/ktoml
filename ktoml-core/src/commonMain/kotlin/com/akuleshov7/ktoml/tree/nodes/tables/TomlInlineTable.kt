@@ -53,7 +53,11 @@ public class TomlInlineTable internal constructor(
         inlineComment,
     )
 
-    public fun returnTable(tomlFileHead: TomlFile, currentParentalNode: TomlNode): TomlTable {
+    public fun returnTable(
+        tomlFileHead: TomlFile,
+        currentParentalNode: TomlNode,
+        validate: Boolean = false
+    ): TomlTable {
         val tomlTable = createTableRoot(currentParentalNode)
 
         // FixMe: this code duplication can be unified with the logic in TomlParser
@@ -61,16 +65,25 @@ public class TomlInlineTable internal constructor(
             when {
                 keyValue is TomlKeyValue && keyValue.key.isDotted -> {
                     // in case parser has faced dot-separated complex key (a.b.c) it should create proper table [a.b],
-                    // because table is the same as dotted key
+                    // because table is the same as dotted key. Dotted keys inside an inline table live
+                    // in the inline table's own section, so the table's own depth is the container.
                     val newTableSection = keyValue.createTomlTableFromDottedKey(tomlTable)
 
                     tomlFileHead
-                        .insertTableToTree(newTableSection)
+                        .insertTableToTree(
+                            newTableSection,
+                            insertionType = TableInsertionType.INLINE_TABLE,
+                            containerDepth = tomlTable.tablesList.size,
+                            validate = validate
+                        )
                         .appendChild(keyValue)
                 }
 
                 keyValue is TomlInlineTable -> tomlFileHead.insertTableToTree(
-                    keyValue.returnTable(tomlFileHead, tomlTable)
+                    keyValue.returnTable(tomlFileHead, tomlTable, validate),
+                    insertionType = TableInsertionType.INLINE_TABLE,
+                    containerDepth = tomlTable.tablesList.size,
+                    validate = validate
                 )
 
                 keyValue is TomlArrayOfTablesElement -> tomlTable.appendChild(keyValue)

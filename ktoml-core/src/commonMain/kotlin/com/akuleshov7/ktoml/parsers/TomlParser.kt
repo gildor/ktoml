@@ -56,6 +56,8 @@ public value class TomlParser(private val config: TomlInputConfig) {
 
         val comments: MutableList<String> = mutableListOf()
         val linesIterator = LinesIteratorWrapper(trimmedTomlLines.iterator())
+        // in spec-compliant mode we reject table/key redefinitions; ktoml's lenient default merges them
+        val validate = !config.allowTableRedefinition
         // all lines will be streamed sequentially
         while (linesIterator.hasNext()) {
             val line = linesIterator.next()
@@ -82,7 +84,7 @@ public value class TomlParser(private val config: TomlInputConfig) {
                     if (tomlLine.isArrayOfTables()) {
                         // TomlArrayOfTables contains all information about the ArrayOfTables ([[array of tables]])
                         val tableArray = TomlTable(tomlLine, lineNo, TableType.ARRAY)
-                        val arrayOfTables = tomlFileHead.insertTableToTree(tableArray, latestCreatedBucket)
+                        val arrayOfTables = tomlFileHead.insertTableToTree(tableArray, latestCreatedBucket, validate = validate)
                         // creating a new empty element that will be used as an element in array and the parent for next key-value records
                         val newArrayElement = TomlArrayOfTablesElement(lineNo, comments, inlineComment)
                         // adding this element as a child to the array of tables
@@ -104,7 +106,7 @@ public value class TomlParser(private val config: TomlInputConfig) {
                         // covering the case when the processed table does not contain nor key-value pairs neither tables (after our insertion)
                         // adding fake nodes to a previous table (it has no children because we have found another table right after)
                         currentParentalNode.insertStub()
-                        currentParentalNode = tomlFileHead.insertTableToTree(tableSection)
+                        currentParentalNode = tomlFileHead.insertTableToTree(tableSection, validate = validate)
                     }
                 } else {
                     val keyValue = tomlLine.parseTomlKeyValue(lineNo, comments, inlineComment, config)
@@ -114,16 +116,26 @@ public value class TomlParser(private val config: TomlInputConfig) {
                             // in case parser has faced dot-separated complex key (a.b.c) it should create proper table [a.b],
                             // because table is the same as dotted key
                             tomlFileHead
-                                .insertTableToTree(keyValue.createTomlTableFromDottedKey(currentParentalNode))
-                                .appendChild(keyValue)
+                                .insertTableToTree(
+                                    keyValue.createTomlTableFromDottedKey(currentParentalNode),
+                                    insertionType = TableInsertionType.DOTTED_KEY,
+                                    containerDepth = currentParentalNode.sectionDepth(),
+                                    validate = validate
+                                )
+                                .appendCheckedKeyValue(keyValue, validate)
 
                         keyValue is TomlInlineTable ->
                             // in case of inline tables (a = { b = "c" }) we need to create a new parental table and
                             // recursively process all inner nested tables (including inline and dotted)
-                            tomlFileHead.insertTableToTree(keyValue.returnTable(tomlFileHead, currentParentalNode))
+                            tomlFileHead.insertTableToTree(
+                                keyValue.returnTable(tomlFileHead, currentParentalNode, validate),
+                                insertionType = TableInsertionType.INLINE_TABLE,
+                                containerDepth = currentParentalNode.sectionDepth(),
+                                validate = validate
+                            )
 
                         // otherwise, it should simply append the keyValue to the parent
-                        else -> currentParentalNode.appendChild(keyValue)
+                        else -> currentParentalNode.appendCheckedKeyValue(keyValue, validate)
                     }
                 }
                 comments.clear()
