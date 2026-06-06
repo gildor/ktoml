@@ -6,7 +6,7 @@ import com.akuleshov7.ktoml.parsers.convertLineEndingBackslash
 import com.akuleshov7.ktoml.parsers.getCountOfOccurrencesOfSubstring
 import com.akuleshov7.ktoml.parsers.trimMultilineQuotes
 import com.akuleshov7.ktoml.parsers.trimQuotes
-import com.akuleshov7.ktoml.utils.checkNoBareCarriageReturn
+import com.akuleshov7.ktoml.utils.checkNoTomlControlChars
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.escapeSpecialCharacters
 import com.akuleshov7.ktoml.writers.TomlEmitter
@@ -46,9 +46,7 @@ public class TomlBasicString internal constructor(
                     // please note that for a better user experience we will also trim spaces for a standalone closing quotes
                     trimMultilineQuotes()
                         .checkCountOfOtherUnescapedQuotes(lineNo)
-                        // a bare CR (\r not part of a \r\n line ending) is an illegal control char inside the
-                        // string content; this check runs before escapes are converted, so an escaped "\r" is unaffected
-                        .checkNoBareCarriageReturn(lineNo)
+                        .checkNoTomlControlChars(lineNo, allowLineFeed = true)
                         .convertLineEndingBackslash()
                         .convertSpecialCharacters(lineNo)
 
@@ -56,6 +54,7 @@ public class TomlBasicString internal constructor(
                 startsWith("\"") && endsWith("\"") ->
                     trimQuotes()
                         .checkOtherQuotesAreEscaped(lineNo)
+                        .checkNoTomlControlChars(lineNo)
                         .convertSpecialCharacters(lineNo)
 
                 // ============= other ===========

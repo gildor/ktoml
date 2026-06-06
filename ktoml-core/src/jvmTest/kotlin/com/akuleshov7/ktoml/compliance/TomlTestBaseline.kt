@@ -37,41 +37,6 @@ data object ValidTomlRejected : KnownFailure {
     )
 }
 
-/** Missing validation — control characters not rejected */
-data object MissingValidationControlChars : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/control/bare-cr.toml",
-        "invalid/control/comment-cr.toml",
-        "invalid/control/comment-del.toml",
-        "invalid/control/comment-ff.toml",
-        "invalid/control/comment-lf.toml",
-        "invalid/control/comment-null.toml",
-        "invalid/control/comment-us.toml",
-        "invalid/control/multi-del.toml",
-        "invalid/control/multi-lf.toml",
-        "invalid/control/multi-null.toml",
-        "invalid/control/multi-us.toml",
-        "invalid/control/only-ff.toml",
-        "invalid/control/only-vt.toml",
-        "invalid/control/rawmulti-del.toml",
-        "invalid/control/rawmulti-lf.toml",
-        "invalid/control/rawmulti-null.toml",
-        "invalid/control/rawmulti-us.toml",
-        "invalid/control/rawstring-cr.toml",
-        "invalid/control/rawstring-del.toml",
-        "invalid/control/rawstring-lf.toml",
-        "invalid/control/rawstring-null.toml",
-        "invalid/control/rawstring-us.toml",
-        "invalid/control/string-bs.toml",
-        "invalid/control/string-cr.toml",
-        "invalid/control/string-del.toml",
-        "invalid/control/string-lf.toml",
-        "invalid/control/string-null.toml",
-        "invalid/control/string-us.toml",
-    )
-}
-
 /** Missing validation — bad UTF-8 encoding not rejected */
 data object MissingValidationEncoding : KnownFailure {
     override val issue = 383
@@ -194,17 +159,6 @@ data object MissingValidationInlineTable : KnownFailure {
     )
 }
 
-/** Missing validation — invalid string escapes not rejected */
-data object MissingValidationStringEscape : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/string/bad-escape-03.toml",
-        "invalid/string/bad-uni-esc-06.toml",
-        "invalid/string/bad-uni-esc-ml-06.toml",
-        "invalid/string/multiline-bad-escape-04.toml",
-    )
-}
-
 /** Missing validation — invalid datetimes not rejected */
 data object MissingValidationDatetime : KnownFailure {
     override val issue = 383
@@ -231,14 +185,12 @@ data object MissingValidationArrays : KnownFailure {
  */
 val allKnownFailures: List<KnownFailure> = listOf(
     ValidTomlRejected,
-    MissingValidationControlChars,
     MissingValidationEncoding,
     MissingValidationTableRedefinition,
     MissingValidationIntegerFormat,
     MissingValidationFloatFormat,
     MissingValidationKeys,
     MissingValidationInlineTable,
-    MissingValidationStringEscape,
     MissingValidationDatetime,
     MissingValidationArrays,
 )

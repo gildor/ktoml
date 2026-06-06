@@ -5,6 +5,7 @@ import com.akuleshov7.ktoml.exceptions.InternalDecodingException
 import com.akuleshov7.ktoml.parsers.enums.MultilineType
 import com.akuleshov7.ktoml.tree.nodes.*
 import com.akuleshov7.ktoml.utils.LinesIteratorWrapper
+import com.akuleshov7.ktoml.utils.checkNoTomlControlChars
 import com.akuleshov7.ktoml.utils.newLineChar
 import kotlin.jvm.JvmInline
 
@@ -50,7 +51,9 @@ public value class TomlParser(private val config: TomlInputConfig) {
         // link to the head of the tree
         val tomlFileHead = currentParentalNode as TomlFile
         // need to trim empty lines BEFORE the start of processing
-        val trimmedTomlLines = tomlLines.trimEmptyLines()
+        val trimmedTomlLines = tomlLines
+            .checkNoTomlControlChars()
+            .trimEmptyLines()
         // here we always store the bucket of the latest created array of tables
         var latestCreatedBucket: TomlArrayOfTablesElement? = null
 
@@ -142,6 +145,15 @@ public value class TomlParser(private val config: TomlInputConfig) {
             }
         }
         return tomlFileHead
+    }
+
+    private fun Sequence<String>.checkNoTomlControlChars(): Sequence<String> = sequence {
+        var lineNo = 1
+        for (line in this@checkNoTomlControlChars) {
+            line.checkNoTomlControlChars(lineNo)
+            yield(line)
+            lineNo++
+        }
     }
 
     @Suppress("TOO_LONG_FUNCTION")

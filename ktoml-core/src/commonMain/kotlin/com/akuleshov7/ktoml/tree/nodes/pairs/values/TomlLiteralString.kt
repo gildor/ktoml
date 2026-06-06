@@ -7,7 +7,7 @@ import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.parsers.getCountOfOccurrencesOfSubstring
 import com.akuleshov7.ktoml.parsers.trimMultilineLiteralQuotes
 import com.akuleshov7.ktoml.parsers.trimSingleQuotes
-import com.akuleshov7.ktoml.utils.checkNoBareCarriageReturn
+import com.akuleshov7.ktoml.utils.checkNoTomlControlChars
 import com.akuleshov7.ktoml.utils.isControlChar
 import com.akuleshov7.ktoml.utils.isMultilineControlChar
 import com.akuleshov7.ktoml.utils.newLineChar
@@ -50,9 +50,7 @@ public class TomlLiteralString internal constructor(
                 startsWith("'''") && endsWith("'''") -> {
                     val contentString = trimMultilineLiteralQuotes()
                         .checkCountOfOtherQuotes(lineNo)
-                        // a bare CR (\r not part of a \r\n line ending) is an illegal control char; literal
-                        // strings keep content verbatim, so the only way a raw \r survives is an unescaped bare CR
-                        .checkNoBareCarriageReturn(lineNo)
+                        .checkNoTomlControlChars(lineNo, allowLineFeed = true)
                     val rawContent = if (config.allowEscapedQuotesInLiteralStrings) {
                         contentString.convertSingleQuotes()
                     } else {
@@ -63,6 +61,7 @@ public class TomlLiteralString internal constructor(
                 // ====== basic literal string (') =======
                 startsWith("'") && endsWith("'") -> {
                     val contentString = trimSingleQuotes()
+                        .checkNoTomlControlChars(lineNo)
                     if (config.allowEscapedQuotesInLiteralStrings) contentString.convertSingleQuotes() else contentString
                 }
                 else ->
