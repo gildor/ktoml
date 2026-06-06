@@ -12,7 +12,6 @@ package com.akuleshov7.ktoml.compliance
  * | Category | Issue |
  * |----------|-------|
  * | Datetime offset normalized to UTC | [#375](https://github.com/orchestr7/ktoml/issues/375) |
- * | Float representation lost | [#376](https://github.com/orchestr7/ktoml/issues/376) |
  * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
  * | Array-of-tables structure | [#378](https://github.com/orchestr7/ktoml/issues/378) |
  * | Key names not unquoted | [#379](https://github.com/orchestr7/ktoml/issues/379) |
@@ -45,15 +44,6 @@ data object DatetimeOffsetLoss : KnownFailure {
         "valid/spec-1.0.0/offset-date-time-0.toml",
         "valid/spec-example-1.toml",
         "valid/spec-example-1-compact.toml",
-    )
-}
-
-/** Scientific notation lost after parsing to Double */
-data object FloatRepresentationLoss : KnownFailure {
-    override val issue = 376
-    override val tests = listOf(
-        "valid/float/exponent.toml",
-        "valid/spec-1.0.0/float-0.toml",
     )
 }
 
@@ -395,7 +385,6 @@ data object TomlOneOneValidFeatures : KnownFailure {
         "valid/datetime/no-seconds.toml",
         "valid/spec-1.1.0/common-4.toml",
         "valid/spec-1.1.0/common-12.toml",
-        "valid/spec-1.1.0/common-23.toml",
         "valid/spec-1.1.0/common-24.toml",
         "valid/spec-1.1.0/common-27.toml",
         "valid/spec-1.1.0/common-29.toml",
@@ -420,7 +409,6 @@ data object TomlOneOneMissingValidation : KnownFailure {
  */
 val allKnownFailures: List<KnownFailure> = listOf(
     DatetimeOffsetLoss,
-    FloatRepresentationLoss,
     DottedKeyExpansion,
     ArrayOfTablesStructure,
     KeyNameQuoting,
