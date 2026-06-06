@@ -5,6 +5,7 @@ import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.removeTrailingComma
 import com.akuleshov7.ktoml.parsers.trimBrackets
+import com.akuleshov7.ktoml.tree.nodes.TomlInlineTable
 import com.akuleshov7.ktoml.tree.nodes.parseValue
 import com.akuleshov7.ktoml.writers.TomlEmitter
 
@@ -33,11 +34,12 @@ public class TomlArray internal constructor(
     ) {
         emitter.startArray()
 
+        // an element is one of: a nested array, an inline table (array element), or a plain value
         val content = (content as List<Any>).map {
             if (it is TomlArray) {
                 TomlArray(it.content, multiline)
             } else {
-                it as TomlValue
+                it
             }
         }
 
@@ -50,7 +52,7 @@ public class TomlArray internal constructor(
                 emitter.emitNewLine()
                     .emitIndent()
 
-                value.write(emitter, config)
+                writeElement(value, emitter, config)
 
                 if (i < last) {
                     emitter.emitElementDelimiter()
@@ -64,7 +66,7 @@ public class TomlArray internal constructor(
             content.forEachIndexed { i, value ->
                 emitter.emitWhitespace()
 
-                value.write(emitter, config)
+                writeElement(value, emitter, config)
 
                 if (i < last) {
                     emitter.emitElementDelimiter()
@@ -77,6 +79,16 @@ public class TomlArray internal constructor(
         emitter.endArray()
     }
 
+    private fun writeElement(
+        element: Any,
+        emitter: TomlEmitter,
+        config: TomlOutputConfig
+    ): Unit = when (element) {
+        is TomlValue -> element.write(emitter, config)
+        is TomlInlineTable -> element.write(emitter, config)
+        else -> throw ParseException("Unsupported array element type: ${element::class.simpleName}", 0)
+    }
+
     public companion object {
         /**
          * recursively parse TOML array from the string: [ParsingArray -> Trimming values -> Parsing Nested Arrays]
@@ -85,10 +97,11 @@ public class TomlArray internal constructor(
             this.parseArray(lineNo)
                 .map { it.trim() }
                 .map {
-                    if (it.startsWith("[")) {
-                        TomlArray(it, lineNo, config)
-                    } else {
-                        it.parseValue(lineNo, config)
+                    when {
+                        it.startsWith("[") -> TomlArray(it, lineNo, config)
+                        // inline table as an array element: [ { a = 1 }, "b" ]
+                        it.startsWith("{") -> TomlInlineTable.parseArrayElement(it, lineNo, config)
+                        else -> it.parseValue(lineNo, config)
                     }
                 }
 
@@ -104,6 +117,7 @@ public class TomlArray internal constructor(
             }
 
             var nbBrackets = 0
+            var nbBraces = 0
             var isInBasicString = false
             var isInLiteralString = false
             var bufferBetweenCommas = StringBuilder()
@@ -123,6 +137,18 @@ public class TomlArray internal constructor(
                         }
                         bufferBetweenCommas.append(current)
                     }
+                    '{' -> {
+                        if (!isInBasicString && !isInLiteralString) {
+                            nbBraces++
+                        }
+                        bufferBetweenCommas.append(current)
+                    }
+                    '}' -> {
+                        if (!isInBasicString && !isInLiteralString) {
+                            nbBraces--
+                        }
+                        bufferBetweenCommas.append(current)
+                    }
                     '\'' -> {
                         if (!isInBasicString) {
                             isInLiteralString = !isInLiteralString
@@ -139,9 +165,9 @@ public class TomlArray internal constructor(
                         }
                         bufferBetweenCommas.append(current)
                     }
-                    // split only if we are on the highest level of brackets (all brackets are closed)
+                    // split only if we are on the highest level of brackets/braces (all are closed)
                     // and if we're not in a string
-                    ',' -> if (isInBasicString || isInLiteralString || nbBrackets != 0) {
+                    ',' -> if (isInBasicString || isInLiteralString || nbBrackets != 0 || nbBraces != 0) {
                         bufferBetweenCommas.append(current)
                     } else {
                         result.add(bufferBetweenCommas.toString())

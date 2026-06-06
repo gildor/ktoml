@@ -142,7 +142,9 @@ public class TomlInlineTable internal constructor(
                 is TomlTable -> currentParentalNode.fullTableKey.keyParts + key!!.keyParts
                 is TomlArrayOfTablesElement -> (currentParentalNode.parent as TomlTable)
                     .fullTableKey.keyParts + key!!.keyParts
-                else -> listOf(name)
+                // use the split key parts (a.b.c -> [a, b, c]) so that dotted inline-table keys
+                // expand into nested tables; `name` would be the joined "a.b.c" single token.
+                else -> key?.keyParts ?: listOf(name)
             },
         ),
         lineNo,
@@ -158,6 +160,27 @@ public class TomlInlineTable internal constructor(
     private fun isInlineArrayOfTables(): Boolean = tomlKeyValues.any { it is TomlArrayOfTablesElement }
 
     public companion object {
+        /**
+         * Builds an inline table that is an element of an array of values (e.g. `[ {a = 1}, "b" ]`).
+         * Such an element has no key of its own; its dotted keys are still expanded into nested
+         * tables when the AST is converted/decoded.
+         *
+         * @param rawInlineTable the raw `{ ... }` string of the element
+         * @param lineNo
+         * @param config
+         * @return a keyless [TomlInlineTable] for use inside a [com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlArray]
+         */
+        internal fun parseArrayElement(
+            rawInlineTable: String,
+            lineNo: Int,
+            config: TomlInputConfig
+        ): TomlInlineTable = TomlInlineTable(
+            key = null,
+            tomlKeyValues = rawInlineTable.parseInlineTableValue("" to rawInlineTable, lineNo, config),
+            inlineTableType = InlineTableType.PRIMITIVE,
+            lineNo = lineNo,
+        )
+
         private fun String.parseInlineTableValue(
             keyValuePair: Pair<String, String>,
             lineNo: Int,
@@ -183,6 +206,19 @@ public class TomlInlineTable internal constructor(
                 }
 
             return parsedList
+        }
+
+        /**
+         * Returns true when this `[ ... ]` array is a pure array of inline tables (`[{..}, {..}]`),
+         * as opposed to a mixed array that merely starts with an inline table (`[{..}, "b", 1]`).
+         * Only the former is modelled as an array-of-tables; the latter is a normal array whose
+         * elements happen to include inline tables.
+         *
+         * @return true if every top-level element of this array is an inline table
+         */
+        internal fun String.isArrayOfInlineTables(): Boolean {
+            val elements = this.trim().splitInlineArrayOfTables()
+            return elements.isNotEmpty() && elements.all { it.startsWithIgnoreAllWhitespaces("{") }
         }
 
         private fun String.parseInlineArrayOfTables(
