@@ -1,17 +1,25 @@
+/**
+ * This file contains datetime-related AST node types for TOML parsing.
+ */
+
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.writers.TomlEmitter
-
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 
+private const val FRACTIONAL_SECOND_PRECISION = 3
+
 /**
  * Preserves the original textual representation of an offset date-time while still exposing the parsed [instant].
+ *
+ * @property raw original TOML date-time text
+ * @property instant parsed instant value
  */
 @OptIn(ExperimentalTime::class)
 public data class TomlOffsetDateTime(
@@ -42,13 +50,13 @@ public data class TomlOffsetDateTime(
         }
 
         val fraction = timePart.substring(dotIndex + 1)
-        if (fraction.length >= 3) {
+        if (fraction.length >= FRACTIONAL_SECOND_PRECISION) {
             return normalized
         }
 
         val paddedTime = buildString {
             append(timePart.substring(0, dotIndex + 1))
-            append(fraction.padEnd(3, '0'))
+            append(fraction.padEnd(FRACTIONAL_SECOND_PRECISION, '0'))
         }
         return buildString {
             append(normalized.substring(0, timeStart + 1))
