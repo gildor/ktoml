@@ -79,31 +79,82 @@ internal fun String.trimMultilineLiteralQuotes(): String = trimMultilineQuotes("
  * @return string with the result
  */
 internal fun String.convertLineEndingBackslash(): String {
-    // We shouldn't trim if the size of the split array == 1
-    // It means there is no ending backslash, and we should keep all spaces
-    val splitEndingBackslash = this.split("\\\n")
-    return if (splitEndingBackslash.size == 1) {
-        this
-    } else {
-        splitEndingBackslash.joinToString("") { it.trimStart() }
+    val result = StringBuilder(length)
+    var i = 0
+
+    while (i < length) {
+        if (this[i] != '\\') {
+            result.append(this[i])
+            i++
+            continue
+        }
+
+        val slashStart = i
+        while (i < length && this[i] == '\\') {
+            i++
+        }
+        val slashCount = i - slashStart
+
+        if (slashCount % 2 == 1) {
+            val continuationStart = i
+            var j = continuationStart
+            while (j < length && this[j].isWhitespace() && lineBreakLengthAt(j) == 0) {
+                j++
+            }
+
+            val lineBreakLength = lineBreakLengthAt(j)
+            val isTerminalContinuation = j == length && continuationStart == j
+            if (lineBreakLength > 0 || isTerminalContinuation) {
+                repeat(slashCount - 1) {
+                    result.append('\\')
+                }
+
+                j += lineBreakLength
+                while (j < length && this[j].isWhitespace()) {
+                    j++
+                }
+
+                i = j
+                continue
+            }
+        }
+
+        repeat(slashCount) {
+            result.append('\\')
+        }
     }
+
+    return result.toString()
 }
 
 /**
  * Checks if the backslash at the given index is a line-ending backslash
  * A line-ending backslash is defined as a backslash that is followed only by
- * whitespace characters and then a newline character or the end of the string
+ * whitespace characters and then a newline character, or is the final character
+ * in the string.
  *
  * @param backslashIndex The index of the backslash to check
  * @return `true` if the backslash is a line-ending backslash, `false` otherwise
  */
 internal fun String.isLineEndingBackslash(backslashIndex: Int): Boolean {
-    var j = backslashIndex + 1
-    while (j < length && this[j] != newLineChar() && this[j].isWhitespace()) {
+    if (backslashIndex !in indices || this[backslashIndex] != '\\') {
+        return false
+    }
+
+    val continuationStart = backslashIndex + 1
+    var j = continuationStart
+    while (j < length && this[j].isWhitespace() && lineBreakLengthAt(j) == 0) {
         j++
     }
 
-    return j == length || this[j] == newLineChar() || j == length
+    return lineBreakLengthAt(j) > 0 || (j == length && continuationStart == j)
+}
+
+private fun String.lineBreakLengthAt(index: Int): Int = when {
+    index >= length -> 0
+    this[index] == '\r' && index + 1 < length && this[index + 1] == '\n' -> 2
+    this[index] == '\r' || this[index] == '\n' -> 1
+    else -> 0
 }
 
 /**

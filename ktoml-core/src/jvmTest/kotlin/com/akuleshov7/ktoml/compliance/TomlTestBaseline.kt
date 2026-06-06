@@ -15,7 +15,6 @@ package com.akuleshov7.ktoml.compliance
  * | Key names not unquoted | [#379](https://github.com/orchestr7/ktoml/issues/379) |
  * | Parser rejects valid TOML | [#380](https://github.com/orchestr7/ktoml/issues/380) |
  * | Stack overflow on deep nesting | [#381](https://github.com/orchestr7/ktoml/issues/381) |
- * | Multiline string escape handling | [#382](https://github.com/orchestr7/ktoml/issues/382) |
  * | Multiline inline table crash | [#374](https://github.com/orchestr7/ktoml/issues/374) |
  * | Missing validation (accepts invalid) | [#383](https://github.com/orchestr7/ktoml/issues/383) |
  * | TOML 1.1 valid features unsupported | [#373](https://github.com/orchestr7/ktoml/issues/373) |
@@ -84,16 +83,6 @@ data object StackOverflowOnNesting : KnownFailure {
     override val tests = listOf(
         "valid/array/nested-double.toml",
         "valid/comment/tricky.toml",
-    )
-}
-
-/** Line-ending backslash in multiline strings not handled correctly */
-data object MultilineStringEscape : KnownFailure {
-    override val issue = 382
-    override val tests = listOf(
-        "valid/string/ends-in-whitespace-escape.toml",
-        "valid/string/multiline.toml",
-        "valid/string/multiline-empty.toml",
     )
 }
 
@@ -377,7 +366,6 @@ val allKnownFailures: List<KnownFailure> = listOf(
     KeyNameQuoting,
     ValidTomlRejected,
     StackOverflowOnNesting,
-    MultilineStringEscape,
     MultilineInlineTableCrash,
     MissingValidationControlChars,
     MissingValidationEncoding,

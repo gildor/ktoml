@@ -113,6 +113,28 @@ class ValueParserTest {
     }
 
     @Test
+    fun multilineStringEscapesParsing() {
+        var test = TomlKeyValuePrimitive(
+            "a" to ("\"\"\"a \\\\" + "\n" + "b\"\"\""),
+            0
+        )
+        assertEquals("a \\\nb", test.value.content)
+
+        test = TomlKeyValuePrimitive(
+            "a" to "\"\"\"\\\n   fox jumps over \\\t  \n   the lazy dog.\"\"\"",
+            0
+        )
+        assertEquals("fox jumps over the lazy dog.", test.value.content)
+
+        test = TomlKeyValuePrimitive("a" to "'''There is no escape\\'''", 0)
+        assertEquals("There is no escape\\", test.value.content)
+
+        assertFailsWith<ParseException> {
+            TomlKeyValuePrimitive("a" to "\"\"\"t\\ \"\"\"", 0)
+        }
+    }
+
+    @Test
     fun symbolsAfterComment() {
         val keyValue = "test_key = \"test_value\"  # \" some comment".splitKeyValue(0)
         assertEquals("test_value", TomlKeyValuePrimitive(keyValue, 0).value.content)
