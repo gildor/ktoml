@@ -152,7 +152,7 @@ public sealed class TomlNode(
                         foundTable.checkRedefinitionAllowed(tomlTable, insertionType)
                         foundTable.mergeProvenance(insertionType)
                     }
-                    tomlTable.children.forEach(foundTable::appendChild)
+                    tomlTable.children.forEach { foundTable.appendCheckedKeyValue(it, validate) }
                     foundTable
                 }
 
@@ -351,24 +351,47 @@ public sealed class TomlNode(
      * @throws ParseException on a name collision with an existing table (only when [validate] is true)
      */
     internal fun appendCheckedKeyValue(keyValue: TomlNode, validate: Boolean) {
-        val keyName = when (keyValue) {
-            is TomlKeyValue -> keyValue.key.last()
-            is TomlInlineTable -> keyValue.key?.last()
-            else -> null
-        }
-        if (validate && keyName != null) {
-            val conflictingTable = childrenInThisOrArrayElement()
-                .filterIsInstance<TomlTable>()
-                .firstOrNull { it.name == keyName }
-            conflictingTable?.let {
-                throw ParseException(
-                    "Cannot define key '$keyName' on line ${keyValue.lineNo}: it was already defined as a " +
-                            "table on line ${conflictingTable.lineNo}",
-                    keyValue.lineNo
-                )
-            }
+        keyValue.normalizedKeyName()?.let { keyName ->
+            checkKeyCanBeDefined(keyName, keyValue.lineNo, validate)
         }
         appendChild(keyValue)
+    }
+
+    internal fun checkKeyCanBeDefined(
+        keyName: String,
+        keyLineNo: Int,
+        validate: Boolean
+    ) {
+        if (!validate) {
+            return
+        }
+
+        val duplicateKey = childrenInThisOrArrayElement()
+            .firstOrNull { it.normalizedKeyName() == keyName }
+        duplicateKey?.let {
+            throw ParseException(
+                "Cannot define key '$keyName' on line $keyLineNo: it was already defined as a " +
+                        "key on line ${duplicateKey.lineNo}",
+                keyLineNo
+            )
+        }
+
+        val conflictingTable = childrenInThisOrArrayElement()
+            .filterIsInstance<TomlTable>()
+            .firstOrNull { it.name == keyName }
+        conflictingTable?.let {
+            throw ParseException(
+                "Cannot define key '$keyName' on line $keyLineNo: it was already defined as a " +
+                        "table on line ${conflictingTable.lineNo}",
+                keyLineNo
+            )
+        }
+    }
+
+    private fun TomlNode.normalizedKeyName(): String? = when (this) {
+        is TomlKeyValue -> key.last()
+        is TomlInlineTable -> key?.last()
+        else -> null
     }
 
     /**

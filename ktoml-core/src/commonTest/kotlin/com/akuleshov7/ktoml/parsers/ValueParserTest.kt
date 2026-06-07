@@ -21,6 +21,68 @@ class ValueParserTest {
     }
 
     @Test
+    fun malformedIntegerLiteralsAreRejected() {
+        listOf(
+            "1__23",
+            "0x-1",
+            "_123",
+            "_0b1",
+            "_0x1",
+            "_0o1",
+            "01",
+            "00",
+            "0_0",
+            "-01",
+            "+01",
+            "+0_1",
+            "123_",
+            "0b1_",
+            "0x1_",
+            "0o1_",
+            "0b_1",
+            "0x_1",
+            "0o_1",
+        ).forEach { literal ->
+            assertFailsWith<ParseException> {
+                TomlKeyValuePrimitive("a" to literal, 1)
+            }
+        }
+    }
+
+    @Test
+    fun malformedFloatLiteralsAreRejected() {
+        listOf(
+            "1.e2",
+            "3.e+20",
+            ".12345",
+            "-.12345",
+            "+.12345",
+            "03.14",
+            "-03.14",
+            "+03.14",
+            "NaN",
+            "1.",
+            "-1.",
+            "+1.",
+        ).forEach { literal ->
+            assertFailsWith<ParseException> {
+                TomlKeyValuePrimitive("a" to literal, 1)
+            }
+        }
+    }
+
+    @Test
+    fun validNumericLiteralsKeepParsing() {
+        listOf("1_000", "0xdead_beef", "0o7_6_5", "0b1_0_1", "0", "+99", "-0").forEach { literal ->
+            testTomlValue("a" to literal, NodeType.INT)
+        }
+
+        listOf("0.0", "3e2", "3E+2", "3e1_4", "+0e0", "-0.0", "nan", "+nan", "-nan").forEach { literal ->
+            testTomlValue("a" to literal, NodeType.FLOAT)
+        }
+    }
+
+    @Test
     fun dateTimeParsingTest() {
         testTomlValue("a" to "1979-05-27T07:32:00Z", NodeType.DATE_TIME)
         testTomlValue("a" to "1979-05-27T00:32:00-07:00", NodeType.DATE_TIME)
@@ -187,5 +249,5 @@ fun testTomlValue(
     expectedType: NodeType,
     config: TomlInputConfig = TomlInputConfig()
 ) {
-    assertEquals(expectedType, getNodeType(TomlKeyValuePrimitive(keyValuePair, 0, config = config).value))
+    assertEquals(expectedType, getNodeType(TomlKeyValuePrimitive(keyValuePair, 0, config = config).value), keyValuePair.second)
 }

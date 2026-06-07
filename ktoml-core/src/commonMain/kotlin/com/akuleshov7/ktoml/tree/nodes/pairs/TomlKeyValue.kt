@@ -127,7 +127,7 @@ public fun String.parseValue(lineNo: Int, config: TomlInputConfig): TomlValue = 
     // ===== special values
     "+inf", "inf" -> TomlDouble(Double.POSITIVE_INFINITY)
     "-inf" -> TomlDouble(Double.NEGATIVE_INFINITY)
-    "-nan", "+nan", "nan", "-NaN", "+NaN", "NaN" -> TomlDouble(Double.NaN)
+    "-nan", "+nan", "nan" -> TomlDouble(Double.NaN)
     // ===== null values
     "null", "nil", "NULL", "NIL", "" -> if (config.allowNullValues) {
         TomlNull()

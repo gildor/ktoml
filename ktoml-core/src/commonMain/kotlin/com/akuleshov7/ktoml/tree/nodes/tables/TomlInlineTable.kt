@@ -14,6 +14,7 @@ import com.akuleshov7.ktoml.writers.TomlEmitter
  * @param lineNo
  * @param comments
  * @param inlineComment
+ * @param validate whether to reject duplicate or overwritten inline-table keys
  * @param inlineTableType type of inline table (primitive or array)
  * @property tomlKeyValues The key-value pairs in the inline table
  * @property multiline whether the inline table should be written in multiple lines
@@ -26,7 +27,8 @@ public class TomlInlineTable internal constructor(
     public val multiline: Boolean = false,
     lineNo: Int,
     comments: List<String> = emptyList(),
-    inlineComment: String = ""
+    inlineComment: String = "",
+    validate: Boolean = false,
 ) : TomlNode(
     lineNo,
     comments,
@@ -34,6 +36,12 @@ public class TomlInlineTable internal constructor(
 ) {
     @Suppress("CUSTOM_GETTERS_SETTERS")
     override val name: String get() = key.toString()
+
+    init {
+        if (validate) {
+            tomlKeyValues.validateInlineTableDefinitions(lineNo)
+        }
+    }
 
     public constructor(
         keyValuePair: Pair<String, String>,
@@ -51,6 +59,7 @@ public class TomlInlineTable internal constructor(
         lineNo,
         comments,
         inlineComment,
+        validate = !config.allowTableRedefinition,
     )
 
     public fun returnTable(
@@ -192,6 +201,7 @@ public class TomlInlineTable internal constructor(
             tomlKeyValues = rawInlineTable.parseInlineTableValue("" to rawInlineTable, lineNo, config),
             inlineTableType = InlineTableType.PRIMITIVE,
             lineNo = lineNo,
+            validate = !config.allowTableRedefinition,
         )
 
         private fun String.parseInlineTableValue(
@@ -363,3 +373,49 @@ public class TomlInlineTable internal constructor(
         }
     }
 }
+
+private fun List<TomlNode>.validateInlineTableDefinitions(lineNo: Int) {
+    val definedPaths: MutableSet<List<String>> = mutableSetOf()
+    forEach { node ->
+        when (node) {
+            is TomlKeyValue -> node.key.keyPartNames(lineNo).registerInlineTablePath(definedPaths, lineNo)
+            is TomlInlineTable -> {
+                node.key?.keyPartNames(lineNo)?.registerInlineTablePath(definedPaths, lineNo)
+                node.tomlKeyValues.validateInlineTableDefinitions(node.lineNo)
+            }
+            is TomlArrayOfTablesElement -> node.children.validateInlineTableDefinitions(node.lineNo)
+            else -> {}
+        }
+    }
+}
+
+private fun TomlKey.keyPartNames(lineNo: Int): List<String> = keyParts.map { it.parseKeyName(lineNo) }
+
+private fun List<String>.registerInlineTablePath(
+    definedPaths: MutableSet<List<String>>,
+    lineNo: Int,
+) {
+    definedPaths.firstOrNull { it == this }?.let {
+        throw ParseException("Duplicate inline table key '${displayPath()}'", lineNo)
+    }
+
+    parentPaths().firstOrNull { it in definedPaths }?.let { ancestor ->
+        throw ParseException(
+            "Cannot extend inline table key '${ancestor.displayPath()}' with '${displayPath()}'",
+            lineNo,
+        )
+    }
+
+    definedPaths.firstOrNull { it.size > size && it.take(size) == this }?.let { descendant ->
+        throw ParseException(
+            "Cannot overwrite inline table key '${displayPath()}' that already contains '${descendant.displayPath()}'",
+            lineNo,
+        )
+    }
+
+    definedPaths += this
+}
+
+private fun List<String>.parentPaths(): List<List<String>> = (1 until size).map { take(it) }
+
+private fun List<String>.displayPath(): String = joinToString(".")

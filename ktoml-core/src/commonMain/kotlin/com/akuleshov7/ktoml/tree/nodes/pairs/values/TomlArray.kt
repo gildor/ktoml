@@ -110,10 +110,15 @@ public class TomlArray internal constructor(
          */
         @Suppress("NESTED_BLOCK", "TOO_LONG_FUNCTION")
         private fun String.parseArray(lineNo: Int): MutableList<String> {
-            val trimmed = trim().trimBrackets().trim().removeTrailingComma()
+            val arrayContent = trim().trimBrackets().trim()
             // covering cases when the array is intentionally blank: myArray = []. It should be empty and not contain null
-            if (trimmed.isBlank()) {
+            if (arrayContent.isBlank()) {
                 return mutableListOf()
+            }
+
+            val trimmed = arrayContent.removeTrailingComma().trim()
+            if (trimmed.isBlank()) {
+                throw ParseException("Array cannot contain only a comma", lineNo)
             }
 
             var nbBrackets = 0
