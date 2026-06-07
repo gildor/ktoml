@@ -9,6 +9,20 @@ import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
 
 private const val MULTILINE_STRING_QUOTE_LENGTH = 3
+private const val TOML_DECIMAL_INTEGER_PATTERN = "(?:0|[1-9](?:_?[0-9])*)"
+private const val TOML_DIGITS_PATTERN = "[0-9](?:_?[0-9])*"
+private const val TOML_EXPONENT_PATTERN = "[eE][+-]?$TOML_DIGITS_PATTERN"
+
+private val tomlDecimalIntegerRegex = Regex("[+-]?$TOML_DECIMAL_INTEGER_PATTERN")
+private val tomlBinaryIntegerRegex = Regex("0b[01](?:_?[01])*")
+private val tomlOctalIntegerRegex = Regex("0o[0-7](?:_?[0-7])*")
+private val tomlHexIntegerRegex = Regex("0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*")
+private val tomlFloatRegex = Regex(
+    "[+-]?(?:" +
+            "$TOML_DECIMAL_INTEGER_PATTERN\\.$TOML_DIGITS_PATTERN(?:$TOML_EXPONENT_PATTERN)?|" +
+            "$TOML_DECIMAL_INTEGER_PATTERN$TOML_EXPONENT_PATTERN" +
+            ")"
+)
 
 /**
  * Callback invoked for every character while scanning a key string: receives the character and
@@ -219,6 +233,23 @@ internal fun String.trimBrackets(): String = trimSymbols(this, "[", "]")
  * @return string with the result
  */
 internal fun String.removeTrailingComma(): String = this.removeSuffix(",")
+
+/**
+ * Checks whether this string is a TOML integer literal.
+ *
+ * @return true for valid decimal, binary, octal, or hexadecimal integer literals
+ */
+internal fun String.isValidTomlIntegerLiteral(): Boolean = tomlDecimalIntegerRegex.matches(this) ||
+        tomlBinaryIntegerRegex.matches(this) ||
+        tomlOctalIntegerRegex.matches(this) ||
+        tomlHexIntegerRegex.matches(this)
+
+/**
+ * Checks whether this string is a TOML float literal.
+ *
+ * @return true for valid decimal float literals, excluding special values handled separately
+ */
+internal fun String.isValidTomlFloatLiteral(): Boolean = tomlFloatRegex.matches(this)
 
 /**
  * If this string starts and end with a pair brackets([[]]) - will return the string with brackets removed
