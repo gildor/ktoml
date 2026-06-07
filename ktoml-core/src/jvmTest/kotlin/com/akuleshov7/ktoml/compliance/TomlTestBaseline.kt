@@ -1,25 +1,19 @@
 package com.akuleshov7.ktoml.compliance
 
 /**
- * Known failures for the [toml-lang/toml-test](https://github.com/toml-lang/toml-test) compliance suite.
+ * Known failures for the [toml-lang/toml-test](https://github.com/toml-lang/toml-test) compliance suite —
+ * test paths that [TomlTestSuite] expects to fail because of an open ktoml bug or a deliberate gap.
  *
- * Each [KnownFailure] object declares an issue ID and a list of test paths that fail due to that issue.
- * When a bug is fixed, the test will start passing and [TomlTestSuite] will fail with an
- * XPASS message — remove the test path from the corresponding object.
+ * Each [KnownFailure] object declares an issue ID and the failing test paths. When a fix lands the
+ * test starts passing and [TomlTestSuite] fails with an XPASS message — remove the path from its object.
  *
- * ## Failure categories
+ * **There are currently no known failures: the whole suite passes.** In particular, the
+ * `invalid/encoding` cases (malformed UTF-8) are rejected at the suite's strict-UTF-8 input
+ * boundary — see `TomlTestSuite.readTomlStrictUtf8`. That is a property of how the suite reads bytes,
+ * not of ktoml: ktoml-core decodes an already-decoded [String] (no bytes to validate), and
+ * ktoml-file/ktoml-source follow okio's lenient UTF-8 reading by design.
  *
- * | Category | Issue |
- * |----------|-------|
- * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
- * | Multiline inline table crash | [#374](https://github.com/orchestr7/ktoml/issues/374) |
- * | Missing validation (accepts invalid) | [#383](https://github.com/orchestr7/ktoml/issues/383) |
- * | TOML 1.1 valid features unsupported | [#373](https://github.com/orchestr7/ktoml/issues/373) |
- *
- * The suite runs against the **TOML 1.1** file list (`files-toml-1.1.0`), matching the project goal.
- *
- * Related: [#32](https://github.com/orchestr7/ktoml/issues/32) (toml-test integration),
- * [#373](https://github.com/orchestr7/ktoml/issues/373) (TOML 1.1 umbrella)
+ * Related: [#32](https://github.com/orchestr7/ktoml/issues/32) (toml-test integration).
  */
 sealed interface KnownFailure {
     val issue: Int
@@ -28,35 +22,11 @@ sealed interface KnownFailure {
     val issueUrl: String get() = "https://github.com/orchestr7/ktoml/issues/$issue"
 }
 
-/** Missing validation — bad UTF-8 encoding not rejected */
-data object MissingValidationEncoding : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/encoding/bad-codepoint.toml",
-        "invalid/encoding/bad-utf8-in-comment.toml",
-        "invalid/encoding/bad-utf8-in-multiline.toml",
-        "invalid/encoding/bad-utf8-in-multiline-literal.toml",
-        "invalid/encoding/bad-utf8-in-string.toml",
-        "invalid/encoding/bad-utf8-in-string-literal.toml",
-    )
-}
-
-/** Missing validation — invalid datetimes not rejected */
-data object MissingValidationDatetime : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/local-time/no-secs.toml",
-        "invalid/local-datetime/no-secs.toml",
-    )
-}
-
 /**
- * All known failure groups. Used by [TomlTestSuite] to build the lookup map.
+ * All known failure groups, used by [TomlTestSuite] to build the lookup map. Empty — add a
+ * [KnownFailure] object here only when a genuine ktoml spec gap is found (and remove it once fixed).
  */
-val allKnownFailures: List<KnownFailure> = listOf(
-    MissingValidationEncoding,
-    MissingValidationDatetime,
-)
+val allKnownFailures: List<KnownFailure> = emptyList()
 
 /**
  * Combined map of all known failures: test path → issue URL.

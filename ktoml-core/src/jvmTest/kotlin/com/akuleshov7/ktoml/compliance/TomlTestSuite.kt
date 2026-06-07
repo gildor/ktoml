@@ -12,6 +12,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Assumptions.assumeTrue
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -20,13 +21,14 @@ import java.io.File
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
  * Runs the [toml-lang/toml-test](https://github.com/toml-lang/toml-test) compliance suite
- * against ktoml's parser (TOML 1.1 file list — matching the project goal).
+ * against ktoml's parser, using the toml-test file list selected by [loadFileList].
  *
  * - **Valid tests:** parse TOML → convert AST to tagged JSON via [TomlTestConverter] → compare
  *   with expected JSON from the test suite.
@@ -75,13 +77,17 @@ class TomlTestSuite {
     fun `valid TOML parses correctly`(testPath: String) {
         val tomlFile = testDir.resolve(testPath)
         val jsonFile = testDir.resolve(testPath.replace(".toml", ".json"))
-        assumeTrue(tomlFile.exists(), "TOML file missing: $testPath")
-        assumeTrue(jsonFile.exists(), "Expected JSON missing for: $testPath")
+        assertTrue(tomlFile.exists(), missingFileMessage(testPath))
+        assertTrue(
+            jsonFile.exists(),
+            "Misconfiguration: expected JSON is listed but missing on disk: " +
+                testPath.replace(".toml", ".json"),
+        )
 
         val issueUrl = knownFailuresMap[testPath]
 
         val result = runCatching {
-            val tomlInput = tomlFile.readText()
+            val tomlInput = readTomlStrictUtf8(tomlFile)
             val expectedJson = Json.parseToJsonElement(jsonFile.readText())
             val tree = TomlParser(TomlInputConfig.compliant()).parseString(tomlInput)
             val actualJson = TomlTestConverter.toJson(tree)
@@ -102,13 +108,13 @@ class TomlTestSuite {
     @MethodSource("invalidTestCases")
     fun `invalid TOML is rejected`(testPath: String) {
         val tomlFile = testDir.resolve(testPath)
-        assumeTrue(tomlFile.exists(), "TOML file missing: $testPath")
+        assertTrue(tomlFile.exists(), missingFileMessage(testPath))
 
         val issueUrl = knownFailuresMap[testPath]
 
         val result = runCatching {
-            val tomlInput = tomlFile.readText()
             assertFails("Expected parse failure for $testPath") {
+                val tomlInput = readTomlStrictUtf8(tomlFile)
                 TomlParser(TomlInputConfig.compliant()).parseString(tomlInput)
             }
         }
@@ -122,6 +128,40 @@ class TomlTestSuite {
                 result.getOrThrow()
         }
     }
+
+    /**
+     * Guards against stale baseline entries: a path listed in [knownFailuresMap] but absent from the
+     * loaded toml-test file list is never executed, so it can neither XPASS nor fail — it just lingers
+     * silently and gives a false sense of coverage. Fail loudly so it gets removed.
+     */
+    @Test
+    fun `baseline references only tests present in the file list`() {
+        val listed = loadFileList().toSet()
+        val stale = knownFailuresMap.keys.filterNot { it in listed }
+        assertTrue(
+            stale.isEmpty(),
+            "Stale baseline entries — listed in TomlTestBaseline.kt but not in the loaded toml-test " +
+                "file list, so they never run. Remove them: $stale",
+        )
+    }
+
+    private fun missingFileMessage(testPath: String) =
+        "Misconfiguration: '$testPath' is in the toml-test file list but missing on disk. " +
+            "The toml-test submodule is incomplete — run: git submodule update --init --recursive"
+
+    /**
+     * Reads a test file with **strict UTF-8** decoding ([ByteArray.decodeToString] with
+     * `throwOnInvalidSequence = true`): malformed bytes (a lone `0xC3`, or a surrogate encoded as
+     * `ED A0 80`) throw instead of being silently replaced with U+FFFD. This is what lets the suite
+     * reject toml-test's `invalid/encoding` cases.
+     *
+     * This is the *suite's* input boundary, not ktoml behaviour. ktoml-core decodes an
+     * already-decoded [String] (no bytes to validate), and ktoml-file/ktoml-source follow okio's
+     * lenient UTF-8 reading by design (a real app shouldn't fail on a stray byte). Strict UTF-8 is a
+     * standard stdlib flag, applied here only for compliance testing.
+     */
+    private fun readTomlStrictUtf8(tomlFile: File): String =
+        tomlFile.readBytes().decodeToString(throwOnInvalidSequence = true)
 
     private fun assertJsonEqualsWithFloatTolerance(
         expected: JsonElement,
