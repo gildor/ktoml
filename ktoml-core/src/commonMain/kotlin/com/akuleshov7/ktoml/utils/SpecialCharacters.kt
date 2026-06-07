@@ -15,6 +15,7 @@ import com.akuleshov7.ktoml.parsers.isLineEndingBackslash
 
 internal const val COMPLEX_UNICODE_LENGTH = 8
 internal const val COMPLEX_UNICODE_PREFIX = 'U'
+internal const val DEC_RADIX = 10
 internal const val BIN_RADIX = 2
 internal const val OCT_RADIX = 8
 internal const val HEX_RADIX = 16
@@ -47,7 +48,10 @@ public fun String.convertSpecialCharacters(lineNo: Int): String {
     while (i < length) {
         val currentChar = get(i)
         var offset = 1
-        if (currentChar == '\\' && i != lastIndex) {
+        if (currentChar == '\\') {
+            if (i == lastIndex) {
+                throw UnknownEscapeSymbolsException("", lineNo)
+            }
             // Escaped
             val next = get(i + 1)
             offset++
@@ -101,8 +105,12 @@ public fun StringBuilder.appendEscapedUnicode(
         throw UnknownEscapeSymbolsException("\\$invalid", lineNo)
     }
     val hexCode = fullString.substring(codeStartIndex, codeStartIndex + nbUnicodeChars)
-    val codePoint = hexCode.toIntOrNull(HEX_RADIX)
-    if (codePoint == null || !codePoint.isUnicodeScalarValue()) {
+    val codePoint = try {
+        hexCode.toInt(HEX_RADIX)
+    } catch (e: NumberFormatException) {
+        throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
+    }
+    if (!codePoint.isUnicodeScalarValue()) {
         throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
     }
     try {
@@ -150,6 +158,36 @@ internal fun Char.isControlChar() = this in CharCategory.CONTROL && this != '\t'
 internal fun Char.isMultilineControlChar() = isControlChar() && this !in "\n\r"
 
 /**
+ * Checks if a character is disallowed by TOML's source character rules.
+ * TOML permits tab, printable Unicode scalar values, and line feeds only as line terminators.
+ *
+ * @return true when this character is a forbidden TOML control character
+ */
+internal fun Char.isTomlControlChar(): Boolean = this in '\u0000'..'\u0008' ||
+        this in '\u000A'..'\u001F' || this == '\u007F'
+
+/**
+ * Rejects raw control characters that TOML does not allow in source text.
+ *
+ * @param lineNo line number of the string for error reporting
+ * @param allowLineFeed whether LF is valid here as a multiline string line separator
+ * @return the original string when it contains no illegal control characters
+ * @throws ParseException if an illegal control character is found
+ */
+internal fun String.checkNoTomlControlChars(lineNo: Int, allowLineFeed: Boolean = false): String {
+    forEach { char ->
+        if (char.isForbiddenTomlControlChar(allowLineFeed)) {
+            throw ParseException(
+                "Control character U+${char.code.toString(HEX_RADIX).padStart(SIMPLE_UNICODE_LENGTH, '0')}" +
+                        " is not allowed here. Please check: <$this>",
+                lineNo
+            )
+        }
+    }
+    return this
+}
+
+/**
  * Rejects a bare carriage return inside string content. A `\r` is only allowed as part of a `\r\n`
  * line ending; a `\r` that is not immediately followed by `\n` is an illegal control character.
  * CRLF line endings are normalized to LF before parsing, so a surviving lone `\r` is always bare.
@@ -170,6 +208,9 @@ internal fun String.checkNoBareCarriageReturn(lineNo: Int): String {
     }
     return this
 }
+
+private fun Char.isForbiddenTomlControlChar(allowLineFeed: Boolean): Boolean =
+    isTomlControlChar() && (this != '\n' || !allowLineFeed)
 
 private fun String.escapeControlChars(isMultiline: Boolean): String {
     val isControlChar = if (isMultiline) {

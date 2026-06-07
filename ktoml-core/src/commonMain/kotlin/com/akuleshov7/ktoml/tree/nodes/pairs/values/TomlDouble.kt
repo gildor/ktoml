@@ -1,6 +1,7 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.parsers.isValidTomlFloatLiteral
 import com.akuleshov7.ktoml.writers.TomlEmitter
 
 /**
@@ -26,25 +27,17 @@ internal constructor(
 
     private companion object {
         /**
-         * Parses a TOML float literal into a [Double], supporting `_` digit separators in the
-         * integer, fractional and exponent parts (e.g. `224_617.445_991_228`, `3e1_4`).
+         * Parses a TOML float literal into a [Double].
          *
-         * Underscores are only allowed between two digits. A leading, trailing or doubled `_`,
-         * or one adjacent to `.`/`e`/sign, is rejected with a [NumberFormatException] so that
-         * invalid literals keep being treated as non-floats by the caller.
+         * Floats must have a decimal integer part without leading zeroes and either a fractional
+         * part with digits on both sides of `.` or an exponent part. Underscores are allowed only
+         * between digits in the integer, fractional, or exponent part.
          */
         private fun String.parse(): Double {
-            if (any { it == '_' } && !isValidUnderscorePlacement()) {
-                throw NumberFormatException("Invalid underscore placement in float <$this>")
+            if (!isValidTomlFloatLiteral()) {
+                throw NumberFormatException("Invalid TOML float literal <$this>")
             }
             return replace("_", "").toDouble()
         }
-
-        private fun String.isValidUnderscorePlacement(): Boolean =
-            indices.none { index ->
-                this[index] == '_' &&
-                        !(index > 0 && this[index - 1].isDigit() &&
-                                index < lastIndex && this[index + 1].isDigit())
-            }
     }
 }
