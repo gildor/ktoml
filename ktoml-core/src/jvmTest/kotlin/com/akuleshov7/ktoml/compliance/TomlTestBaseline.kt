@@ -12,7 +12,6 @@ package com.akuleshov7.ktoml.compliance
  * | Category | Issue |
  * |----------|-------|
  * | Dotted key expansion incorrect | [#377](https://github.com/orchestr7/ktoml/issues/377) |
- * | Parser rejects valid TOML | [#380](https://github.com/orchestr7/ktoml/issues/380) |
  * | Multiline inline table crash | [#374](https://github.com/orchestr7/ktoml/issues/374) |
  * | Missing validation (accepts invalid) | [#383](https://github.com/orchestr7/ktoml/issues/383) |
  * | TOML 1.1 valid features unsupported | [#373](https://github.com/orchestr7/ktoml/issues/373) |
@@ -27,14 +26,6 @@ sealed interface KnownFailure {
     val tests: List<String>
 
     val issueUrl: String get() = "https://github.com/orchestr7/ktoml/issues/$issue"
-}
-
-/** ktoml rejects valid TOML with ParseException */
-data object ValidTomlRejected : KnownFailure {
-    override val issue = 380
-    override val tests = listOf(
-        "valid/spec-1.0.0/array-0.toml",
-    )
 }
 
 /** Missing validation — control characters not rejected */
@@ -86,21 +77,6 @@ data object MissingValidationEncoding : KnownFailure {
     )
 }
 
-/** Missing validation — invalid inline tables not rejected */
-data object MissingValidationInlineTable : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/inline-table/duplicate-key-01.toml",
-        "invalid/inline-table/duplicate-key-02.toml",
-        "invalid/inline-table/duplicate-key-03.toml",
-        "invalid/inline-table/overwrite-08.toml",
-        "invalid/spec-1.0.0/inline-table-2-0.toml",
-        "invalid/spec-1.0.0/inline-table-3-0.toml",
-        "invalid/spec-1.0.0/table-9-0.toml",
-        "invalid/spec-1.0.0/table-9-1.toml",
-    )
-}
-
 /** Missing validation — invalid string escapes not rejected */
 data object MissingValidationStringEscape : KnownFailure {
     override val issue = 383
@@ -125,25 +101,14 @@ data object MissingValidationDatetime : KnownFailure {
     )
 }
 
-/** Missing validation — invalid arrays not rejected */
-data object MissingValidationArrays : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/array/only-comma-01.toml",
-    )
-}
-
 /**
  * All known failure groups. Used by [TomlTestSuite] to build the lookup map.
  */
 val allKnownFailures: List<KnownFailure> = listOf(
-    ValidTomlRejected,
     MissingValidationControlChars,
     MissingValidationEncoding,
-    MissingValidationInlineTable,
     MissingValidationStringEscape,
     MissingValidationDatetime,
-    MissingValidationArrays,
 )
 
 /**
