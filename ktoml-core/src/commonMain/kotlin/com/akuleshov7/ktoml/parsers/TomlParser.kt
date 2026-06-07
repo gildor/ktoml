@@ -124,15 +124,19 @@ public value class TomlParser(private val config: TomlInputConfig) {
                                 )
                                 .appendCheckedKeyValue(keyValue, validate)
 
-                        keyValue is TomlInlineTable ->
+                        keyValue is TomlInlineTable -> {
                             // in case of inline tables (a = { b = "c" }) we need to create a new parental table and
                             // recursively process all inner nested tables (including inline and dotted)
+                            keyValue.key?.last()?.let { keyName ->
+                                currentParentalNode.checkKeyCanBeDefined(keyName, keyValue.lineNo, validate)
+                            }
                             tomlFileHead.insertTableToTree(
                                 keyValue.returnTable(tomlFileHead, currentParentalNode, validate),
                                 insertionType = TableInsertionType.INLINE_TABLE,
                                 containerDepth = currentParentalNode.sectionDepth(),
                                 validate = validate
                             )
+                        }
 
                         // otherwise, it should simply append the keyValue to the parent
                         else -> currentParentalNode.appendCheckedKeyValue(keyValue, validate)

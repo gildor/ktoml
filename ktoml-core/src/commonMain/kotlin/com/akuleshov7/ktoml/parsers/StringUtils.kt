@@ -55,9 +55,8 @@ internal fun String.splitKeyToTokens(lineNo: Int): List<String> {
     }
 
     val keyPart = currentPart.toString().trim()
-    keyPart.validateSpaces(lineNo, this)
-
     dotSeparatedParts.add(keyPart)
+    dotSeparatedParts.forEach { it.validateKeyPart(lineNo, this) }
     return dotSeparatedParts
 }
 
@@ -383,6 +382,18 @@ internal fun String.replaceEscaped(allowEscapedQuotesInLiteralStrings: Boolean, 
     }
 }
 
+private fun String.validateKeyPart(lineNo: Int, fullKey: String) {
+    if (isEmpty()) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as it contains an empty key part.",
+            lineNo
+        )
+    }
+
+    validateSpaces(lineNo, fullKey)
+    validateQuoteBoundaries(lineNo, fullKey)
+}
+
 private fun String.validateSpaces(lineNo: Int, fullKey: String) {
     if (this.trim().count { it == ' ' } > 0 && this.isNotQuoted()) {
         throw ParseException(
@@ -390,6 +401,47 @@ private fun String.validateSpaces(lineNo: Int, fullKey: String) {
                     " If you would like to have spaces in the middle of the key - use quotes: \"WORD SPACE\"", lineNo
         )
     }
+}
+
+private fun String.validateQuoteBoundaries(lineNo: Int, fullKey: String) {
+    if (startsWith("\"\"\"") || startsWith("'''")) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as multiline strings cannot be used as keys.",
+            lineNo
+        )
+    }
+
+    val first = first()
+    val isQuoted = first == '"' || first == '\''
+    if (isQuoted) {
+        if (last() != first || !isSingleQuotedKeyToken(first)) {
+            throw ParseException(
+                "Not able to parse the key: [$fullKey] as quoted key parts must be fully quoted.",
+                lineNo
+            )
+        }
+    } else if (any { it == '"' || it == '\'' }) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as quoted key parts must be fully quoted.",
+            lineNo
+        )
+    }
+}
+
+private fun String.isSingleQuotedKeyToken(quote: Char): Boolean {
+    var index = 1
+    while (index < lastIndex) {
+        val ch = this[index]
+        if (quote == '"' && ch == '\\' && index + 1 < lastIndex) {
+            index += 2
+            continue
+        }
+        if (ch == quote) {
+            return false
+        }
+        index++
+    }
+    return true
 }
 
 /**
