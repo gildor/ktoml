@@ -111,8 +111,7 @@ internal fun String.convertLineEndingBackslash(): String {
             }
 
             val lineBreakLength = lineBreakLengthAt(j)
-            val isTerminalContinuation = j == length && continuationStart == j
-            if (lineBreakLength > 0 || isTerminalContinuation) {
+            if (lineBreakLength > 0) {
                 repeat(slashCount - 1) {
                     result.append('\\')
                 }
@@ -136,10 +135,9 @@ internal fun String.convertLineEndingBackslash(): String {
 }
 
 /**
- * Checks if the backslash at the given index is a line-ending backslash
- * A line-ending backslash is defined as a backslash that is followed only by
- * whitespace characters and then a newline character, or is the final character
- * in the string.
+ * Checks if the backslash at the given index is a line-ending backslash.
+ * A line-ending backslash is followed only by whitespace characters and then
+ * a newline character.
  *
  * @param backslashIndex The index of the backslash to check
  * @return `true` if the backslash is a line-ending backslash, `false` otherwise
@@ -155,7 +153,7 @@ internal fun String.isLineEndingBackslash(backslashIndex: Int): Boolean {
         j++
     }
 
-    return lineBreakLengthAt(j) > 0 || (j == length && continuationStart == j)
+    return lineBreakLengthAt(j) > 0
 }
 
 /**

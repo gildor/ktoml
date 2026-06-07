@@ -125,8 +125,9 @@ class ValueParserTest {
         test = TomlKeyValuePrimitive(Pair("a", "\"helloworld\\n\""), 0)
         assertEquals("helloworld\n", test.value.content)
 
-        test = TomlKeyValuePrimitive(Pair("a", "\"helloworld\\\""), 0)
-        assertEquals("helloworld\\", test.value.content)
+        assertFailsWith<ParseException> {
+            TomlKeyValuePrimitive(Pair("a", "\"helloworld\\\""), 0)
+        }
 
         test = TomlKeyValuePrimitive(Pair("a", "\"hello\\nworld\""), 0)
         assertEquals("hello\nworld", test.value.content)
