@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'toml-1.1'
 
 env:
   PGP_SEC: ${{ secrets.PGP_SEC }}
@@ -38,11 +40,21 @@ jobs:
       - name: gradle release from tag
         # if workflow is triggered after push of a tag, deploy full release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: ./gradlew            
+        run: ./gradlew
           --console=rich
           -Prelease
+          -Pgroup=app.gildor
           -PgprUser=${{ github.actor }}
           -PgprKey=${{ secrets.GITHUB_TOKEN }}
+          publishToSonatype closeSonatypeStagingRepository
+      - name: gradle publish snapshot
+        # branch pushes publish a -SNAPSHOT to the Central Portal snapshot repository
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: ./gradlew
+          --console=rich
+          -Pgroup=app.gildor
+          -Preckon.stage=snapshot
+          -Preckon.scope=minor
           publishToSonatype
       - name: Status git after
         if: ${{ always() }}
@@ -51,6 +63,8 @@ jobs:
   github_release:
     needs: release
     name: Create Github Release
+    # only for tag releases, not for branch snapshot builds
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - name: Create Github Release
