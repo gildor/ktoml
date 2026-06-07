@@ -77,96 +77,6 @@ data object MissingValidationEncoding : KnownFailure {
     )
 }
 
-/**
- * Missing validation — table redefinition and duplicate keys not rejected.
- *
- * The redefinition / duplicate-key / overwrite / append-with-dotted-keys family is now rejected.
- * What remains here is purely invalid *table-name syntax* (empty key segments and multiline-string
- * keys in headers), which belongs to key-name parsing validation rather than table redefinition.
- */
-data object MissingValidationTableRedefinition : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/table/dot.toml",
-        "invalid/table/dotdot.toml",
-        "invalid/table/empty-implicit-table.toml",
-        "invalid/table/multiline-key-01.toml",
-        "invalid/table/multiline-key-02.toml",
-        "invalid/table/trailing-dot.toml",
-    )
-}
-
-/** Missing validation — malformed integer literals not rejected */
-data object MissingValidationIntegerFormat : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/integer/double-us.toml",
-        "invalid/integer/invalid-hex-03.toml",
-        "invalid/integer/leading-us.toml",
-        "invalid/integer/leading-us-bin.toml",
-        "invalid/integer/leading-us-hex.toml",
-        "invalid/integer/leading-us-oct.toml",
-        "invalid/integer/leading-zero-01.toml",
-        "invalid/integer/leading-zero-02.toml",
-        "invalid/integer/leading-zero-03.toml",
-        "invalid/integer/leading-zero-sign-01.toml",
-        "invalid/integer/leading-zero-sign-02.toml",
-        "invalid/integer/leading-zero-sign-03.toml",
-        "invalid/integer/trailing-us.toml",
-        "invalid/integer/trailing-us-bin.toml",
-        "invalid/integer/trailing-us-hex.toml",
-        "invalid/integer/trailing-us-oct.toml",
-        "invalid/integer/us-after-bin.toml",
-        "invalid/integer/us-after-hex.toml",
-        "invalid/integer/us-after-oct.toml",
-    )
-}
-
-/** Missing validation — malformed float literals not rejected */
-data object MissingValidationFloatFormat : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/float/exp-dot-02.toml",
-        "invalid/float/exp-dot-03.toml",
-        "invalid/float/leading-dot.toml",
-        "invalid/float/leading-dot-neg.toml",
-        "invalid/float/leading-dot-plus.toml",
-        "invalid/float/leading-zero.toml",
-        "invalid/float/leading-zero-neg.toml",
-        "invalid/float/leading-zero-plus.toml",
-        "invalid/float/nan-capital.toml",
-        "invalid/float/trailing-dot.toml",
-        "invalid/float/trailing-dot-01.toml",
-        "invalid/float/trailing-dot-02.toml",
-        "invalid/float/trailing-dot-min.toml",
-        "invalid/float/trailing-dot-plus.toml",
-    )
-}
-
-/** Missing validation — invalid keys not rejected */
-data object MissingValidationKeys : KnownFailure {
-    override val issue = 383
-    override val tests = listOf(
-        "invalid/key/dot.toml",
-        "invalid/key/dotdot.toml",
-        "invalid/key/duplicate-keys-01.toml",
-        "invalid/key/duplicate-keys-02.toml",
-        "invalid/key/duplicate-keys-03.toml",
-        "invalid/key/duplicate-keys-04.toml",
-        "invalid/key/duplicate-keys-05.toml",
-        "invalid/key/duplicate-keys-06.toml",
-        "invalid/key/duplicate-keys-07.toml",
-        "invalid/key/duplicate-keys-08.toml",
-        "invalid/key/duplicate-keys-09.toml",
-        "invalid/key/multiline-key-01.toml",
-        "invalid/key/multiline-key-02.toml",
-        "invalid/key/multiline-key-03.toml",
-        "invalid/key/multiline-key-04.toml",
-        "invalid/key/partial-quoted.toml",
-        "invalid/key/start-dot.toml",
-    )
-}
-
 /** Missing validation — invalid string escapes not rejected */
 data object MissingValidationStringEscape : KnownFailure {
     override val issue = 383
@@ -197,10 +107,6 @@ data object MissingValidationDatetime : KnownFailure {
 val allKnownFailures: List<KnownFailure> = listOf(
     MissingValidationControlChars,
     MissingValidationEncoding,
-    MissingValidationTableRedefinition,
-    MissingValidationIntegerFormat,
-    MissingValidationFloatFormat,
-    MissingValidationKeys,
     MissingValidationStringEscape,
     MissingValidationDatetime,
 )

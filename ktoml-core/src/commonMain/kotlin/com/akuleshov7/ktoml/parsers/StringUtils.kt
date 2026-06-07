@@ -9,6 +9,20 @@ import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
 
 private const val MULTILINE_STRING_QUOTE_LENGTH = 3
+private const val TOML_DECIMAL_INTEGER_PATTERN = "(?:0|[1-9](?:_?[0-9])*)"
+private const val TOML_DIGITS_PATTERN = "[0-9](?:_?[0-9])*"
+private const val TOML_EXPONENT_PATTERN = "[eE][+-]?$TOML_DIGITS_PATTERN"
+
+private val tomlDecimalIntegerRegex = Regex("[+-]?$TOML_DECIMAL_INTEGER_PATTERN")
+private val tomlBinaryIntegerRegex = Regex("0b[01](?:_?[01])*")
+private val tomlOctalIntegerRegex = Regex("0o[0-7](?:_?[0-7])*")
+private val tomlHexIntegerRegex = Regex("0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*")
+private val tomlFloatRegex = Regex(
+    "[+-]?(?:" +
+            "$TOML_DECIMAL_INTEGER_PATTERN\\.$TOML_DIGITS_PATTERN(?:$TOML_EXPONENT_PATTERN)?|" +
+            "$TOML_DECIMAL_INTEGER_PATTERN$TOML_EXPONENT_PATTERN" +
+            ")"
+)
 
 /**
  * Callback invoked for every character while scanning a key string: receives the character and
@@ -41,9 +55,8 @@ internal fun String.splitKeyToTokens(lineNo: Int): List<String> {
     }
 
     val keyPart = currentPart.toString().trim()
-    keyPart.validateSpaces(lineNo, this)
-
     dotSeparatedParts.add(keyPart)
+    dotSeparatedParts.forEach { it.validateKeyPart(lineNo, this) }
     return dotSeparatedParts
 }
 
@@ -222,6 +235,23 @@ internal fun String.trimBrackets(): String = trimSymbols(this, "[", "]")
 internal fun String.removeTrailingComma(): String = this.removeSuffix(",")
 
 /**
+ * Checks whether this string is a TOML integer literal.
+ *
+ * @return true for valid decimal, binary, octal, or hexadecimal integer literals
+ */
+internal fun String.isValidTomlIntegerLiteral(): Boolean = tomlDecimalIntegerRegex.matches(this) ||
+        tomlBinaryIntegerRegex.matches(this) ||
+        tomlOctalIntegerRegex.matches(this) ||
+        tomlHexIntegerRegex.matches(this)
+
+/**
+ * Checks whether this string is a TOML float literal.
+ *
+ * @return true for valid decimal float literals, excluding special values handled separately
+ */
+internal fun String.isValidTomlFloatLiteral(): Boolean = tomlFloatRegex.matches(this)
+
+/**
  * If this string starts and end with a pair brackets([[]]) - will return the string with brackets removed
  * Otherwise, returns this string.
  *
@@ -352,6 +382,18 @@ internal fun String.replaceEscaped(allowEscapedQuotesInLiteralStrings: Boolean, 
     }
 }
 
+private fun String.validateKeyPart(lineNo: Int, fullKey: String) {
+    if (isEmpty()) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as it contains an empty key part.",
+            lineNo
+        )
+    }
+
+    validateSpaces(lineNo, fullKey)
+    validateQuoteBoundaries(lineNo, fullKey)
+}
+
 private fun String.validateSpaces(lineNo: Int, fullKey: String) {
     if (this.trim().count { it == ' ' } > 0 && this.isNotQuoted()) {
         throw ParseException(
@@ -359,6 +401,47 @@ private fun String.validateSpaces(lineNo: Int, fullKey: String) {
                     " If you would like to have spaces in the middle of the key - use quotes: \"WORD SPACE\"", lineNo
         )
     }
+}
+
+private fun String.validateQuoteBoundaries(lineNo: Int, fullKey: String) {
+    if (startsWith("\"\"\"") || startsWith("'''")) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as multiline strings cannot be used as keys.",
+            lineNo
+        )
+    }
+
+    val first = first()
+    val isQuoted = first == '"' || first == '\''
+    if (isQuoted) {
+        if (last() != first || !isSingleQuotedKeyToken(first)) {
+            throw ParseException(
+                "Not able to parse the key: [$fullKey] as quoted key parts must be fully quoted.",
+                lineNo
+            )
+        }
+    } else if (any { it == '"' || it == '\'' }) {
+        throw ParseException(
+            "Not able to parse the key: [$fullKey] as quoted key parts must be fully quoted.",
+            lineNo
+        )
+    }
+}
+
+private fun String.isSingleQuotedKeyToken(quote: Char): Boolean {
+    var index = 1
+    while (index < lastIndex) {
+        val ch = this[index]
+        if (quote == '"' && ch == '\\' && index + 1 < lastIndex) {
+            index += 2
+            continue
+        }
+        if (ch == quote) {
+            return false
+        }
+        index++
+    }
+    return true
 }
 
 /**

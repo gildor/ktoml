@@ -15,6 +15,7 @@ import com.akuleshov7.ktoml.parsers.isLineEndingBackslash
 
 internal const val COMPLEX_UNICODE_LENGTH = 8
 internal const val COMPLEX_UNICODE_PREFIX = 'U'
+internal const val DEC_RADIX = 10
 internal const val BIN_RADIX = 2
 internal const val OCT_RADIX = 8
 internal const val HEX_RADIX = 16
