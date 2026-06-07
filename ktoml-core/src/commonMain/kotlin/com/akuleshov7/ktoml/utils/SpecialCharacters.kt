@@ -26,12 +26,13 @@ internal const val SIMPLE_UNICODE_PREFIX = 'u'
 internal const val HEX_ESCAPE_LENGTH = 2
 internal const val HEX_ESCAPE_PREFIX = 'x'
 
-// TOML 1.1 escape escape (\e) — the ESC control character (U+001B)
-internal const val ESCAPE_CHAR = '\u001B'
-
+private const val MIN_UNICODE_CODE_POINT = 0x0000
 private const val MIN_SURROGATE_CODE_POINT = 0xD800
 private const val MAX_SURROGATE_CODE_POINT = 0xDFFF
-private const val MAX_UNICODE_CODE_POINT = 1_114_111
+private const val MAX_UNICODE_CODE_POINT = 0x10_FF_FF
+
+// TOML 1.1 escape escape (\e) — the ESC control character (U+001B)
+internal const val ESCAPE_CHAR = '\u001B'
 
 /**
  * Converting special escaped symbols like newlines, tabs and unicode symbols to proper characters for decoding
@@ -211,9 +212,6 @@ internal fun String.checkNoBareCarriageReturn(lineNo: Int): String {
 private fun Char.isForbiddenTomlControlChar(allowLineFeed: Boolean): Boolean =
     isTomlControlChar() && (this != '\n' || !allowLineFeed)
 
-private fun Int.isUnicodeScalarValue(): Boolean = this in 0..MAX_UNICODE_CODE_POINT &&
-        this !in MIN_SURROGATE_CODE_POINT..MAX_SURROGATE_CODE_POINT
-
 private fun String.escapeControlChars(isMultiline: Boolean): String {
     val isControlChar = if (isMultiline) {
         Char::isMultilineControlChar
@@ -282,6 +280,9 @@ private fun Char.escapeControlChar() = when (this) {
         }"
     }
 }
+
+private fun Int.isUnicodeScalarValue(): Boolean = this in MIN_UNICODE_CODE_POINT..MAX_UNICODE_CODE_POINT &&
+        this !in MIN_SURROGATE_CODE_POINT..MAX_SURROGATE_CODE_POINT
 
 /**
  * just a newline character on different platforms/targets
