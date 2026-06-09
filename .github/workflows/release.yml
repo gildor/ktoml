@@ -44,13 +44,18 @@ jobs:
         env:
           PGP_SEC: ${{ secrets.PGP_SEC }}
           PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+        # closeAndRelease (vs close) auto-promotes to Maven Central: close uploads the
+        # staging repo to the Central Portal as publishing_type=user_managed, which then
+        # waits for a manual "Publish" click; release issues the Nexus promote call that
+        # the OSSRH staging-api bridge maps to a Portal publish, so the deployment goes
+        # to Central automatically once validation passes — no manual step.
         run: ./gradlew
           --console=rich
           -Prelease
           -Pgroup=app.gildor
           -PgprUser=${{ github.actor }}
           -PgprKey=${{ secrets.GITHUB_TOKEN }}
-          publishToSonatype closeSonatypeStagingRepository
+          publishToSonatype closeAndReleaseSonatypeStagingRepository
       - name: gradle publish snapshot
         # manual on-request snapshot publish (workflow_dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' }}
