@@ -1,0 +1,1562 @@
+# large-mixed.toml — broad TOML 1.0 feature mix
+
+[server_0]
+id = 0
+hostname = "host-0.example.com"
+"display name" = "Server #0 \u2014 prod node"
+'literal_path' = 'C:\srv\node0\bin'
+enabled = true
+ratio = 1000.000991228
+mass = 6.62607015e-34
+big = 0xDEAD_0000
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-01T07:32:00-08:00
+updated = 2021-11-15T13:37:01.250Z
+local_dt = 1987-07-05T17:45:01
+local_d = 1970-07-05
+local_t = 07:32:00.5
+ports = [ 8000, 8001, 8002 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.0", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_1]
+id = 1
+hostname = "host-1.example.com"
+"display name" = "Server #1 \u2014 prod node"
+'literal_path' = 'C:\srv\node1\bin'
+enabled = false
+ratio = 1001.001991228
+mass = 6.62607015e-34
+big = 0xDEAD_0001
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-02T07:32:00-08:00
+updated = 2021-11-15T13:37:02.250Z
+local_dt = 1987-07-05T17:45:02
+local_d = 1971-07-05
+local_t = 07:32:00.5
+ports = [ 8001, 8002, 8003 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.1", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_2]
+id = 2
+hostname = "host-2.example.com"
+"display name" = "Server #2 \u2014 prod node"
+'literal_path' = 'C:\srv\node2\bin'
+enabled = true
+ratio = 1002.002991228
+mass = 6.62607015e-34
+big = 0xDEAD_0002
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-03T07:32:00-08:00
+updated = 2021-11-15T13:37:03.250Z
+local_dt = 1987-07-05T17:45:03
+local_d = 1972-07-05
+local_t = 07:32:00.5
+ports = [ 8002, 8003, 8004 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.2", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_3]
+id = 3
+hostname = "host-3.example.com"
+"display name" = "Server #3 \u2014 prod node"
+'literal_path' = 'C:\srv\node3\bin'
+enabled = false
+ratio = 1003.003991228
+mass = 6.62607015e-34
+big = 0xDEAD_0003
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-04T07:32:00-08:00
+updated = 2021-11-15T13:37:04.250Z
+local_dt = 1987-07-05T17:45:04
+local_d = 1973-07-05
+local_t = 07:32:00.5
+ports = [ 8003, 8004, 8005 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.3", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_4]
+id = 4
+hostname = "host-4.example.com"
+"display name" = "Server #4 \u2014 prod node"
+'literal_path' = 'C:\srv\node4\bin'
+enabled = true
+ratio = 1004.004991228
+mass = 6.62607015e-34
+big = 0xDEAD_0004
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-05T07:32:00-08:00
+updated = 2021-11-15T13:37:05.250Z
+local_dt = 1987-07-05T17:45:05
+local_d = 1974-07-05
+local_t = 07:32:00.5
+ports = [ 8004, 8005, 8006 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.4", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_5]
+id = 5
+hostname = "host-5.example.com"
+"display name" = "Server #5 \u2014 prod node"
+'literal_path' = 'C:\srv\node5\bin'
+enabled = false
+ratio = 1005.005991228
+mass = 6.62607015e-34
+big = 0xDEAD_0005
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-06T07:32:00-08:00
+updated = 2021-11-15T13:37:06.250Z
+local_dt = 1987-07-05T17:45:06
+local_d = 1975-07-05
+local_t = 07:32:00.5
+ports = [ 8005, 8006, 8007 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.5", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_6]
+id = 6
+hostname = "host-6.example.com"
+"display name" = "Server #6 \u2014 prod node"
+'literal_path' = 'C:\srv\node6\bin'
+enabled = true
+ratio = 1006.006991228
+mass = 6.62607015e-34
+big = 0xDEAD_0006
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-07T07:32:00-08:00
+updated = 2021-11-15T13:37:07.250Z
+local_dt = 1987-07-05T17:45:07
+local_d = 1976-07-05
+local_t = 07:32:00.5
+ports = [ 8006, 8007, 8008 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.6", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_7]
+id = 7
+hostname = "host-7.example.com"
+"display name" = "Server #7 \u2014 prod node"
+'literal_path' = 'C:\srv\node7\bin'
+enabled = false
+ratio = 1007.007991228
+mass = 6.62607015e-34
+big = 0xDEAD_0007
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-08T07:32:00-08:00
+updated = 2021-11-15T13:37:08.250Z
+local_dt = 1987-07-05T17:45:08
+local_d = 1977-07-05
+local_t = 07:32:00.5
+ports = [ 8007, 8008, 8009 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.7", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_8]
+id = 8
+hostname = "host-8.example.com"
+"display name" = "Server #8 \u2014 prod node"
+'literal_path' = 'C:\srv\node8\bin'
+enabled = true
+ratio = 1008.008991228
+mass = 6.62607015e-34
+big = 0xDEAD_0008
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-09T07:32:00-08:00
+updated = 2021-11-15T13:37:09.250Z
+local_dt = 1987-07-05T17:45:09
+local_d = 1978-07-05
+local_t = 07:32:00.5
+ports = [ 8008, 8009, 8010 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.8", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_9]
+id = 9
+hostname = "host-9.example.com"
+"display name" = "Server #9 \u2014 prod node"
+'literal_path' = 'C:\srv\node9\bin'
+enabled = false
+ratio = 1009.009991228
+mass = 6.62607015e-34
+big = 0xDEAD_0009
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-10T07:32:00-08:00
+updated = 2021-11-15T13:37:10.250Z
+local_dt = 1987-07-05T17:45:10
+local_d = 1979-07-05
+local_t = 07:32:00.5
+ports = [ 8009, 8010, 8011 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.9", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_10]
+id = 10
+hostname = "host-10.example.com"
+"display name" = "Server #10 \u2014 prod node"
+'literal_path' = 'C:\srv\node10\bin'
+enabled = true
+ratio = 1010.010991228
+mass = 6.62607015e-34
+big = 0xDEAD_000A
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-11T07:32:00-08:00
+updated = 2021-11-15T13:37:11.250Z
+local_dt = 1987-07-05T17:45:11
+local_d = 1980-07-05
+local_t = 07:32:00.5
+ports = [ 8010, 8011, 8012 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.10", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_11]
+id = 11
+hostname = "host-11.example.com"
+"display name" = "Server #11 \u2014 prod node"
+'literal_path' = 'C:\srv\node11\bin'
+enabled = false
+ratio = 1011.011991228
+mass = 6.62607015e-34
+big = 0xDEAD_000B
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-12T07:32:00-08:00
+updated = 2021-11-15T13:37:12.250Z
+local_dt = 1987-07-05T17:45:12
+local_d = 1981-07-05
+local_t = 07:32:00.5
+ports = [ 8011, 8012, 8013 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.11", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_12]
+id = 12
+hostname = "host-12.example.com"
+"display name" = "Server #12 \u2014 prod node"
+'literal_path' = 'C:\srv\node12\bin'
+enabled = true
+ratio = 1012.012991228
+mass = 6.62607015e-34
+big = 0xDEAD_000C
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-13T07:32:00-08:00
+updated = 2021-11-15T13:37:13.250Z
+local_dt = 1987-07-05T17:45:13
+local_d = 1982-07-05
+local_t = 07:32:00.5
+ports = [ 8012, 8013, 8014 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.12", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_13]
+id = 13
+hostname = "host-13.example.com"
+"display name" = "Server #13 \u2014 prod node"
+'literal_path' = 'C:\srv\node13\bin'
+enabled = false
+ratio = 1013.013991228
+mass = 6.62607015e-34
+big = 0xDEAD_000D
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-14T07:32:00-08:00
+updated = 2021-11-15T13:37:14.250Z
+local_dt = 1987-07-05T17:45:14
+local_d = 1983-07-05
+local_t = 07:32:00.5
+ports = [ 8013, 8014, 8015 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.13", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_14]
+id = 14
+hostname = "host-14.example.com"
+"display name" = "Server #14 \u2014 prod node"
+'literal_path' = 'C:\srv\node14\bin'
+enabled = true
+ratio = 1014.014991228
+mass = 6.62607015e-34
+big = 0xDEAD_000E
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-15T07:32:00-08:00
+updated = 2021-11-15T13:37:15.250Z
+local_dt = 1987-07-05T17:45:15
+local_d = 1984-07-05
+local_t = 07:32:00.5
+ports = [ 8014, 8015, 8016 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.14", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_15]
+id = 15
+hostname = "host-15.example.com"
+"display name" = "Server #15 \u2014 prod node"
+'literal_path' = 'C:\srv\node15\bin'
+enabled = false
+ratio = 1015.015991228
+mass = 6.62607015e-34
+big = 0xDEAD_000F
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-16T07:32:00-08:00
+updated = 2021-11-15T13:37:16.250Z
+local_dt = 1987-07-05T17:45:16
+local_d = 1985-07-05
+local_t = 07:32:00.5
+ports = [ 8015, 8016, 8017 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.15", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_16]
+id = 16
+hostname = "host-16.example.com"
+"display name" = "Server #16 \u2014 prod node"
+'literal_path' = 'C:\srv\node16\bin'
+enabled = true
+ratio = 1016.016991228
+mass = 6.62607015e-34
+big = 0xDEAD_0010
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-17T07:32:00-08:00
+updated = 2021-11-15T13:37:17.250Z
+local_dt = 1987-07-05T17:45:17
+local_d = 1986-07-05
+local_t = 07:32:00.5
+ports = [ 8016, 8017, 8018 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.16", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_17]
+id = 17
+hostname = "host-17.example.com"
+"display name" = "Server #17 \u2014 prod node"
+'literal_path' = 'C:\srv\node17\bin'
+enabled = false
+ratio = 1017.017991228
+mass = 6.62607015e-34
+big = 0xDEAD_0011
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-18T07:32:00-08:00
+updated = 2021-11-15T13:37:18.250Z
+local_dt = 1987-07-05T17:45:18
+local_d = 1987-07-05
+local_t = 07:32:00.5
+ports = [ 8017, 8018, 8019 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.17", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_18]
+id = 18
+hostname = "host-18.example.com"
+"display name" = "Server #18 \u2014 prod node"
+'literal_path' = 'C:\srv\node18\bin'
+enabled = true
+ratio = 1018.018991228
+mass = 6.62607015e-34
+big = 0xDEAD_0012
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-19T07:32:00-08:00
+updated = 2021-11-15T13:37:19.250Z
+local_dt = 1987-07-05T17:45:19
+local_d = 1988-07-05
+local_t = 07:32:00.5
+ports = [ 8018, 8019, 8020 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.18", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_19]
+id = 19
+hostname = "host-19.example.com"
+"display name" = "Server #19 \u2014 prod node"
+'literal_path' = 'C:\srv\node19\bin'
+enabled = false
+ratio = 1019.019991228
+mass = 6.62607015e-34
+big = 0xDEAD_0013
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-20T07:32:00-08:00
+updated = 2021-11-15T13:37:20.250Z
+local_dt = 1987-07-05T17:45:20
+local_d = 1989-07-05
+local_t = 07:32:00.5
+ports = [ 8019, 8020, 8021 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.19", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_20]
+id = 20
+hostname = "host-20.example.com"
+"display name" = "Server #20 \u2014 prod node"
+'literal_path' = 'C:\srv\node20\bin'
+enabled = true
+ratio = 1020.020991228
+mass = 6.62607015e-34
+big = 0xDEAD_0014
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-21T07:32:00-08:00
+updated = 2021-11-15T13:37:21.250Z
+local_dt = 1987-07-05T17:45:21
+local_d = 1990-07-05
+local_t = 07:32:00.5
+ports = [ 8020, 8021, 8022 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.20", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_21]
+id = 21
+hostname = "host-21.example.com"
+"display name" = "Server #21 \u2014 prod node"
+'literal_path' = 'C:\srv\node21\bin'
+enabled = false
+ratio = 1021.021991228
+mass = 6.62607015e-34
+big = 0xDEAD_0015
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-22T07:32:00-08:00
+updated = 2021-11-15T13:37:22.250Z
+local_dt = 1987-07-05T17:45:22
+local_d = 1991-07-05
+local_t = 07:32:00.5
+ports = [ 8021, 8022, 8023 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.21", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_22]
+id = 22
+hostname = "host-22.example.com"
+"display name" = "Server #22 \u2014 prod node"
+'literal_path' = 'C:\srv\node22\bin'
+enabled = true
+ratio = 1022.022991228
+mass = 6.62607015e-34
+big = 0xDEAD_0016
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-23T07:32:00-08:00
+updated = 2021-11-15T13:37:23.250Z
+local_dt = 1987-07-05T17:45:23
+local_d = 1992-07-05
+local_t = 07:32:00.5
+ports = [ 8022, 8023, 8024 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.22", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_23]
+id = 23
+hostname = "host-23.example.com"
+"display name" = "Server #23 \u2014 prod node"
+'literal_path' = 'C:\srv\node23\bin'
+enabled = false
+ratio = 1023.023991228
+mass = 6.62607015e-34
+big = 0xDEAD_0017
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-24T07:32:00-08:00
+updated = 2021-11-15T13:37:24.250Z
+local_dt = 1987-07-05T17:45:24
+local_d = 1993-07-05
+local_t = 07:32:00.5
+ports = [ 8023, 8024, 8025 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.23", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_24]
+id = 24
+hostname = "host-24.example.com"
+"display name" = "Server #24 \u2014 prod node"
+'literal_path' = 'C:\srv\node24\bin'
+enabled = true
+ratio = 1024.024991228
+mass = 6.62607015e-34
+big = 0xDEAD_0018
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-25T07:32:00-08:00
+updated = 2021-11-15T13:37:25.250Z
+local_dt = 1987-07-05T17:45:25
+local_d = 1994-07-05
+local_t = 07:32:00.5
+ports = [ 8024, 8025, 8026 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.24", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_25]
+id = 25
+hostname = "host-25.example.com"
+"display name" = "Server #25 \u2014 prod node"
+'literal_path' = 'C:\srv\node25\bin'
+enabled = false
+ratio = 1025.025991228
+mass = 6.62607015e-34
+big = 0xDEAD_0019
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-26T07:32:00-08:00
+updated = 2021-11-15T13:37:26.250Z
+local_dt = 1987-07-05T17:45:26
+local_d = 1995-07-05
+local_t = 07:32:00.5
+ports = [ 8025, 8026, 8027 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.25", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_26]
+id = 26
+hostname = "host-26.example.com"
+"display name" = "Server #26 \u2014 prod node"
+'literal_path' = 'C:\srv\node26\bin'
+enabled = true
+ratio = 1026.026991228
+mass = 6.62607015e-34
+big = 0xDEAD_001A
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-27T07:32:00-08:00
+updated = 2021-11-15T13:37:27.250Z
+local_dt = 1987-07-05T17:45:27
+local_d = 1996-07-05
+local_t = 07:32:00.5
+ports = [ 8026, 8027, 8028 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.26", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_27]
+id = 27
+hostname = "host-27.example.com"
+"display name" = "Server #27 \u2014 prod node"
+'literal_path' = 'C:\srv\node27\bin'
+enabled = false
+ratio = 1027.027991228
+mass = 6.62607015e-34
+big = 0xDEAD_001B
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-01T07:32:00-08:00
+updated = 2021-11-15T13:37:28.250Z
+local_dt = 1987-07-05T17:45:28
+local_d = 1997-07-05
+local_t = 07:32:00.5
+ports = [ 8027, 8028, 8029 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.27", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_28]
+id = 28
+hostname = "host-28.example.com"
+"display name" = "Server #28 \u2014 prod node"
+'literal_path' = 'C:\srv\node28\bin'
+enabled = true
+ratio = 1028.028991228
+mass = 6.62607015e-34
+big = 0xDEAD_001C
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-02T07:32:00-08:00
+updated = 2021-11-15T13:37:29.250Z
+local_dt = 1987-07-05T17:45:29
+local_d = 1998-07-05
+local_t = 07:32:00.5
+ports = [ 8028, 8029, 8030 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.28", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_29]
+id = 29
+hostname = "host-29.example.com"
+"display name" = "Server #29 \u2014 prod node"
+'literal_path' = 'C:\srv\node29\bin'
+enabled = false
+ratio = 1029.029991228
+mass = 6.62607015e-34
+big = 0xDEAD_001D
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-03T07:32:00-08:00
+updated = 2021-11-15T13:37:30.250Z
+local_dt = 1987-07-05T17:45:30
+local_d = 1999-07-05
+local_t = 07:32:00.5
+ports = [ 8029, 8030, 8031 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.29", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_30]
+id = 30
+hostname = "host-30.example.com"
+"display name" = "Server #30 \u2014 prod node"
+'literal_path' = 'C:\srv\node30\bin'
+enabled = true
+ratio = 1030.030991228
+mass = 6.62607015e-34
+big = 0xDEAD_001E
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-04T07:32:00-08:00
+updated = 2021-11-15T13:37:31.250Z
+local_dt = 1987-07-05T17:45:31
+local_d = 1970-07-05
+local_t = 07:32:00.5
+ports = [ 8030, 8031, 8032 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.30", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_31]
+id = 31
+hostname = "host-31.example.com"
+"display name" = "Server #31 \u2014 prod node"
+'literal_path' = 'C:\srv\node31\bin'
+enabled = false
+ratio = 1031.031991228
+mass = 6.62607015e-34
+big = 0xDEAD_001F
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-05T07:32:00-08:00
+updated = 2021-11-15T13:37:32.250Z
+local_dt = 1987-07-05T17:45:32
+local_d = 1971-07-05
+local_t = 07:32:00.5
+ports = [ 8031, 8032, 8033 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.31", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_32]
+id = 32
+hostname = "host-32.example.com"
+"display name" = "Server #32 \u2014 prod node"
+'literal_path' = 'C:\srv\node32\bin'
+enabled = true
+ratio = 1032.032991228
+mass = 6.62607015e-34
+big = 0xDEAD_0020
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-06T07:32:00-08:00
+updated = 2021-11-15T13:37:33.250Z
+local_dt = 1987-07-05T17:45:33
+local_d = 1972-07-05
+local_t = 07:32:00.5
+ports = [ 8032, 8033, 8034 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.32", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_33]
+id = 33
+hostname = "host-33.example.com"
+"display name" = "Server #33 \u2014 prod node"
+'literal_path' = 'C:\srv\node33\bin'
+enabled = false
+ratio = 1033.033991228
+mass = 6.62607015e-34
+big = 0xDEAD_0021
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-07T07:32:00-08:00
+updated = 2021-11-15T13:37:34.250Z
+local_dt = 1987-07-05T17:45:34
+local_d = 1973-07-05
+local_t = 07:32:00.5
+ports = [ 8033, 8034, 8035 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.33", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_34]
+id = 34
+hostname = "host-34.example.com"
+"display name" = "Server #34 \u2014 prod node"
+'literal_path' = 'C:\srv\node34\bin'
+enabled = true
+ratio = 1034.034991228
+mass = 6.62607015e-34
+big = 0xDEAD_0022
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-08T07:32:00-08:00
+updated = 2021-11-15T13:37:35.250Z
+local_dt = 1987-07-05T17:45:35
+local_d = 1974-07-05
+local_t = 07:32:00.5
+ports = [ 8034, 8035, 8036 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.34", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_35]
+id = 35
+hostname = "host-35.example.com"
+"display name" = "Server #35 \u2014 prod node"
+'literal_path' = 'C:\srv\node35\bin'
+enabled = false
+ratio = 1035.035991228
+mass = 6.62607015e-34
+big = 0xDEAD_0023
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-09T07:32:00-08:00
+updated = 2021-11-15T13:37:36.250Z
+local_dt = 1987-07-05T17:45:36
+local_d = 1975-07-05
+local_t = 07:32:00.5
+ports = [ 8035, 8036, 8037 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.35", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_36]
+id = 36
+hostname = "host-36.example.com"
+"display name" = "Server #36 \u2014 prod node"
+'literal_path' = 'C:\srv\node36\bin'
+enabled = true
+ratio = 1036.036991228
+mass = 6.62607015e-34
+big = 0xDEAD_0024
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-10T07:32:00-08:00
+updated = 2021-11-15T13:37:37.250Z
+local_dt = 1987-07-05T17:45:37
+local_d = 1976-07-05
+local_t = 07:32:00.5
+ports = [ 8036, 8037, 8038 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.36", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_37]
+id = 37
+hostname = "host-37.example.com"
+"display name" = "Server #37 \u2014 prod node"
+'literal_path' = 'C:\srv\node37\bin'
+enabled = false
+ratio = 1037.037991228
+mass = 6.62607015e-34
+big = 0xDEAD_0025
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-11T07:32:00-08:00
+updated = 2021-11-15T13:37:38.250Z
+local_dt = 1987-07-05T17:45:38
+local_d = 1977-07-05
+local_t = 07:32:00.5
+ports = [ 8037, 8038, 8039 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.37", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_38]
+id = 38
+hostname = "host-38.example.com"
+"display name" = "Server #38 \u2014 prod node"
+'literal_path' = 'C:\srv\node38\bin'
+enabled = true
+ratio = 1038.038991228
+mass = 6.62607015e-34
+big = 0xDEAD_0026
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-12T07:32:00-08:00
+updated = 2021-11-15T13:37:39.250Z
+local_dt = 1987-07-05T17:45:39
+local_d = 1978-07-05
+local_t = 07:32:00.5
+ports = [ 8038, 8039, 8040 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.38", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_39]
+id = 39
+hostname = "host-39.example.com"
+"display name" = "Server #39 \u2014 prod node"
+'literal_path' = 'C:\srv\node39\bin'
+enabled = false
+ratio = 1039.039991228
+mass = 6.62607015e-34
+big = 0xDEAD_0027
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-13T07:32:00-08:00
+updated = 2021-11-15T13:37:40.250Z
+local_dt = 1987-07-05T17:45:40
+local_d = 1979-07-05
+local_t = 07:32:00.5
+ports = [ 8039, 8040, 8041 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.39", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_40]
+id = 40
+hostname = "host-40.example.com"
+"display name" = "Server #40 \u2014 prod node"
+'literal_path' = 'C:\srv\node40\bin'
+enabled = true
+ratio = 1040.040991228
+mass = 6.62607015e-34
+big = 0xDEAD_0028
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-14T07:32:00-08:00
+updated = 2021-11-15T13:37:41.250Z
+local_dt = 1987-07-05T17:45:41
+local_d = 1980-07-05
+local_t = 07:32:00.5
+ports = [ 8040, 8041, 8042 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.40", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_41]
+id = 41
+hostname = "host-41.example.com"
+"display name" = "Server #41 \u2014 prod node"
+'literal_path' = 'C:\srv\node41\bin'
+enabled = false
+ratio = 1041.041991228
+mass = 6.62607015e-34
+big = 0xDEAD_0029
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-15T07:32:00-08:00
+updated = 2021-11-15T13:37:42.250Z
+local_dt = 1987-07-05T17:45:42
+local_d = 1981-07-05
+local_t = 07:32:00.5
+ports = [ 8041, 8042, 8043 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.41", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_42]
+id = 42
+hostname = "host-42.example.com"
+"display name" = "Server #42 \u2014 prod node"
+'literal_path' = 'C:\srv\node42\bin'
+enabled = true
+ratio = 1042.042991228
+mass = 6.62607015e-34
+big = 0xDEAD_002A
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-16T07:32:00-08:00
+updated = 2021-11-15T13:37:43.250Z
+local_dt = 1987-07-05T17:45:43
+local_d = 1982-07-05
+local_t = 07:32:00.5
+ports = [ 8042, 8043, 8044 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.42", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_43]
+id = 43
+hostname = "host-43.example.com"
+"display name" = "Server #43 \u2014 prod node"
+'literal_path' = 'C:\srv\node43\bin'
+enabled = false
+ratio = 1043.043991228
+mass = 6.62607015e-34
+big = 0xDEAD_002B
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-17T07:32:00-08:00
+updated = 2021-11-15T13:37:44.250Z
+local_dt = 1987-07-05T17:45:44
+local_d = 1983-07-05
+local_t = 07:32:00.5
+ports = [ 8043, 8044, 8045 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.43", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_44]
+id = 44
+hostname = "host-44.example.com"
+"display name" = "Server #44 \u2014 prod node"
+'literal_path' = 'C:\srv\node44\bin'
+enabled = true
+ratio = 1044.044991228
+mass = 6.62607015e-34
+big = 0xDEAD_002C
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-18T07:32:00-08:00
+updated = 2021-11-15T13:37:45.250Z
+local_dt = 1987-07-05T17:45:45
+local_d = 1984-07-05
+local_t = 07:32:00.5
+ports = [ 8044, 8045, 8046 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.44", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_45]
+id = 45
+hostname = "host-45.example.com"
+"display name" = "Server #45 \u2014 prod node"
+'literal_path' = 'C:\srv\node45\bin'
+enabled = false
+ratio = 1045.045991228
+mass = 6.62607015e-34
+big = 0xDEAD_002D
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-19T07:32:00-08:00
+updated = 2021-11-15T13:37:46.250Z
+local_dt = 1987-07-05T17:45:46
+local_d = 1985-07-05
+local_t = 07:32:00.5
+ports = [ 8045, 8046, 8047 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.45", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_46]
+id = 46
+hostname = "host-46.example.com"
+"display name" = "Server #46 \u2014 prod node"
+'literal_path' = 'C:\srv\node46\bin'
+enabled = true
+ratio = 1046.046991228
+mass = 6.62607015e-34
+big = 0xDEAD_002E
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-20T07:32:00-08:00
+updated = 2021-11-15T13:37:47.250Z
+local_dt = 1987-07-05T17:45:47
+local_d = 1986-07-05
+local_t = 07:32:00.5
+ports = [ 8046, 8047, 8048 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.46", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_47]
+id = 47
+hostname = "host-47.example.com"
+"display name" = "Server #47 \u2014 prod node"
+'literal_path' = 'C:\srv\node47\bin'
+enabled = false
+ratio = 1047.047991228
+mass = 6.62607015e-34
+big = 0xDEAD_002F
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-21T07:32:00-08:00
+updated = 2021-11-15T13:37:48.250Z
+local_dt = 1987-07-05T17:45:48
+local_d = 1987-07-05
+local_t = 07:32:00.5
+ports = [ 8047, 8048, 8049 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.47", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_48]
+id = 48
+hostname = "host-48.example.com"
+"display name" = "Server #48 \u2014 prod node"
+'literal_path' = 'C:\srv\node48\bin'
+enabled = true
+ratio = 1048.048991228
+mass = 6.62607015e-34
+big = 0xDEAD_0030
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-22T07:32:00-08:00
+updated = 2021-11-15T13:37:49.250Z
+local_dt = 1987-07-05T17:45:49
+local_d = 1988-07-05
+local_t = 07:32:00.5
+ports = [ 8048, 8049, 8050 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.48", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_49]
+id = 49
+hostname = "host-49.example.com"
+"display name" = "Server #49 \u2014 prod node"
+'literal_path' = 'C:\srv\node49\bin'
+enabled = false
+ratio = 1049.049991228
+mass = 6.62607015e-34
+big = 0xDEAD_0031
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-23T07:32:00-08:00
+updated = 2021-11-15T13:37:50.250Z
+local_dt = 1987-07-05T17:45:50
+local_d = 1989-07-05
+local_t = 07:32:00.5
+ports = [ 8049, 8050, 8051 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.49", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_50]
+id = 50
+hostname = "host-50.example.com"
+"display name" = "Server #50 \u2014 prod node"
+'literal_path' = 'C:\srv\node50\bin'
+enabled = true
+ratio = 1050.050991228
+mass = 6.62607015e-34
+big = 0xDEAD_0032
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-24T07:32:00-08:00
+updated = 2021-11-15T13:37:51.250Z
+local_dt = 1987-07-05T17:45:51
+local_d = 1990-07-05
+local_t = 07:32:00.5
+ports = [ 8050, 8051, 8052 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.50", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_51]
+id = 51
+hostname = "host-51.example.com"
+"display name" = "Server #51 \u2014 prod node"
+'literal_path' = 'C:\srv\node51\bin'
+enabled = false
+ratio = 1051.051991228
+mass = 6.62607015e-34
+big = 0xDEAD_0033
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-25T07:32:00-08:00
+updated = 2021-11-15T13:37:52.250Z
+local_dt = 1987-07-05T17:45:52
+local_d = 1991-07-05
+local_t = 07:32:00.5
+ports = [ 8051, 8052, 8053 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.51", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_52]
+id = 52
+hostname = "host-52.example.com"
+"display name" = "Server #52 \u2014 prod node"
+'literal_path' = 'C:\srv\node52\bin'
+enabled = true
+ratio = 1052.052991228
+mass = 6.62607015e-34
+big = 0xDEAD_0034
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-26T07:32:00-08:00
+updated = 2021-11-15T13:37:53.250Z
+local_dt = 1987-07-05T17:45:53
+local_d = 1992-07-05
+local_t = 07:32:00.5
+ports = [ 8052, 8053, 8054 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.52", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_53]
+id = 53
+hostname = "host-53.example.com"
+"display name" = "Server #53 \u2014 prod node"
+'literal_path' = 'C:\srv\node53\bin'
+enabled = false
+ratio = 1053.053991228
+mass = 6.62607015e-34
+big = 0xDEAD_0035
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-27T07:32:00-08:00
+updated = 2021-11-15T13:37:54.250Z
+local_dt = 1987-07-05T17:45:54
+local_d = 1993-07-05
+local_t = 07:32:00.5
+ports = [ 8053, 8054, 8055 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.53", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_54]
+id = 54
+hostname = "host-54.example.com"
+"display name" = "Server #54 \u2014 prod node"
+'literal_path' = 'C:\srv\node54\bin'
+enabled = true
+ratio = 1054.054991228
+mass = 6.62607015e-34
+big = 0xDEAD_0036
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-01T07:32:00-08:00
+updated = 2021-11-15T13:37:55.250Z
+local_dt = 1987-07-05T17:45:55
+local_d = 1994-07-05
+local_t = 07:32:00.5
+ports = [ 8054, 8055, 8056 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.54", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_55]
+id = 55
+hostname = "host-55.example.com"
+"display name" = "Server #55 \u2014 prod node"
+'literal_path' = 'C:\srv\node55\bin'
+enabled = false
+ratio = 1055.055991228
+mass = 6.62607015e-34
+big = 0xDEAD_0037
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-02T07:32:00-08:00
+updated = 2021-11-15T13:37:56.250Z
+local_dt = 1987-07-05T17:45:56
+local_d = 1995-07-05
+local_t = 07:32:00.5
+ports = [ 8055, 8056, 8057 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.55", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_56]
+id = 56
+hostname = "host-56.example.com"
+"display name" = "Server #56 \u2014 prod node"
+'literal_path' = 'C:\srv\node56\bin'
+enabled = true
+ratio = 1056.056991228
+mass = 6.62607015e-34
+big = 0xDEAD_0038
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-03T07:32:00-08:00
+updated = 2021-11-15T13:37:57.250Z
+local_dt = 1987-07-05T17:45:57
+local_d = 1996-07-05
+local_t = 07:32:00.5
+ports = [ 8056, 8057, 8058 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.56", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_57]
+id = 57
+hostname = "host-57.example.com"
+"display name" = "Server #57 \u2014 prod node"
+'literal_path' = 'C:\srv\node57\bin'
+enabled = false
+ratio = 1057.057991228
+mass = 6.62607015e-34
+big = 0xDEAD_0039
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-04T07:32:00-08:00
+updated = 2021-11-15T13:37:58.250Z
+local_dt = 1987-07-05T17:45:58
+local_d = 1997-07-05
+local_t = 07:32:00.5
+ports = [ 8057, 8058, 8059 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.57", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_58]
+id = 58
+hostname = "host-58.example.com"
+"display name" = "Server #58 \u2014 prod node"
+'literal_path' = 'C:\srv\node58\bin'
+enabled = true
+ratio = 1058.058991228
+mass = 6.62607015e-34
+big = 0xDEAD_003A
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-05T07:32:00-08:00
+updated = 2021-11-15T13:37:59.250Z
+local_dt = 1987-07-05T17:45:59
+local_d = 1998-07-05
+local_t = 07:32:00.5
+ports = [ 8058, 8059, 8060 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.58", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+
+[server_59]
+id = 59
+hostname = "host-59.example.com"
+"display name" = "Server #59 \u2014 prod node"
+'literal_path' = 'C:\srv\node59\bin'
+enabled = false
+ratio = 1059.059991228
+mass = 6.62607015e-34
+big = 0xDEAD_003B
+perms = 0o755
+flags = 0b1010_1101
+created = 1979-05-06T07:32:00-08:00
+updated = 2021-11-15T13:37:01.250Z
+local_dt = 1987-07-05T17:45:01
+local_d = 1999-07-05
+local_t = 07:32:00.5
+ports = [ 8059, 8060, 8061 ]
+matrix = [ [1, 2], [3, 4], [5, 6] ]
+tags = [ "alpha", "beta", "gamma", "delta" ]
+endpoint = { host = "10.0.0.59", port = 8080, tls = true }
+physical.color = "gray"
+physical.shape = "round"
+config.limits.max = 1_000_000
+config.limits.min = -1_024
+description = "multi\nline\tvalue with a quote \" and unicode \u00e9\u00f1\u2603"
+

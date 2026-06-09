@@ -1,0 +1,30 @@
+# CI pipeline configuration
+[pipeline]
+name = "build-test-deploy"
+timeout_minutes = 45
+retries = 2
+
+[[stages]]
+name = "build"
+image = "eclipse-temurin:21"
+commands = ["./gradlew assemble"]
+cache_paths = ["~/.gradle/caches", "build/"]
+
+[[stages]]
+name = "test"
+image = "eclipse-temurin:21"
+commands = ["./gradlew test", "./gradlew jacocoTestReport"]
+needs = ["build"]
+coverage_threshold = 0.80
+
+[[stages]]
+name = "deploy"
+image = "google/cloud-sdk:slim"
+commands = ["./deploy.sh production"]
+needs = ["test"]
+when = "on_success"
+
+[notifications]
+slack_channel = "#ci-alerts"
+notify_on = ["failure", "fixed"]
+email = ["devops@example.com"]

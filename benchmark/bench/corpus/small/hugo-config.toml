@@ -1,0 +1,37 @@
+baseURL = "https://example.com/"
+languageCode = "en-us"
+title = "Example Static Site"
+theme = "minimal"
+paginate = 10
+enableRobotsTXT = true
+
+[params]
+description = "A realistic static-site config"
+author = "Jane Doe"
+showReadingTime = true
+dateFormat = "2006-01-02"
+
+[menu]
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "Posts"
+url = "/posts/"
+weight = 2
+
+[[menu.main]]
+name = "About"
+url = "/about/"
+weight = 3
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.highlight]
+style = "monokai"
+lineNos = true
+tabWidth = 4

@@ -1,0 +1,26 @@
+# Feature flags & rollout config
+[flags.new_checkout]
+enabled = true
+rollout_percentage = 35
+allowlist = ["beta@example.com", "qa@example.com"]
+updated_at = 2024-03-01T12:00:00-05:00
+
+[flags.dark_mode]
+enabled = true
+rollout_percentage = 100
+
+[flags.experimental_search]
+enabled = false
+rollout_percentage = 0
+note = "blocked on indexing job \"reindex-v2\""
+
+[flags.referral_program]
+enabled = true
+rollout_percentage = 50
+reward_amount = 5.00
+currency = "USD"
+expires_at = 2024-12-31T23:59:59Z
+
+[segments]
+internal = { domains = ["example.com"], min_app_version = "3.2.0" }
+beta = { count = 2_500, opt_in = true }

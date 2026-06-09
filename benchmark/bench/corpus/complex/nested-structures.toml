@@ -1,0 +1,568 @@
+# nested-structures.toml — arrays of tables, deep arrays, nested inline tables
+
+[[fruit]]
+name = "fruit-0"
+sku = 1000
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 120.5
+[[fruit.variety]]
+name = "variety-0-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-0-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-1"
+sku = 1001
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 121.5
+[[fruit.variety]]
+name = "variety-1-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-1-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-2"
+sku = 1002
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 122.5
+[[fruit.variety]]
+name = "variety-2-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-2-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-3"
+sku = 1003
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 123.5
+[[fruit.variety]]
+name = "variety-3-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-3-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-4"
+sku = 1004
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 124.5
+[[fruit.variety]]
+name = "variety-4-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-4-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-5"
+sku = 1005
+[fruit.physical]
+color = "color-5"
+shape = "round"
+weight.grams = 125.5
+[[fruit.variety]]
+name = "variety-5-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-5-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-6"
+sku = 1006
+[fruit.physical]
+color = "color-6"
+shape = "round"
+weight.grams = 126.5
+[[fruit.variety]]
+name = "variety-6-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-6-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-7"
+sku = 1007
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 127.5
+[[fruit.variety]]
+name = "variety-7-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-7-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-8"
+sku = 1008
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 128.5
+[[fruit.variety]]
+name = "variety-8-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-8-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-9"
+sku = 1009
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 129.5
+[[fruit.variety]]
+name = "variety-9-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-9-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-10"
+sku = 1010
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 120.5
+[[fruit.variety]]
+name = "variety-10-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-10-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-11"
+sku = 1011
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 121.5
+[[fruit.variety]]
+name = "variety-11-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-11-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-12"
+sku = 1012
+[fruit.physical]
+color = "color-5"
+shape = "round"
+weight.grams = 122.5
+[[fruit.variety]]
+name = "variety-12-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-12-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-13"
+sku = 1013
+[fruit.physical]
+color = "color-6"
+shape = "round"
+weight.grams = 123.5
+[[fruit.variety]]
+name = "variety-13-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-13-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-14"
+sku = 1014
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 124.5
+[[fruit.variety]]
+name = "variety-14-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-14-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-15"
+sku = 1015
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 125.5
+[[fruit.variety]]
+name = "variety-15-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-15-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-16"
+sku = 1016
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 126.5
+[[fruit.variety]]
+name = "variety-16-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-16-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-17"
+sku = 1017
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 127.5
+[[fruit.variety]]
+name = "variety-17-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-17-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-18"
+sku = 1018
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 128.5
+[[fruit.variety]]
+name = "variety-18-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-18-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-19"
+sku = 1019
+[fruit.physical]
+color = "color-5"
+shape = "round"
+weight.grams = 129.5
+[[fruit.variety]]
+name = "variety-19-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-19-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-20"
+sku = 1020
+[fruit.physical]
+color = "color-6"
+shape = "round"
+weight.grams = 120.5
+[[fruit.variety]]
+name = "variety-20-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-20-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-21"
+sku = 1021
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 121.5
+[[fruit.variety]]
+name = "variety-21-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-21-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-22"
+sku = 1022
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 122.5
+[[fruit.variety]]
+name = "variety-22-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-22-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-23"
+sku = 1023
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 123.5
+[[fruit.variety]]
+name = "variety-23-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-23-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-24"
+sku = 1024
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 124.5
+[[fruit.variety]]
+name = "variety-24-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-24-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-25"
+sku = 1025
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 125.5
+[[fruit.variety]]
+name = "variety-25-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-25-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-26"
+sku = 1026
+[fruit.physical]
+color = "color-5"
+shape = "round"
+weight.grams = 126.5
+[[fruit.variety]]
+name = "variety-26-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-26-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-27"
+sku = 1027
+[fruit.physical]
+color = "color-6"
+shape = "round"
+weight.grams = 127.5
+[[fruit.variety]]
+name = "variety-27-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-27-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-28"
+sku = 1028
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 128.5
+[[fruit.variety]]
+name = "variety-28-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-28-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-29"
+sku = 1029
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 129.5
+[[fruit.variety]]
+name = "variety-29-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-29-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-30"
+sku = 1030
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 120.5
+[[fruit.variety]]
+name = "variety-30-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-30-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-31"
+sku = 1031
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 121.5
+[[fruit.variety]]
+name = "variety-31-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-31-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-32"
+sku = 1032
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 122.5
+[[fruit.variety]]
+name = "variety-32-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-32-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-33"
+sku = 1033
+[fruit.physical]
+color = "color-5"
+shape = "round"
+weight.grams = 123.5
+[[fruit.variety]]
+name = "variety-33-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-33-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-34"
+sku = 1034
+[fruit.physical]
+color = "color-6"
+shape = "round"
+weight.grams = 124.5
+[[fruit.variety]]
+name = "variety-34-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-34-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-35"
+sku = 1035
+[fruit.physical]
+color = "color-0"
+shape = "round"
+weight.grams = 125.5
+[[fruit.variety]]
+name = "variety-35-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-35-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-36"
+sku = 1036
+[fruit.physical]
+color = "color-1"
+shape = "round"
+weight.grams = 126.5
+[[fruit.variety]]
+name = "variety-36-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-36-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-37"
+sku = 1037
+[fruit.physical]
+color = "color-2"
+shape = "round"
+weight.grams = 127.5
+[[fruit.variety]]
+name = "variety-37-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-37-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-38"
+sku = 1038
+[fruit.physical]
+color = "color-3"
+shape = "round"
+weight.grams = 128.5
+[[fruit.variety]]
+name = "variety-38-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-38-b"
+ripe = false
+
+[[fruit]]
+name = "fruit-39"
+sku = 1039
+[fruit.physical]
+color = "color-4"
+shape = "round"
+weight.grams = 129.5
+[[fruit.variety]]
+name = "variety-39-a"
+ripe = true
+[[fruit.variety]]
+name = "variety-39-b"
+ripe = false
+
+[deep]
+arr = [[[[1, 2], [3, 4]]], [[[5, 6], [7, 8]]], [[[9, 10]]]]
+mixed = [ { a = 1, b = [2, 3] }, { a = 4, b = [5, 6] } ]
+inline = { a = { b = 1 }, c = { d = 2 }, e = { f = 3 } }
+matrix = [ [ "x", "y" ], [ "z", "w" ] ]
+
