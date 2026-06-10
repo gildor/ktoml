@@ -59,7 +59,12 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.SERIALIZATION}")
-                api("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
+                // NB: ktoml-core does NOT depend on kotlinx-datetime. Offset date-times use the stdlib
+                // `kotlin.time.Instant`; local date/time values are parsed and validated by ktoml itself
+                // and kept as raw text. Deserializing them into `kotlinx.datetime.LocalDate`/`LocalDateTime`/
+                // `LocalTime` is opt-in: the consumer adds `org.jetbrains.kotlinx:kotlinx-datetime` (0.6.0+)
+                // and ktoml bridges to its serializers by serial name. A consumer that never names those
+                // types pulls no date library.
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.KOTLIN}")
             }
         }
@@ -68,6 +73,9 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                // Test-only: lets the bridge tests construct real kotlinx.datetime types and assert they
+                // round-trip. Not exposed by the published artifact.
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
             }
         }
 
