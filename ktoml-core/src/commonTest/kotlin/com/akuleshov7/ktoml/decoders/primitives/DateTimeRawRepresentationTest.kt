@@ -11,6 +11,7 @@ import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalTime
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlOffsetDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -85,6 +86,18 @@ class DateTimeRawRepresentationTest {
         )
     }
 
+    @Test
+    fun instantEncodeDecodeRoundTrip() {
+        // Encoding -> decoding an Instant round-trips to an equal value, with no date library present.
+        listOf(
+            WithInstant(kotlin.time.Instant.parse("1979-05-27T07:32:00Z")),
+            WithInstant(kotlin.time.Instant.parse("1979-05-27T00:32:00.999999Z")),
+        ).forEach { original ->
+            val toml = Toml.encodeToString(original)
+            assertEquals(original, Toml.decodeFromString<WithInstant>(toml))
+        }
+    }
+
     @Serializable
     data class WithStringDates(val d: String, val t: String, val dt: String)
 
@@ -100,6 +113,31 @@ class DateTimeRawRepresentationTest {
                 dt = 1979-05-27 07:32:00
                 """.trimIndent(),
             ),
+        )
+    }
+
+    @Test
+    fun malformedDatetimeLiteralsAreRejectedDuringParse() {
+        listOf(
+            "1997-09-09T09:09:09.09+09",
+            "1997-09-09T09:09:09.09-09",
+            "1997-09-09T09:09:09.",
+            "12:13:14.",
+        ).forEach { literal ->
+            assertFailsWith<ParseException>("expected <$literal> to be rejected") {
+                TomlParser(TomlInputConfig.compliant()).parseString("value = $literal")
+            }
+        }
+    }
+
+    @Test
+    fun secondsOmittedToml11TimeLiteralsStillParse() {
+        TomlParser(TomlInputConfig.compliant()).parseString(
+            """
+            localTime = 17:45
+            localDateTime = 1987-07-05T17:45
+            offsetDateTime = 1987-07-05T17:45-07:00
+            """.trimIndent(),
         )
     }
 }

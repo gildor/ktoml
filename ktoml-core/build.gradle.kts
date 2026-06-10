@@ -73,9 +73,10 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                // Test-only: lets the bridge tests construct real kotlinx.datetime types and assert they
-                // round-trip. Not exposed by the published artifact.
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
+                // NB: ktoml-core's own tests intentionally do NOT depend on kotlinx-datetime — they prove
+                // the library works with no date library on the classpath (offset date-times via the
+                // stdlib `kotlin.time.Instant`, locals as raw text / `String`). Tests for the
+                // `kotlinx.datetime.Local*` bridge live in the separate `:ktoml-datetime-tests` module.
             }
         }
 
