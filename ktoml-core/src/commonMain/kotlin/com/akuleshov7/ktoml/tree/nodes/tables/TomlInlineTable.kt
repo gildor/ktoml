@@ -95,13 +95,45 @@ public class TomlInlineTable internal constructor(
                     validate = validate
                 )
 
-                keyValue is TomlArrayOfTablesElement -> tomlTable.appendChild(keyValue)
+                keyValue is TomlArrayOfTablesElement -> {
+                    tomlTable.appendChild(keyValue)
+                    keyValue.expandNestedInlineArraysOfTables(tomlFileHead, validate)
+                }
 
                 // otherwise, it should simply append the keyValue to the parent
                 else -> tomlTable.appendChild(keyValue)
             }
         }
         return tomlTable
+    }
+
+    /**
+     * Expand inline arrays of tables nested inside this array-of-tables element (e.g. the
+     * `children = [{ ... }]` in `kids = [{ name = "x", children = [{ ... }] }]`) into proper
+     * `[[parent.child]]` tables nested under the element. Otherwise they would be left as raw
+     * inline nodes and fail to decode as lists - see issues #360 and #29.
+     *
+     * Dotted-keyed nested arrays (`a.b = [{ ... }]`) are intentionally left untouched: expanding
+     * them here would attach a single `[[parent.a.b]]` table directly to the element, collapsing
+     * the `a` level (the parent table is not yet in the file tree, so the dotted key cannot be
+     * split into nested tables the way `insertTableToTree` would). Those are already decoded and
+     * converted correctly from their raw inline form by the dotted-key handling - see the
+     * `valid/inline-table/key-dotted-*` toml-test cases.
+     */
+    private fun TomlArrayOfTablesElement.expandNestedInlineArraysOfTables(
+        tomlFileHead: TomlFile,
+        validate: Boolean
+    ) {
+        children
+            .filterIsInstance<TomlInlineTable>()
+            .filter { it.isInlineArrayOfTables() && it.key?.isDotted != true }
+            .toList()
+            .forEach { nested ->
+                children.remove(nested)
+                // the parent table is not in the file tree yet, so we attach the expanded
+                // table directly to the element instead of going through insertTableToTree
+                appendChild(nested.returnTable(tomlFileHead, this, validate))
+            }
     }
 
     public override fun write(
@@ -223,7 +255,7 @@ public class TomlInlineTable internal constructor(
             val parsedList = inlineTableContent
                 .removeTrailingComma()
                 .trim()
-                .splitInlineTableToKeyValue(config.allowEscapedQuotesInLiteralStrings, lineNo)
+                .splitInlineTableToKeyValue(config.allowEscapedQuotesInLiteralStrings)
                 .map {
                     it.parseTomlKeyValue(lineNo, comments = emptyList(), inlineComment = "", config)
                 }
@@ -311,65 +343,38 @@ public class TomlInlineTable internal constructor(
 
         /**
          * That's basically split(",") function, but we ignore all commas inside arrays [ ],
-         * nested tables { } and quotes " "/' '
+         * nested tables { } and quotes " "/' '. The bracket depth is tracked so that inline
+         * tables nested to any depth are split correctly (see issues #29 and #360).
          */
         @Suppress("TOO_LONG_FUNCTION")
         private fun String.splitInlineTableToKeyValue(
             allowEscapedQuotesInLiteralStrings: Boolean,
-            lineNo: Int,
         ): List<String> {
             val clearedString = this.replaceEscaped(allowEscapedQuotesInLiteralStrings)
             val keyValueList: MutableList<String> = mutableListOf()
-            var isLastAdded = false
             var currentQuoteChar: Char? = null
+            var bracketDepth = 0
             var prevIdx = 0
-            var curIdx = 0
 
-            while (curIdx < clearedString.length) {
-                val ch = clearedString[curIdx]
-                if (ch == ',' && currentQuoteChar == null) {
-                    keyValueList.add(this.substring(prevIdx, curIdx).trim())
-                    prevIdx = curIdx + 1
-                } else if (currentQuoteChar == null && (ch == '[' || ch == '{')) {
-                    val closeBracketIdx = this.indexOfNextOutsideQuotes(
-                        allowEscapedQuotesInLiteralStrings = allowEscapedQuotesInLiteralStrings,
-                        searchChar = getCloseBracket(ch, lineNo),
-                        startIndex = curIdx,
-                    )
-                    keyValueList.add(this.substring(prevIdx, closeBracketIdx + 1).trim())
-                    val nextCommaIdx = this.indexOfNextOutsideQuotes(
-                        allowEscapedQuotesInLiteralStrings = allowEscapedQuotesInLiteralStrings,
-                        searchChar = ',',
-                        startIndex = closeBracketIdx,
-                    )
-                    if (nextCommaIdx == -1) {
-                        isLastAdded = true
-                        break
-                    }
-                    prevIdx = nextCommaIdx + 1
-                    curIdx = nextCommaIdx + 1
-                } else if (ch == '\'' || ch == '\"') {
-                    if (currentQuoteChar == null) {
-                        currentQuoteChar = ch
-                    } else if (currentQuoteChar == ch) {
+            clearedString.forEachIndexed { idx, ch ->
+                when {
+                    // inside a quoted string only the matching closing quote is meaningful
+                    currentQuoteChar != null -> if (ch == currentQuoteChar) {
                         currentQuoteChar = null
                     }
+                    ch == '\'' || ch == '\"' -> currentQuoteChar = ch
+                    ch == '[' || ch == '{' -> bracketDepth++
+                    ch == ']' || ch == '}' -> bracketDepth--
+                    // only a top-level comma (not nested inside [] or {}) separates key-value pairs
+                    ch == ',' && bracketDepth == 0 -> {
+                        keyValueList.add(this.substring(prevIdx, idx).trim())
+                        prevIdx = idx + 1
+                    }
                 }
-                curIdx++
             }
-            if (!isLastAdded) {
-                keyValueList.add(this.substring(prevIdx, this.length).trim())
-            }
+            keyValueList.add(this.substring(prevIdx).trim())
 
             return keyValueList
-        }
-
-        private fun getCloseBracket(openBracket: Char, lineNo: Int): Char = if (openBracket == '[') {
-            ']'
-        } else if (openBracket == '{') {
-            '}'
-        } else {
-            throw ParseException("Invalid open bracket: $openBracket, should never happen", lineNo)
         }
     }
 }
