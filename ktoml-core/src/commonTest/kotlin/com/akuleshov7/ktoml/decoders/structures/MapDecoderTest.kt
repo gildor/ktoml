@@ -345,6 +345,42 @@ class MapDecoderTest {
     }
 
     @Test
+    fun decodeUpstreamIssue280Example() {
+        @Serializable
+        data class Foobar(val foo: String, val bar: String)
+
+        // verbatim input from orchestr7/ktoml#280
+        //language=toml
+        val toml = """
+            [a]
+            foo = "foo"
+            bar = "bar"
+
+            [b.a]
+            foo = "foo"
+            bar = "bar"
+
+            [b.b]
+            foo = "foo"
+            bar = "bar"
+
+            [x.y.z]
+            foo = "foo"
+            bar = "bar"
+        """.trimIndent()
+
+        assertEquals(
+            mapOf(
+                "a" to Foobar("foo", "bar"),
+                "b.a" to Foobar("foo", "bar"),
+                "b.b" to Foobar("foo", "bar"),
+                "x.y.z" to Foobar("foo", "bar"),
+            ),
+            Toml.decodeFromString<Map<String, Foobar>>(toml),
+        )
+    }
+
+    @Test
     fun decodeNestedTablesAsPathKeyedMapField() {
         @Serializable
         data class Foobar(val foo: String, val bar: String)
