@@ -317,6 +317,86 @@ class MapDecoderTest {
     }
 
     @Test
+    fun decodeNestedTablesAsPathKeyedMap() {
+        @Serializable
+        data class Foobar(val foo: String, val bar: String)
+
+        //language=toml
+        val toml = """
+            [a]
+            foo = "foo"
+            bar = "bar"
+            [b.a]
+            foo = "foo"
+            bar = "bar"
+            [x.y.z]
+            foo = "foo"
+            bar = "bar"
+        """.trimIndent()
+
+        assertEquals(
+            mapOf(
+                "a" to Foobar("foo", "bar"),
+                "b.a" to Foobar("foo", "bar"),
+                "x.y.z" to Foobar("foo", "bar"),
+            ),
+            Toml.decodeFromString<Map<String, Foobar>>(toml),
+        )
+    }
+
+    @Test
+    fun decodeNestedTablesAsPathKeyedMapField() {
+        @Serializable
+        data class Foobar(val foo: String, val bar: String)
+        @Serializable
+        data class Wrapper(val items: Map<String, Foobar>)
+
+        //language=toml
+        val toml = """
+            [items.a]
+            foo = "foo"
+            bar = "bar"
+            [items.b.a]
+            foo = "nested-foo"
+            bar = "nested-bar"
+        """.trimIndent()
+
+        assertEquals(
+            Wrapper(
+                mapOf(
+                    "a" to Foobar("foo", "bar"),
+                    "b.a" to Foobar("nested-foo", "nested-bar"),
+                )
+            ),
+            Toml.decodeFromString<Wrapper>(toml),
+        )
+    }
+
+    @Test
+    fun decodePathPrefixWithMultipleLeaves() {
+        @Serializable
+        data class Foobar(val foo: String, val bar: String)
+
+        //language=toml
+        val toml = """
+            [b.a]
+            foo = "a-foo"
+            bar = "a-bar"
+            [b.c]
+            foo = "c-foo"
+            bar = "c-bar"
+        """.trimIndent()
+
+        assertEquals(
+            mapOf(
+                "b.a" to Foobar("a-foo", "a-bar"),
+                "b.c" to Foobar("c-foo", "c-bar"),
+            ),
+            Toml.decodeFromString<Map<String, Foobar>>(toml),
+        )
+    }
+
+    @Test
     fun shouldThrowIllegalTypeExceptionOnWrongMapType() {
         @Serializable
         data class MapWrapper(
