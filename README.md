@@ -69,10 +69,10 @@ We are still developing and testing this library, so it has several limitations:
 :white_check_mark: Simple Arrays \
 :white_check_mark: Comments \
 :white_check_mark: Inline Tables \
-:white_check_mark: Offset Date-Time (to `Instant` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Date-Time (to `LocalDateTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Date (to `LocalDate` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Time (to `LocalTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
+:white_check_mark: Offset Date-Time (to the stdlib `kotlin.time.Instant`, or `String` — no extra dependency) \
+:white_check_mark: Local Date-Time (to `LocalDateTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
+:white_check_mark: Local Date (to `LocalDate` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
+:white_check_mark: Local Time (to `LocalTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
 :white_check_mark: Multiline Strings \
 :white_check_mark: Arrays (including multiline and nested arrays) \
 :white_check_mark: Maps (for anonymous key-value pairs) \
@@ -118,6 +118,24 @@ implementation("com.akuleshov7:ktoml-core:0.7.1")
 implementation("com.akuleshov7:ktoml-file:0.7.1")
 ```
 </details>
+
+### Date-times and `kotlinx-datetime` (opt-in)
+
+`ktoml-core` parses and validates all TOML date-times itself and does **not** depend on a date library.
+Out of the box:
+
+* **offset date-times** deserialize to the stdlib `kotlin.time.Instant`;
+* **any** date-time (offset, local date-time, local date, local time) can be deserialized into a `String`.
+
+To deserialize a **local** value into a `kotlinx.datetime` type (`LocalDate`, `LocalDateTime`,
+`LocalTime`), depend on [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime) directly (any
+recent version) — ktoml bridges to its serializers automatically.
+
+> **Migrating from earlier ktoml:** `ktoml-core` used to bring `kotlinx-datetime` in transitively;
+> now you depend on it explicitly only if you need it. If you have a `LocalDate`/`LocalDateTime`/
+> `LocalTime` field, your code will now fail to compile with `unresolved reference: LocalDate` until you
+> add `kotlinx-datetime` to your own dependencies. Projects with no date-times (or only offset
+> date-times / strings) need no changes and no longer ship `kotlinx-datetime`.
 
 ## How to use
 :heavy_exclamation_mark: as TOML is a foremost language for config files, we have also supported the deserialization from file.
