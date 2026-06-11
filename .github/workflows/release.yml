@@ -75,14 +75,15 @@ jobs:
     # only for tag releases, not for branch snapshot builds
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
+    # creating a release needs write access to repo contents; the default token is read-only
+    permissions:
+      contents: write
     steps:
       - name: Create Github Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # actions/create-release@v1 is archived/unmaintained; this one is maintained and
+        # auto-generates notes from merged PRs since the previous tag
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          tag_name: ${{ github.ref_name }}
+          name: ktoml ${{ github.ref_name }}
+          generate_release_notes: true
