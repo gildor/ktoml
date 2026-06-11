@@ -8,6 +8,7 @@ import com.akuleshov7.ktoml.exceptions.MissingRequiredPropertyException
 import com.akuleshov7.ktoml.parsers.TomlParser
 import com.akuleshov7.ktoml.tree.nodes.TomlFile
 import com.akuleshov7.ktoml.tree.nodes.TomlKeyValueArray
+import com.akuleshov7.ktoml.tree.nodes.TomlNode
 import com.akuleshov7.ktoml.utils.findPrimitiveTableInAstByName
 import com.akuleshov7.ktoml.writers.TomlWriter
 
@@ -151,6 +152,43 @@ public open class Toml(
             TomlParser::parseLines,
         )
         return TomlMainDecoder.decode(deserializer, fakeFileNode, this.inputConfig)
+    }
+
+    /**
+     * Deserializer of an already-parsed TOML node into an object of type [T], WITHOUT re-parsing
+     * the input.
+     *
+     * This is the efficient building block for the "parse once, decode many" workflow: parse the
+     * document a single time via [tomlParser], traverse the resulting AST, and decode just the
+     * sub-nodes you care about. Unlike [partiallyDecodeFromString] it neither re-parses the source on
+     * every call nor is it limited to looking a table up by its name.
+     *
+     * For example, to decode every table into its own typed object keyed by its full path:
+     * ```kotlin
+     * val file = Toml.tomlParser.parseString(input)       // a single parse
+     * val byPath = file.getRealTomlTables().associate { table ->
+     *     table.fullTableKey.toString() to Toml.decodeFromTomlNode<Foobar>(table)
+     * }
+     * ```
+     *
+     * @param deserializer deserialization strategy
+     * @param node the already-parsed node to decode; typically a `TomlTable` or a [TomlFile]
+     * @return deserialized object of type T
+     */
+    public fun <T> decodeFromTomlNode(
+        deserializer: DeserializationStrategy<T>,
+        node: TomlNode
+    ): T = decode(deserializer, node.wrapIntoFileNode())
+
+    /**
+     * Wraps an arbitrary node into a [TomlFile] so it can be fed to the existing decoders, which
+     * expect a file root. A [TomlFile] is returned as-is; any other node's children are re-hosted
+     * under a fresh file node. The children are added without re-parenting, so the caller's original
+     * tree (and its `parent` links) is left intact and can keep being traversed and decoded.
+     */
+    private fun TomlNode.wrapIntoFileNode(): TomlFile = when (this) {
+        is TomlFile -> this
+        else -> TomlFile().also { it.children.addAll(children) }
     }
 
     private fun <T> decode(deserializer: DeserializationStrategy<T>, parsedToml: TomlFile): T =
