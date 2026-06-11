@@ -93,6 +93,56 @@ class ValueParserTest {
         testTomlValue("a" to "1979-05-27", NodeType.DATE_TIME)
     }
 
+    // Guards the regex-free structural classifier (issue #35) against the old regexes: every shape
+    // and separator variant must still be recognised as a date-time.
+    @Test
+    fun dateTimeClassifierAcceptsAllValidShapes() {
+        listOf(
+            // offset date-times: Z, lowercase z, +/- offsets, fractional seconds, space & lowercase-t separators
+            "1979-05-27T07:32:00Z",
+            "1979-05-27t07:32:00z",
+            "1979-05-27 07:32:00Z",
+            "1979-05-27T07:32:00+09:30",
+            "1979-05-27T07:32:00-08:00",
+            "1979-05-27T00:32:00.999999-07:00",
+            // local date-times, including the TOML 1.1 seconds-omitted form
+            "1979-05-27T07:32:00",
+            "1979-05-27T07:32",
+            "1979-05-27 07:32:00.5",
+            // local date
+            "1979-05-27",
+            // local times: with seconds, fractional, and seconds-omitted
+            "07:32:00",
+            "07:32:00.999999",
+            "07:32",
+        ).forEach { literal ->
+            testTomlValue("a" to literal, NodeType.DATE_TIME)
+        }
+    }
+
+    // Date-time-like (matches the `\d{4}-\d{2}-\d{2}.*` / `\d{2}:\d{2}.*` shape) but not a valid form,
+    // or out-of-range: must be REJECTED (ParseException), never silently treated as a string.
+    @Test
+    fun dateTimeLikeButInvalidIsRejected() {
+        listOf(
+            "1979-05-27Z",            // date followed by a non-separator
+            "1979-05-27-extra",       // date followed by junk
+            "1979-05-27Tfoo",         // bad time
+            "1979-05-27T07:32:1",     // single-digit seconds
+            "1979-05-27T07:32:00Zz",  // trailing char after offset
+            "1979-05-27T07:32:00+7:00",   // single-digit offset hour
+            "07:32:1",                // time-like, single-digit seconds
+            "07:32:00xyz",            // time-like with trailing junk
+            "25:00:00",               // hour out of range
+            "1979-13-01",             // month out of range
+            "1979-02-30",             // day out of range
+        ).forEach { literal ->
+            assertFailsWith<ParseException>(literal) {
+                TomlKeyValuePrimitive("a" to literal, 1)
+            }
+        }
+    }
+
     @Test
     fun nullParsingTest() {
         testTomlValue("a" to "null", NodeType.NULL)
