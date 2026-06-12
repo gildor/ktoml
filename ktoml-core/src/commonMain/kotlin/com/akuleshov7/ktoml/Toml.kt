@@ -1,5 +1,6 @@
 package com.akuleshov7.ktoml
 
+import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.decoders.TomlArrayDecoder
 import com.akuleshov7.ktoml.decoders.TomlMainDecoder
 import com.akuleshov7.ktoml.decoders.TomlMapDecoder
@@ -175,6 +176,7 @@ public open class Toml(
      * @param node the already-parsed node to decode; typically a `TomlTable` or a [TomlFile]
      * @return deserialized object of type T
      */
+    @ExperimentalKtomlApi
     public fun <T> decodeFromTomlNode(
         deserializer: DeserializationStrategy<T>,
         node: TomlNode

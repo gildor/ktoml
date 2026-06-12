@@ -7,6 +7,7 @@ package com.akuleshov7.ktoml.tree.nodes
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.exceptions.InternalAstException
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.tree.nodes.pairs.keys.TomlKey
@@ -565,6 +566,7 @@ public sealed class TomlNode(
  * @property INLINE_TABLE a table created from an inline-table value (`a = { b = 1 }`), including the
  *   synthetic tables for any dotted keys written inside it
  */
+@ExperimentalKtomlApi
 public enum class TableInsertionType {
     DOTTED_KEY,
     HEADER,

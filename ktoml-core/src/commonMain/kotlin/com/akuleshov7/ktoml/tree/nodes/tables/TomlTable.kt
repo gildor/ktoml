@@ -5,6 +5,7 @@
 package com.akuleshov7.ktoml.tree.nodes
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.parseKeyName
 import com.akuleshov7.ktoml.parsers.takeBeforeComment
@@ -50,6 +51,7 @@ public class TomlTable(
      * redefinitions that the TOML spec forbids (e.g. defining the same `[table]` header twice,
      * or appending to an explicitly-defined table with dotted keys).
      */
+    @ExperimentalKtomlApi
     public var provenance: TableProvenance = TableProvenance.EXPLICIT_HEADER
 
     public constructor(
@@ -290,6 +292,7 @@ public class TomlTable(
  * @property INLINE_TABLE created from an inline table value (e.g. `a = { b = 1 }`) — fully closed,
  *   may not be extended or redefined afterwards
  */
+@ExperimentalKtomlApi
 public enum class TableProvenance {
     DOTTED_KEY,
     EXPLICIT_HEADER,

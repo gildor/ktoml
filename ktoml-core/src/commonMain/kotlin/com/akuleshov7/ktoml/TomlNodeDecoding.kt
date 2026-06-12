@@ -5,6 +5,7 @@
 
 package com.akuleshov7.ktoml
 
+import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.tree.nodes.TomlNode
 import kotlinx.serialization.serializer
 
@@ -17,5 +18,6 @@ import kotlinx.serialization.serializer
  *   [com.akuleshov7.ktoml.tree.nodes.TomlFile]
  * @return deserialized object of type T
  */
+@ExperimentalKtomlApi
 public inline fun <reified T> Toml.decodeFromTomlNode(node: TomlNode): T =
     decodeFromTomlNode(serializersModule.serializer(), node)
