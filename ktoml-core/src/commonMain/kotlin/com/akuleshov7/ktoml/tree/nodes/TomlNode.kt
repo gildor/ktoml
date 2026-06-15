@@ -25,6 +25,7 @@ public const val EMPTY_TECHNICAL_NODE: String = "technical_node"
  * @property lineNo - the number of a line from TOML that is linked to the current node
  * @property inlineComment A comment appended to the end of the line
  */
+@InternalKtomlApi
 public sealed class TomlNode(
     public open val lineNo: Int,
     comments: List<String>,
