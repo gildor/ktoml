@@ -1,7 +1,6 @@
 package com.akuleshov7.ktoml.writers
 
 import com.akuleshov7.ktoml.TomlOutputConfig
-import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.tree.nodes.TableType
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDate
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDateTime
@@ -287,7 +286,6 @@ public abstract class TomlEmitter(config: TomlOutputConfig) {
      * @param offsetDateTime
      * @return this instance
      */
-    @ExperimentalKtomlApi
     public fun emitValue(offsetDateTime: TomlOffsetDateTime): TomlEmitter = emit(offsetDateTime.raw)
 
     /**
@@ -296,7 +294,6 @@ public abstract class TomlEmitter(config: TomlOutputConfig) {
      * @param dateTime
      * @return this instance
      */
-    @ExperimentalKtomlApi
     public fun emitValue(dateTime: TomlLocalDateTime): TomlEmitter = emit(dateTime.raw)
 
     /**
@@ -305,7 +302,6 @@ public abstract class TomlEmitter(config: TomlOutputConfig) {
      * @param date
      * @return this instance
      */
-    @ExperimentalKtomlApi
     public fun emitValue(date: TomlLocalDate): TomlEmitter = emit(date.raw)
 
     /**
@@ -314,7 +310,6 @@ public abstract class TomlEmitter(config: TomlOutputConfig) {
      * @param time
      * @return this instance
      */
-    @ExperimentalKtomlApi
     public fun emitValue(time: TomlLocalTime): TomlEmitter = emit(time.raw)
 
     /**

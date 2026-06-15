@@ -11,7 +11,6 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
-import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.writers.TomlEmitter
@@ -62,7 +61,6 @@ private const val LEAP_CENTURY_DIVISOR = 400
  *
  * @property raw the normalized TOML offset date-time text (e.g. `1979-05-27T07:32:00Z`)
  */
-@ExperimentalKtomlApi
 public data class TomlOffsetDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
@@ -73,7 +71,6 @@ public data class TomlOffsetDateTime internal constructor(public val raw: String
  *
  * @property raw the normalized TOML local date-time text (e.g. `1979-05-27T07:32:00`)
  */
-@ExperimentalKtomlApi
 public data class TomlLocalDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
@@ -84,7 +81,6 @@ public data class TomlLocalDateTime internal constructor(public val raw: String)
  *
  * @property raw the TOML local date text (e.g. `1979-05-27`)
  */
-@ExperimentalKtomlApi
 public data class TomlLocalDate internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
@@ -95,7 +91,6 @@ public data class TomlLocalDate internal constructor(public val raw: String) {
  *
  * @property raw the normalized TOML local time text (e.g. `07:32:00`)
  */
-@ExperimentalKtomlApi
 public data class TomlLocalTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
