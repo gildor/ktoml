@@ -38,6 +38,7 @@ kotlin {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")
             languageSettings.optIn("com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi")
+            languageSettings.optIn("com.akuleshov7.ktoml.annotations.InternalKtomlApi")
         }
 
         val commonMain by getting {

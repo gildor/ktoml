@@ -5,7 +5,6 @@
 package com.akuleshov7.ktoml.tree.nodes
 
 import com.akuleshov7.ktoml.TomlOutputConfig
-import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.parseKeyName
 import com.akuleshov7.ktoml.parsers.takeBeforeComment
@@ -51,8 +50,7 @@ public class TomlTable(
      * redefinitions that the TOML spec forbids (e.g. defining the same `[table]` header twice,
      * or appending to an explicitly-defined table with dotted keys).
      */
-    @ExperimentalKtomlApi
-    public var provenance: TableProvenance = TableProvenance.EXPLICIT_HEADER
+    internal var provenance: TableProvenance = TableProvenance.EXPLICIT_HEADER
 
     public constructor(
         content: String,
@@ -280,6 +278,21 @@ public class TomlTable(
 }
 
 /**
+ * Special Enum that is used in a logic related to insertion of tables to AST
+ *
+ * @property open The header opening sequence.
+ * @property close The header closing sequence.
+ */
+public enum class TableType(
+    internal val open: String,
+    internal val close: String
+) {
+    ARRAY("[[", "]]"),
+    PRIMITIVE("[", "]"),
+    ;
+}
+
+/**
  * Describes how a [TomlTable] node was introduced into the AST. This drives redefinition
  * validation: the TOML spec allows implicit super-tables to later be made explicit, but forbids
  * redefining an already-explicit table, redefining a dotted-key table with a header, or appending
@@ -292,26 +305,10 @@ public class TomlTable(
  * @property INLINE_TABLE created from an inline table value (e.g. `a = { b = 1 }`) — fully closed,
  *   may not be extended or redefined afterwards
  */
-@ExperimentalKtomlApi
-public enum class TableProvenance {
+internal enum class TableProvenance {
     DOTTED_KEY,
     EXPLICIT_HEADER,
     IMPLICIT_SUPER,
     INLINE_TABLE,
-    ;
-}
-
-/**
- * Special Enum that is used in a logic related to insertion of tables to AST
- *
- * @property open The header opening sequence.
- * @property close The header closing sequence.
- */
-public enum class TableType(
-    internal val open: String,
-    internal val close: String
-) {
-    ARRAY("[[", "]]"),
-    PRIMITIVE("[", "]"),
     ;
 }

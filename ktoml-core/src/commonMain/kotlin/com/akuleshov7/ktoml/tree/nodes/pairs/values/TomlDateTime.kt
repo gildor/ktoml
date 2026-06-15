@@ -63,7 +63,7 @@ private const val LEAP_CENTURY_DIVISOR = 400
  * @property raw the normalized TOML offset date-time text (e.g. `1979-05-27T07:32:00Z`)
  */
 @ExperimentalKtomlApi
-public data class TomlOffsetDateTime(public val raw: String) {
+public data class TomlOffsetDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -74,7 +74,7 @@ public data class TomlOffsetDateTime(public val raw: String) {
  * @property raw the normalized TOML local date-time text (e.g. `1979-05-27T07:32:00`)
  */
 @ExperimentalKtomlApi
-public data class TomlLocalDateTime(public val raw: String) {
+public data class TomlLocalDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -85,7 +85,7 @@ public data class TomlLocalDateTime(public val raw: String) {
  * @property raw the TOML local date text (e.g. `1979-05-27`)
  */
 @ExperimentalKtomlApi
-public data class TomlLocalDate(public val raw: String) {
+public data class TomlLocalDate internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -96,7 +96,7 @@ public data class TomlLocalDate(public val raw: String) {
  * @property raw the normalized TOML local time text (e.g. `07:32:00`)
  */
 @ExperimentalKtomlApi
-public data class TomlLocalTime(public val raw: String) {
+public data class TomlLocalTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -129,17 +129,10 @@ internal constructor(
 
     public companion object {
         /** Serial names of the date-time serializers ktoml bridges to (see decoder/encoder). */
-        @ExperimentalKtomlApi
-        public const val INSTANT_SERIAL_NAME: String = "kotlin.time.Instant"
-
-        @ExperimentalKtomlApi
-        public const val LOCAL_DATE_SERIAL_NAME: String = "kotlinx.datetime.LocalDate"
-
-        @ExperimentalKtomlApi
-        public const val LOCAL_DATE_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalDateTime"
-
-        @ExperimentalKtomlApi
-        public const val LOCAL_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalTime"
+        internal const val INSTANT_SERIAL_NAME: String = "kotlin.time.Instant"
+        internal const val LOCAL_DATE_SERIAL_NAME: String = "kotlinx.datetime.LocalDate"
+        internal const val LOCAL_DATE_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalDateTime"
+        internal const val LOCAL_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalTime"
 
         /**
          * Classifies [this] date-time literal, validates it semantically (calendar/time/offset ranges)
