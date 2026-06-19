@@ -79,7 +79,7 @@ We are still developing and testing this library, so it has several limitations:
 :white_check_mark: Nested Inline Tables \
 :white_check_mark: Array of Tables \
 :white_check_mark: Inline Array of Tables \
-:x: Arrays: of Different Types
+:white_check_mark: Arrays of Different Types (parsed fine — every element keeps its own type in the AST, e.g. `x = [1, "a", true]`; they just can't map onto a single `List<E>`, so read the parsed AST directly or supply a custom `KSerializer` — see [`MixedTypeArrayDecodeTest`](ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/MixedTypeArrayDecodeTest.kt))
 
 ## Dependency
 The library is hosted on the [Maven Central](https://search.maven.org/artifact/com.akuleshov7/ktoml-core).
