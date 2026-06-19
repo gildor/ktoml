@@ -54,6 +54,9 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")
+            // ktoml's own experimental APIs are opted into internally; external consumers must opt in.
+            languageSettings.optIn("com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi")
+            languageSettings.optIn("com.akuleshov7.ktoml.annotations.InternalKtomlApi")
         }
 
         val commonMain by getting {

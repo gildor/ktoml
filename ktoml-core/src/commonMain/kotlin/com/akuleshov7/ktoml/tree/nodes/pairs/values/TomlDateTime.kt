@@ -11,6 +11,7 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.writers.TomlEmitter
@@ -61,7 +62,8 @@ private const val LEAP_CENTURY_DIVISOR = 400
  *
  * @property raw the normalized TOML offset date-time text (e.g. `1979-05-27T07:32:00Z`)
  */
-public data class TomlOffsetDateTime(public val raw: String) {
+@InternalKtomlApi
+public data class TomlOffsetDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -71,7 +73,8 @@ public data class TomlOffsetDateTime(public val raw: String) {
  *
  * @property raw the normalized TOML local date-time text (e.g. `1979-05-27T07:32:00`)
  */
-public data class TomlLocalDateTime(public val raw: String) {
+@InternalKtomlApi
+public data class TomlLocalDateTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -81,7 +84,8 @@ public data class TomlLocalDateTime(public val raw: String) {
  *
  * @property raw the TOML local date text (e.g. `1979-05-27`)
  */
-public data class TomlLocalDate(public val raw: String) {
+@InternalKtomlApi
+public data class TomlLocalDate internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -91,7 +95,8 @@ public data class TomlLocalDate(public val raw: String) {
  *
  * @property raw the normalized TOML local time text (e.g. `07:32:00`)
  */
-public data class TomlLocalTime(public val raw: String) {
+@InternalKtomlApi
+public data class TomlLocalTime internal constructor(public val raw: String) {
     override fun toString(): String = raw
 }
 
@@ -100,6 +105,7 @@ public data class TomlLocalTime(public val raw: String) {
  * Its [content] holds one of [TomlOffsetDateTime], [TomlLocalDateTime], [TomlLocalDate] or [TomlLocalTime].
  * @property content
  */
+@InternalKtomlApi
 public class TomlDateTime
 internal constructor(
     override var content: Any
@@ -124,10 +130,10 @@ internal constructor(
 
     public companion object {
         /** Serial names of the date-time serializers ktoml bridges to (see decoder/encoder). */
-        public const val INSTANT_SERIAL_NAME: String = "kotlin.time.Instant"
-        public const val LOCAL_DATE_SERIAL_NAME: String = "kotlinx.datetime.LocalDate"
-        public const val LOCAL_DATE_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalDateTime"
-        public const val LOCAL_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalTime"
+        internal const val INSTANT_SERIAL_NAME: String = "kotlin.time.Instant"
+        internal const val LOCAL_DATE_SERIAL_NAME: String = "kotlinx.datetime.LocalDate"
+        internal const val LOCAL_DATE_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalDateTime"
+        internal const val LOCAL_TIME_SERIAL_NAME: String = "kotlinx.datetime.LocalTime"
 
         /**
          * Classifies [this] date-time literal, validates it semantically (calendar/time/offset ranges)
