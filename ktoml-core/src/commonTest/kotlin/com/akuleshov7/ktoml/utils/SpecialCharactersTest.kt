@@ -28,6 +28,8 @@ class SpecialCharactersTest {
             "\\x-3",
             "\\uZZZZ",
             "\\uabag",
+            // TOML HEXDIG is ASCII-only; Unicode digits must not be accepted as escape digits
+            "\\u００４１",
             "\\u+041",
             "\\u-041",
             "\\UFFFFFFFF",
