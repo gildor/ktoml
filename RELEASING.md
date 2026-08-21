@@ -1,16 +1,17 @@
 # How to release a new version of ktoml
 
 * You should have permissions to push to the main repo
-* Simply create a new git tag with format `v*` and push it. Github workflow will perform release automatically.
+* Simply create a new git tag with format `v*` and push it. The GitHub workflow will perform the release automatically.
   
   For example:
   ```bash
   $ git tag v1.0.0
-  $ git push origin --tags 
+  $ git push origin v1.0.0
   ```
   
-After the release workflow has started, version number is determined from tag. Binaries are uploaded to maven repo and 
-a new github release is created with fat jar.
+After the release workflow starts, the version number is determined from the tag. Signed binaries are uploaded and
+promoted to Maven Central, then a GitHub release is created with generated release notes.
 
-* We are using both maven central and github to publish releases. 
-To prevent invalid files reaching Nexus you should manually promote releases in [staging](https://s01.oss.sonatype.org/#stagingRepositories)
+The release workflow uses `closeAndReleaseSonatypeStagingRepository`, so Maven Central promotion is automatic after
+Sonatype validation passes; there is no manual staging step. Monitor both workflow jobs and verify the published
+artifacts on Maven Central before announcing the release.
