@@ -1,16 +1,16 @@
  ## <img src="/ktoml.png" width="300px"/>
 
-[![Releases](https://img.shields.io/github/v/release/akuleshov7/ktoml)](https://github.com/orchestr7/ktoml/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/com.akuleshov7/ktoml-core)](https://search.maven.org/artifact/com.akuleshov7/ktoml-core/)
-[![License](https://img.shields.io/github/license/akuleshov7/ktoml)](https://github.com/orchestr7/ktoml/blob/main/LICENSE)
-![Build and test](https://github.com/akuleshov7/ktoml/actions/workflows/build_and_test.yml/badge.svg?branch=main)
-![Lines of code](https://img.shields.io/tokei/lines/github/akuleshov7/ktoml)
-![Hits-of-Code](https://hitsofcode.com/github/akuleshov7/ktoml?branch=main)
-![GitHub repo size](https://img.shields.io/github/repo-size/akuleshov7/ktoml)
+[![Releases](https://img.shields.io/github/v/release/gildor/ktoml)](https://github.com/gildor/ktoml/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/app.gildor/ktoml-core)](https://central.sonatype.com/artifact/app.gildor/ktoml-core)
+[![License](https://img.shields.io/github/license/gildor/ktoml)](https://github.com/gildor/ktoml/blob/toml-1.1/LICENSE)
+![Build and test](https://github.com/gildor/ktoml/actions/workflows/build_and_test.yml/badge.svg?branch=toml-1.1)
+![Lines of code](https://img.shields.io/tokei/lines/github/gildor/ktoml)
+![Hits-of-Code](https://hitsofcode.com/github/gildor/ktoml?branch=toml-1.1)
+![GitHub repo size](https://img.shields.io/github/repo-size/gildor/ktoml)
 ![codebeat badge](https://codebeat.co/badges/0518ea49-71ed-4bfd-8dd3-62da7034eebd)
 ![maintainability](https://api.codeclimate.com/v1/badges/c75d2d6b0d44cea7aefe/maintainability)
-![Run deteKT](https://github.com/akuleshov7/ktoml/actions/workflows/detekt.yml/badge.svg?branch=main)
-![Run diKTat](https://github.com/akuleshov7/ktoml/actions/workflows/diktat.yml/badge.svg?branch=main)
+![Run deteKT](https://github.com/gildor/ktoml/actions/workflows/detekt.yml/badge.svg?branch=toml-1.1)
+![Run diKTat](https://github.com/gildor/ktoml/actions/workflows/diktat.yml/badge.svg?branch=toml-1.1)
 
 Fully Native and Multiplatform Kotlin serialization library for serialization/deserialization of [toml](https://toml.io/en/) format.
 Uses native [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization), provided by Kotlin. This library contains no Java code and no Java dependencies.
@@ -82,21 +82,22 @@ We are still developing and testing this library, so it has several limitations:
 :white_check_mark: Arrays of Different Types (parsed fine — every element keeps its own type in the AST, e.g. `x = [1, "a", true]`; they just can't map onto a single `List<E>`, so read the parsed AST directly or supply a custom `KSerializer` — see [`MixedTypeArrayDecodeTest`](ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/MixedTypeArrayDecodeTest.kt))
 
 ## Dependency
-The library is hosted on the [Maven Central](https://search.maven.org/artifact/com.akuleshov7/ktoml-core).
+The fork is hosted on [Maven Central](https://central.sonatype.com/artifact/app.gildor/ktoml-core)
+under the `app.gildor` group. Kotlin package imports remain `com.akuleshov7.ktoml.*`.
 To import `ktoml` library you need to add following dependencies to your code:
 <details>
 <summary>Maven</summary>
 
 ```pom
 <dependency>
-  <groupId>com.akuleshov7</groupId>
+  <groupId>app.gildor</groupId>
   <artifactId>ktoml-core</artifactId>
-  <version>0.7.1</version>
+  <version>0.9.0</version>
 </dependency>
 <dependency>
-  <groupId>com.akuleshov7</groupId>
+  <groupId>app.gildor</groupId>
   <artifactId>ktoml-file</artifactId>
-  <version>0.7.1</version>
+  <version>0.9.0</version>
 </dependency>
 ```
 </details>
@@ -105,8 +106,8 @@ To import `ktoml` library you need to add following dependencies to your code:
 <summary>Gradle Groovy</summary>
 
 ```groovy
-implementation 'com.akuleshov7:ktoml-core:0.7.1'
-implementation 'com.akuleshov7:ktoml-file:0.7.1'
+implementation 'app.gildor:ktoml-core:0.9.0'
+implementation 'app.gildor:ktoml-file:0.9.0'
 ```
 </details>
 
@@ -114,8 +115,8 @@ implementation 'com.akuleshov7:ktoml-file:0.7.1'
 <summary>Gradle Kotlin</summary>
 
 ```kotlin
-implementation("com.akuleshov7:ktoml-core:0.7.1")
-implementation("com.akuleshov7:ktoml-file:0.7.1")
+implementation("app.gildor:ktoml-core:0.9.0")
+implementation("app.gildor:ktoml-file:0.9.0")
 ```
 </details>
 
@@ -140,9 +141,9 @@ recent version) — ktoml bridges to its serializers automatically.
 ## How to use
 :heavy_exclamation_mark: as TOML is a foremost language for config files, we have also supported the deserialization from file.
 However, we are using [okio](https://github.com/square/okio) to read the file, so it will be added as a dependency to your
-project if you will import [ktoml-file](https://search.maven.org/artifact/com.akuleshov7/ktoml-file). 
-Same about okio `Source` (for example if you need Streaming): [ktoml-source](https://search.maven.org/artifact/com.akuleshov7/ktoml-source).
-For basic scenarios of decoding strings you can simply use [ktoml-core](https://search.maven.org/artifact/com.akuleshov7/ktoml-core).
+project if you will import [ktoml-file](https://central.sonatype.com/artifact/app.gildor/ktoml-file).
+Same about okio `Source` (for example if you need Streaming): [ktoml-source](https://central.sonatype.com/artifact/app.gildor/ktoml-source).
+For basic scenarios of decoding strings you can simply use [ktoml-core](https://central.sonatype.com/artifact/app.gildor/ktoml-core).
 
 :heavy_exclamation_mark: don't forget to add the serialization plugin `kotlin("plugin.serialization")` to your project.
 Otherwise, `@Serialization` annotation won't work properly.
@@ -155,7 +156,7 @@ Otherwise, `@Serialization` annotation won't work properly.
 // add extensions from 'kotlinx' lib to your project:
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.serializer
-// add com.akuleshov7:ktoml-core to your project:
+// add app.gildor:ktoml-core to your project:
 import com.akuleshov7.ktoml.deserialize
 
 @Serializable
@@ -222,7 +223,7 @@ val decoded = Toml.decodeFromTomlNode<Foobar>(server)
 <summary>Toml File deserialization</summary>
 
 ```kotlin
-// add com.akuleshov7:ktoml-file to your project
+// add app.gildor:ktoml-file to your project
 import com.akuleshov7.ktoml.file
 
 val resultFromString = TomlFileReader.decodeFromFile<MyClass>(serializer(), /* file path to toml file */)
@@ -233,11 +234,11 @@ val resultFromList = TomlFileReader.partiallyDecodeFromFile<MyClass>(serializer(
 For your particular case you can implement your own source provider based on
 [okio.Source](https://github.com/square/okio/blob/1d86391ca0ee8e5730fd0bbb6bee94c4a41ad945/okio/src/commonMain/kotlin/okio/Source.kt#L8).
 For this purpose we have prepared `toml-source` module and implemented an 
-[example](https://github.com/akuleshov7/ktoml/blob/main/ktoml-source/src/jvmMain/kotlin/com/akuleshov7/ktoml/source/JvmStreams.kt) 
+[example](https://github.com/gildor/ktoml/blob/toml-1.1/ktoml-source/src/jvmMain/kotlin/com/akuleshov7/ktoml/source/JvmStreams.kt)
 with java streams for JVM target.
 
 ```kotlin
-// add com.akuleshov7:ktoml-source to your project
+// add app.gildor:ktoml-source to your project
 import com.akuleshov7.ktoml.source
 
 val resultFromString = TomlFileReader.decodeFromSource<MyClass>(serializer(), /* your source */)
@@ -252,7 +253,7 @@ val resultFromList = TomlFileReader.partiallyDecodeFromSource<MyClass>(serialize
 ```kotlin
 // add extensions from 'kotlinx' lib to your project:
 import kotlinx.serialization.encodeToString
-// add com.akuleshov7:ktoml-core to your project:
+// add app.gildor:ktoml-core to your project:
 import com.akuleshov7.ktoml.Toml
 
 @Serializable
@@ -266,7 +267,7 @@ val toml = Toml.encodeToString(MyClass(/* ... */))
 <summary>Toml File serialization</summary>
 
 ```kotlin
-// add com.akuleshov7:ktoml-file to your project
+// add app.gildor:ktoml-file to your project
 import com.akuleshov7.ktoml.file.TomlFileWriter
 
 TomlFileWriter.encodeToFile<MyClass>(serializer(), /* file path to toml file */)
@@ -317,7 +318,7 @@ Toml(
 ```
 
 ## How ktoml works: examples
-:heavy_exclamation_mark: You can check how below examples work in [decoding ReadMeExampleTest](https://github.com/akuleshov7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/ReadMeExampleTest.kt) and [encoding ReadMeExampleTest](https://github.com/akuleshov7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/encoders/ReadMeExampleTest.kt).
+:heavy_exclamation_mark: You can check how below examples work in [decoding ReadMeExampleTest](https://github.com/gildor/ktoml/blob/toml-1.1/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/ReadMeExampleTest.kt) and [encoding ReadMeExampleTest](https://github.com/gildor/ktoml/blob/toml-1.1/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/encoders/ReadMeExampleTest.kt).
 
 <details>
 <summary>Deserialization</summary>
