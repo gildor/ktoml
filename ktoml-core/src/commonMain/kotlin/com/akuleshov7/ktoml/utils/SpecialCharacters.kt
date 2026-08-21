@@ -105,19 +105,14 @@ public fun StringBuilder.appendEscapedUnicode(
         throw UnknownEscapeSymbolsException("\\$invalid", lineNo)
     }
     val hexCode = fullString.substring(codeStartIndex, codeStartIndex + nbUnicodeChars)
-    val codePoint = try {
-        hexCode.toInt(HEX_RADIX)
-    } catch (e: NumberFormatException) {
-        throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
-    }
-    if (!codePoint.isUnicodeScalarValue()) {
-        throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
-    }
-    try {
-        appendCodePointCompat(codePoint)
-    } catch (e: IllegalArgumentException) {
-        throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
-    }
+    val codePoint = hexCode
+        .takeIf { code -> code.all { it.digitToIntOrNull(HEX_RADIX) != null } }
+        ?.toLong(HEX_RADIX)
+        ?.takeIf { it <= MAX_UNICODE_CODE_POINT }
+        ?.toInt()
+        ?.takeIf { it.isUnicodeScalarValue() }
+        ?: throw UnknownEscapeSymbolsException("\\$marker$hexCode", lineNo)
+    appendCodePointCompat(codePoint)
     return nbUnicodeChars
 }
 
