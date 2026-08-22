@@ -1,7 +1,9 @@
 package com.akuleshov7.ktoml
 
 import com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.decoders.TomlArrayDecoder
+import com.akuleshov7.ktoml.decoders.TomlArrayOfTablesDecoder
 import com.akuleshov7.ktoml.decoders.TomlMainDecoder
 import com.akuleshov7.ktoml.decoders.TomlMapDecoder
 import com.akuleshov7.ktoml.encoders.TomlMainEncoder
@@ -10,6 +12,7 @@ import com.akuleshov7.ktoml.parsers.TomlParser
 import com.akuleshov7.ktoml.tree.nodes.TomlFile
 import com.akuleshov7.ktoml.tree.nodes.TomlKeyValueArray
 import com.akuleshov7.ktoml.tree.nodes.TomlNode
+import com.akuleshov7.ktoml.tree.nodes.TomlTable
 import com.akuleshov7.ktoml.utils.findPrimitiveTableInAstByName
 import com.akuleshov7.ktoml.writers.TomlWriter
 
@@ -31,14 +34,20 @@ import kotlinx.serialization.modules.SerializersModule
  * @property serializersModule - default overridden
  */
 @OptIn(ExperimentalSerializationApi::class)
+@SubclassOptInRequired(InternalKtomlApi::class)
 public open class Toml(
+    @InternalKtomlApi
     protected val inputConfig: TomlInputConfig = TomlInputConfig(),
+    @InternalKtomlApi
     protected val outputConfig: TomlOutputConfig = TomlOutputConfig(),
     override val serializersModule: SerializersModule = EmptySerializersModule(),
 ) : StringFormat {
     // parser and writer are created once after the creation of the class, to reduce
     // the number of created parsers and writers for each toml
+    @InternalKtomlApi
     public val tomlParser: TomlParser = TomlParser(inputConfig)
+
+    @InternalKtomlApi
     public val tomlWriter: TomlWriter = TomlWriter(outputConfig)
 
     // ================== basic overrides ===============
@@ -51,7 +60,7 @@ public open class Toml(
      */
     override fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
         val parsedToml = tomlParser.parseString(string)
-        return decode(deserializer, parsedToml)
+        return decode(deserializer, parsedToml, inputConfig)
     }
 
     override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String {
@@ -69,14 +78,24 @@ public open class Toml(
      * @param config
      * @return deserialized object of type T
      */
+    @InternalKtomlApi
     public fun <T> decodeFromString(
         deserializer: DeserializationStrategy<T>,
         toml: Sequence<String>,
         config: TomlInputConfig = this.inputConfig
     ): T {
         val parsedToml = tomlParser.parseStringsToTomlTree(toml, config)
-        return decode(deserializer, parsedToml)
+        return decode(deserializer, parsedToml, config)
     }
+
+    /**
+     * Parses [string] once and returns an opaque element that can be inspected or decoded repeatedly.
+     *
+     * @param string TOML document
+     * @return parsed document handle
+     */
+    @ExperimentalKtomlApi
+    public fun parseToTomlElement(string: String): TomlElement = TomlElement(tomlParser.parseString(string))
 
     /**
      * partial deserializer of a sequence of lines in a toml format.
@@ -92,6 +111,7 @@ public open class Toml(
      * @param config
      * @return deserialized object of type T
      */
+    @InternalKtomlApi
     public fun <T> partiallyDecodeFromLines(
         deserializer: DeserializationStrategy<T>,
         tomlLines: Sequence<String>,
@@ -99,7 +119,7 @@ public open class Toml(
         config: TomlInputConfig = this.inputConfig
     ): T {
         val fakeFileNode = generateFakeTomlStructureForPartialParsing(tomlLines, tomlTableName, config, TomlParser::parseLines)
-        return TomlMainDecoder.decode(deserializer, fakeFileNode, this.inputConfig)
+        return TomlMainDecoder.decode(deserializer, fakeFileNode, config, tomlFor(config))
     }
 
     /**
@@ -123,7 +143,7 @@ public open class Toml(
         config: TomlInputConfig = this.inputConfig
     ): T {
         val fakeFileNode = generateFakeTomlStructureForPartialParsing(toml, tomlTableName, config, TomlParser::parseString)
-        return TomlMainDecoder.decode(deserializer, fakeFileNode, config)
+        return TomlMainDecoder.decode(deserializer, fakeFileNode, config, tomlFor(config))
     }
 
     /**
@@ -140,6 +160,7 @@ public open class Toml(
      * @param config
      * @return deserialized object of type T
      */
+    @InternalKtomlApi
     public fun <T> partiallyDecodeFromString(
         deserializer: DeserializationStrategy<T>,
         tomlLines: Sequence<String>,
@@ -152,35 +173,44 @@ public open class Toml(
             config,
             TomlParser::parseLines,
         )
-        return TomlMainDecoder.decode(deserializer, fakeFileNode, this.inputConfig)
+        return TomlMainDecoder.decode(deserializer, fakeFileNode, config, tomlFor(config))
     }
 
     /**
-     * Deserializer of an already-parsed TOML node into an object of type [T], WITHOUT re-parsing
-     * the input.
-     *
-     * This is the efficient building block for the "parse once, decode many" workflow: parse the
-     * document a single time via [tomlParser], traverse the resulting AST, and decode just the
-     * sub-nodes you care about. Unlike [partiallyDecodeFromString] it neither re-parses the source on
-     * every call nor is it limited to looking a table up by its name.
-     *
-     * For example, to decode every table into its own typed object keyed by its full path:
-     * ```kotlin
-     * val file = Toml.tomlParser.parseString(input)       // a single parse
-     * val byPath = file.getRealTomlTables().associate { table ->
-     *     table.fullTableKey.toString() to Toml.decodeFromTomlNode<Foobar>(table)
-     * }
-     * ```
+     * Decodes an already-parsed [element] without parsing its source again.
      *
      * @param deserializer deserialization strategy
-     * @param node the already-parsed node to decode; typically a `TomlTable` or a [TomlFile]
-     * @return deserialized object of type T
+     * @param element parsed element to decode
+     * @return decoded value
      */
     @ExperimentalKtomlApi
+    public fun <T> decodeFromTomlElement(
+        deserializer: DeserializationStrategy<T>,
+        element: TomlElement,
+    ): T = if (deserializer.descriptor.kind == StructureKind.LIST && element.isArrayOfTables()) {
+        TomlArrayOfTablesDecoder(
+            element.node as TomlTable,
+            inputConfig,
+            serializersModule,
+            this,
+        ).decodeSerializableValue(deserializer)
+    } else {
+        decode(deserializer, element.asFileNode(), inputConfig)
+    }
+
+    /**
+     * Internal bridge retained for tests and decoder implementation code.
+     *
+     * @param deserializer deserialization strategy
+     * @param node internal parser node to decode
+     * @return decoded value
+     */
+    @ExperimentalKtomlApi
+    @InternalKtomlApi
     public fun <T> decodeFromTomlNode(
         deserializer: DeserializationStrategy<T>,
-        node: TomlNode
-    ): T = decode(deserializer, node.wrapIntoFileNode())
+        node: TomlNode,
+    ): T = decode(deserializer, node.wrapIntoFileNode(), inputConfig)
 
     /**
      * Wraps an arbitrary node into a [TomlFile] so it can be fed to the existing decoders, which
@@ -193,12 +223,26 @@ public open class Toml(
         else -> TomlFile().also { it.children.addAll(children) }
     }
 
-    private fun <T> decode(deserializer: DeserializationStrategy<T>, parsedToml: TomlFile): T =
-        when (deserializer.descriptor.kind) {
-            StructureKind.LIST -> TomlArrayDecoder.decode(deserializer, parsedToml.getFirstChild() as TomlKeyValueArray, inputConfig)
-            StructureKind.MAP -> TomlMapDecoder.decode(deserializer, parsedToml, inputConfig)
-            else -> TomlMainDecoder.decode(deserializer, parsedToml, inputConfig, serializersModule)
+    private fun <T> decode(
+        deserializer: DeserializationStrategy<T>,
+        parsedToml: TomlFile,
+        config: TomlInputConfig,
+    ): T {
+        val decodingToml = tomlFor(config)
+        return when (deserializer.descriptor.kind) {
+            StructureKind.LIST -> TomlArrayDecoder.decode(
+                deserializer,
+                parsedToml.getFirstChild() as TomlKeyValueArray,
+                config,
+                decodingToml,
+            )
+            StructureKind.MAP -> TomlMapDecoder.decode(deserializer, parsedToml, config, decodingToml)
+            else -> TomlMainDecoder.decode(deserializer, parsedToml, config, decodingToml)
         }
+    }
+
+    private fun tomlFor(config: TomlInputConfig): Toml =
+        if (config == inputConfig) this else Toml(config, outputConfig, serializersModule)
 
     // ================== other ===============
     @Suppress("TYPE_ALIAS")
