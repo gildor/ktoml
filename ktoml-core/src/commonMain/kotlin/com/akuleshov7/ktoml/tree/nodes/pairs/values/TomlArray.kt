@@ -123,76 +123,79 @@ public class TomlArray internal constructor(
                 throw ParseException("Array cannot contain only a comma", lineNo)
             }
 
+            var bufferBetweenCommas = StringBuilder()
+            val result: MutableList<String> = mutableListOf()
+            var index = 0
             var nbBrackets = 0
             var nbBraces = 0
             var currentQuote: String? = null
-            var bufferBetweenCommas = StringBuilder()
-            val result: MutableList<String> = mutableListOf()
-
-            var index = 0
             while (index < trimmed.length) {
                 val current = trimmed[index]
-                val quote = currentQuote
-
-                if (quote != null) {
-                    if (index + quote.length <= trimmed.length &&
-                        trimmed.substring(index, index + quote.length) == quote &&
-                        !(quote == "\"" && isEscapedBasicQuote(trimmed, index))
-                    ) {
-                        bufferBetweenCommas.append(quote)
-                        index += quote.length
-                        currentQuote = null
-                        continue
-                    }
-
-                    bufferBetweenCommas.append(current)
-                    index++
-                    continue
-                }
-
-                when (current) {
-                    '[' -> {
-                        nbBrackets++
-                        bufferBetweenCommas.append(current)
-                    }
-                    ']' -> {
-                        nbBrackets--
-                        bufferBetweenCommas.append(current)
-                    }
-                    '{' -> {
-                        nbBraces++
-                        bufferBetweenCommas.append(current)
-                    }
-                    '}' -> {
-                        nbBraces--
-                        bufferBetweenCommas.append(current)
-                    }
-                    '\'', '"' -> {
-                        currentQuote = if (index + 2 < trimmed.length &&
-                            trimmed[index + 1] == current &&
-                            trimmed[index + 2] == current
-                        ) {
-                            "$current$current$current"
+                currentQuote?.let { quote ->
+                    if (index + quote.length <= trimmed.length) {
+                        val quoteCandidate = trimmed.substring(index, index + quote.length)
+                        val escapedDoubleQuote = quote == "\"" && isEscapedBasicQuote(trimmed, index)
+                        if (quoteCandidate == quote && !escapedDoubleQuote) {
+                            bufferBetweenCommas.append(quote)
+                            index += quote.length
+                            currentQuote = null
                         } else {
-                            current.toString()
+                            bufferBetweenCommas.append(current)
+                            index++
                         }
-                        bufferBetweenCommas.append(currentQuote)
-                        index += currentQuote.length
-                        continue
-                    }
-                    // split only if we are on the highest level of brackets/braces (all are closed)
-                    // and if we're not in a string
-                    ',' -> if (nbBrackets != 0 || nbBraces != 0) {
-                        bufferBetweenCommas.append(current)
                     } else {
-                        result.add(bufferBetweenCommas.toString())
-                        bufferBetweenCommas = StringBuilder()
+                        bufferBetweenCommas.append(current)
+                        index++
                     }
-                    else -> bufferBetweenCommas.append(current)
+                } ?: run {
+                    var shouldAdvanceByOne = true
+                    when (current) {
+                        '[' -> {
+                            nbBrackets++
+                            bufferBetweenCommas.append(current)
+                        }
+                        ']' -> {
+                            nbBrackets--
+                            bufferBetweenCommas.append(current)
+                        }
+                        '{' -> {
+                            nbBraces++
+                            bufferBetweenCommas.append(current)
+                        }
+                        '}' -> {
+                            nbBraces--
+                            bufferBetweenCommas.append(current)
+                        }
+                        '\'', '"' -> {
+                            val isTripleQuote = index + 2 < trimmed.length &&
+                                    trimmed[index + 1] == current &&
+                                    trimmed[index + 2] == current
+                            val quoteToken = if (isTripleQuote) {
+                                "$current$current$current"
+                            } else {
+                                current.toString()
+                            }
+                            currentQuote = quoteToken
+                            bufferBetweenCommas.append(quoteToken)
+                            index += quoteToken.length
+                            shouldAdvanceByOne = false
+                        }
+                        // split only if we are on the highest level of brackets/braces (all are closed)
+                        // and if we're not in a string
+                        ',' -> if (nbBrackets != 0 || nbBraces != 0) {
+                            bufferBetweenCommas.append(current)
+                        } else {
+                            result.add(bufferBetweenCommas.toString())
+                            bufferBetweenCommas = StringBuilder()
+                        }
+                        else -> bufferBetweenCommas.append(current)
+                    }
+                    if (shouldAdvanceByOne) {
+                        index++
+                    }
                 }
-                index++
             }
-            if (currentQuote != null) {
+            currentQuote?.let {
                 throw ParseException(
                     "Not able to parse the array: [$this] as it does not have closing quote",
                     lineNo,
