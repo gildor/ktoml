@@ -144,6 +144,17 @@ public class TomlArrayEncoder internal constructor(
                     )
                 )
             }
+        } else if (tables.isEmpty()) {
+            val key = attributes.parent!!.keyOrThrow()
+            rootNode.appendChild(
+                TomlKeyValueArray(
+                    TomlKey(key, elementIndex),
+                    TomlArray(emptyList<Any>(), attributes.isMultiline),
+                    elementIndex,
+                    attributes.comments,
+                    attributes.inlineComment
+                )
+            )
         } else {
             // If the root table array contains a single nested table array, move it
             // from its element to the root and mark the root as synthetic.

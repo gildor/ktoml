@@ -125,56 +125,64 @@ public class TomlArray internal constructor(
 
             var nbBrackets = 0
             var nbBraces = 0
-            var isInBasicString = false
-            var isInLiteralString = false
+            var currentQuote: String? = null
             var bufferBetweenCommas = StringBuilder()
             val result: MutableList<String> = mutableListOf()
 
-            for (i in trimmed.indices) {
-                when (val current = trimmed[i]) {
+            var index = 0
+            while (index < trimmed.length) {
+                val current = trimmed[index]
+                val quote = currentQuote
+
+                if (quote != null) {
+                    if (index + quote.length <= trimmed.length &&
+                        trimmed.substring(index, index + quote.length) == quote &&
+                        !(quote == "\"" && isEscapedBasicQuote(trimmed, index))
+                    ) {
+                        bufferBetweenCommas.append(quote)
+                        index += quote.length
+                        currentQuote = null
+                        continue
+                    }
+
+                    bufferBetweenCommas.append(current)
+                    index++
+                    continue
+                }
+
+                when (current) {
                     '[' -> {
-                        if (!isInBasicString && !isInLiteralString) {
-                            nbBrackets++
-                        }
+                        nbBrackets++
                         bufferBetweenCommas.append(current)
                     }
                     ']' -> {
-                        if (!isInBasicString && !isInLiteralString) {
-                            nbBrackets--
-                        }
+                        nbBrackets--
                         bufferBetweenCommas.append(current)
                     }
                     '{' -> {
-                        if (!isInBasicString && !isInLiteralString) {
-                            nbBraces++
-                        }
+                        nbBraces++
                         bufferBetweenCommas.append(current)
                     }
                     '}' -> {
-                        if (!isInBasicString && !isInLiteralString) {
-                            nbBraces--
-                        }
+                        nbBraces--
                         bufferBetweenCommas.append(current)
                     }
-                    '\'' -> {
-                        if (!isInBasicString) {
-                            isInLiteralString = !isInLiteralString
+                    '\'', '"' -> {
+                        currentQuote = if (index + 2 < trimmed.length &&
+                            trimmed[index + 1] == current &&
+                            trimmed[index + 2] == current
+                        ) {
+                            "$current$current$current"
+                        } else {
+                            current.toString()
                         }
-                        bufferBetweenCommas.append(current)
-                    }
-                    '"' -> {
-                        if (!isInLiteralString) {
-                            if (!isInBasicString) {
-                                isInBasicString = true
-                            } else if (trimmed[i - 1] != '\\') {
-                                isInBasicString = false
-                            }
-                        }
-                        bufferBetweenCommas.append(current)
+                        bufferBetweenCommas.append(currentQuote)
+                        index += currentQuote.length
+                        continue
                     }
                     // split only if we are on the highest level of brackets/braces (all are closed)
                     // and if we're not in a string
-                    ',' -> if (isInBasicString || isInLiteralString || nbBrackets != 0 || nbBraces != 0) {
+                    ',' -> if (nbBrackets != 0 || nbBraces != 0) {
                         bufferBetweenCommas.append(current)
                     } else {
                         result.add(bufferBetweenCommas.toString())
@@ -182,8 +190,9 @@ public class TomlArray internal constructor(
                     }
                     else -> bufferBetweenCommas.append(current)
                 }
+                index++
             }
-            if (isInBasicString || isInLiteralString) {
+            if (currentQuote != null) {
                 throw ParseException(
                     "Not able to parse the array: [$this] as it does not have closing quote",
                     lineNo,
@@ -191,6 +200,16 @@ public class TomlArray internal constructor(
             }
             result.add(bufferBetweenCommas.toString())
             return result
+        }
+
+        private fun isEscapedBasicQuote(value: String, quoteIndex: Int): Boolean {
+            var slashCount = 0
+            var idx = quoteIndex - 1
+            while (idx >= 0 && value[idx] == '\\') {
+                slashCount++
+                idx--
+            }
+            return slashCount % 2 == 1
         }
     }
 }

@@ -66,7 +66,11 @@ public class TomlMainDecoder(
      * |--- child1, child2, ... , childN
      * ------------elementIndex------->
      */
-    private fun getCurrentNode() = rootNode.getNeighbourNodes().elementAt(elementIndex - 1)
+    private fun getCurrentNode() = if (rootNode is TomlKeyValue && elementIndex == 0) {
+        rootNode
+    } else {
+        rootNode.getNeighbourNodes().elementAt(elementIndex - 1)
+    }
 
     /**
      * Trying to decode the value using elementIndex
@@ -259,7 +263,18 @@ public class TomlMainDecoder(
 
             when (nextProcessingNode) {
                 is TomlKeyValueArray -> TomlArrayDecoder(nextProcessingNode, config, serializersModule)
-                is TomlKeyValuePrimitive, is TomlStubEmptyNode -> TomlMainDecoder(
+                is TomlKeyValuePrimitive -> {
+                    if (!inlineFunc) {
+                        checkMissingRequiredProperties(mutableListOf(nextProcessingNode), descriptor)
+                    }
+                    TomlMainDecoder(
+                        rootNode = nextProcessingNode,
+                        config = config,
+                        serializersModule = serializersModule,
+                    )
+                }
+
+                is TomlStubEmptyNode -> TomlMainDecoder(
                     rootNode = nextProcessingNode,
                     config = config,
                     serializersModule = serializersModule,

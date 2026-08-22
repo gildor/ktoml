@@ -153,4 +153,14 @@ class ArrayOfStringsDecoderTest {
             Toml.decodeFromString(test),
         )
     }
+
+    @Test
+    fun testMultilineLiteralInArrayWithApostropheAndHash() {
+        val test = "a = ['''\nrandom quote ' is here\n# this is not a comment\n''']"
+
+        assertEquals(
+            SimpleStringArray(listOf("random quote ' is here\n# this is not a comment\n")),
+            Toml.decodeFromString(test),
+        )
+    }
 }
