@@ -454,6 +454,12 @@ class GeneralDecoderTest {
     @Serializable
     data class NestedBool(val a: Boolean)
 
+    @Serializable
+    data class SameNameNestedValueWrapper(val bool: SameNameNestedBool)
+
+    @Serializable
+    data class SameNameNestedBool(val bool: Boolean)
+
     @Test
     fun primitiveValueForNestedObjectShouldFailAsMissingProperty() {
         assertFailsWith<MissingRequiredPropertyException> {
@@ -463,6 +469,10 @@ class GeneralDecoderTest {
                     bool = true
                 """.trimIndent()
             )
+        }
+
+        assertFailsWith<MissingRequiredPropertyException> {
+            Toml.decodeFromString<SameNameNestedValueWrapper>("bool = true")
         }
     }
 }

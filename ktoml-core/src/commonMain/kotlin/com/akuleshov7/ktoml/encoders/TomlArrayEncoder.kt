@@ -125,7 +125,7 @@ public class TomlArrayEncoder internal constructor(
     }
 
     override fun endStructure(descriptor: SerialDescriptor) {
-        if (attributes.isInline && tables.isEmpty()) {
+        if (tables.isEmpty()) {
             val array = TomlArray(values, attributes.isMultiline)
 
             parent?.let {
@@ -144,17 +144,6 @@ public class TomlArrayEncoder internal constructor(
                     )
                 )
             }
-        } else if (tables.isEmpty()) {
-            val key = attributes.parent!!.keyOrThrow()
-            rootNode.appendChild(
-                TomlKeyValueArray(
-                    TomlKey(key, elementIndex),
-                    TomlArray(emptyList<Any>(), attributes.isMultiline),
-                    elementIndex,
-                    attributes.comments,
-                    attributes.inlineComment
-                )
-            )
         } else {
             // If the root table array contains a single nested table array, move it
             // from its element to the root and mark the root as synthetic.

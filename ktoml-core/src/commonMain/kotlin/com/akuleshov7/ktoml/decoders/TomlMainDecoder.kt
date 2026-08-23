@@ -276,7 +276,7 @@ public class TomlMainDecoder(
             is TomlKeyValueArray -> TomlArrayDecoder(nextProcessingNode, config, serializersModule)
             is TomlKeyValuePrimitive -> {
                 if (!inlineFunc) {
-                    checkMissingRequiredProperties(mutableListOf(nextProcessingNode), descriptor)
+                    rejectPrimitiveStructure(nextProcessingNode, descriptor)
                 }
                 TomlMainDecoder(
                     rootNode = nextProcessingNode,
@@ -296,6 +296,30 @@ public class TomlMainDecoder(
                 "Incorrect decoding state in the beginStructure()" +
                         " with $nextProcessingNode ($nextProcessingNode)[${nextProcessingNode.name}]"
             )
+        }
+    }
+
+    private fun rejectPrimitiveStructure(node: TomlKeyValuePrimitive, descriptor: SerialDescriptor): Nothing {
+        when (descriptor.kind) {
+            StructureKind.LIST -> throw IllegalTypeException(
+                "Expected type ARRAY for key \"${node.name}\"",
+                node.lineNo,
+            )
+
+            StructureKind.MAP -> throw IllegalTypeException(
+                "Expected type MAP for key \"${node.name}\"",
+                node.lineNo,
+            )
+
+            else -> {
+                // A primitive has no nested fields. This produces the existing, useful missing-property
+                // error for required fields even when one happens to have the same name as the outer key.
+                checkMissingRequiredProperties(null, descriptor)
+                throw IllegalTypeException(
+                    "Expected type TABLE for key \"${node.name}\"",
+                    node.lineNo,
+                )
+            }
         }
     }
 

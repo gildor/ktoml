@@ -111,7 +111,7 @@ class ArrayEncoderTest {
         
         assertEncodedEquals(
             value = EmptyListData(),
-            expectedToml = ""
+            expectedToml = "content = [ ]"
         )
     }
 }

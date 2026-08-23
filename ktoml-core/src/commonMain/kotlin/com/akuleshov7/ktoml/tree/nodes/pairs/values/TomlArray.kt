@@ -96,7 +96,7 @@ public class TomlArray internal constructor(
          * recursively parse TOML array from the string: [ParsingArray -> Trimming values -> Parsing Nested Arrays]
          */
         private fun String.parse(lineNo: Int, config: TomlInputConfig = TomlInputConfig()): List<Any> =
-            this.parseArray(lineNo)
+            this.parseArray(lineNo, config)
                 .map { it.trim() }
                 .map {
                     when {
@@ -111,7 +111,7 @@ public class TomlArray internal constructor(
          * method for splitting the string to the array: "[[a, b], [c], [d]]" to -> [a,b] [c] [d]
          */
         @Suppress("NESTED_BLOCK", "TOO_LONG_FUNCTION")
-        private fun String.parseArray(lineNo: Int): MutableList<String> {
+        private fun String.parseArray(lineNo: Int, config: TomlInputConfig): MutableList<String> {
             val arrayContent = trim().trimBrackets().trim()
             // covering cases when the array is intentionally blank: myArray = []. It should be empty and not contain null
             if (arrayContent.isBlank()) {
@@ -132,20 +132,25 @@ public class TomlArray internal constructor(
             while (index < trimmed.length) {
                 val current = trimmed[index]
                 currentQuote?.let { quote ->
-                    if (index + quote.length <= trimmed.length) {
-                        val quoteCandidate = trimmed.substring(index, index + quote.length)
-                        val escapedDoubleQuote = quote == "\"" && isEscapedBasicQuote(trimmed, index)
-                        if (quoteCandidate == quote && !escapedDoubleQuote) {
-                            bufferBetweenCommas.append(quote)
-                            index += quote.length
+                    if (current != quote.first() || isEscapedQuote(trimmed, index, quote, config)) {
+                        bufferBetweenCommas.append(current)
+                        index++
+                    } else if (quote.length == 1) {
+                        bufferBetweenCommas.append(current)
+                        index++
+                        currentQuote = null
+                    } else {
+                        val quoteRunLength = trimmed.countQuoteRun(index, current)
+                        if (quoteRunLength >= quote.length) {
+                            // A one- or two-quote suffix before a multiline delimiter belongs to the value.
+                            // Consume the complete run so the final three quotes close the string.
+                            bufferBetweenCommas.append(trimmed.substring(index, index + quoteRunLength))
+                            index += quoteRunLength
                             currentQuote = null
                         } else {
                             bufferBetweenCommas.append(current)
                             index++
                         }
-                    } else {
-                        bufferBetweenCommas.append(current)
-                        index++
                     }
                 } ?: run {
                     var shouldAdvanceByOne = true
@@ -205,7 +210,16 @@ public class TomlArray internal constructor(
             return result
         }
 
-        private fun isEscapedBasicQuote(value: String, quoteIndex: Int): Boolean {
+        private fun isEscapedQuote(
+            value: String,
+            quoteIndex: Int,
+            quote: String,
+            config: TomlInputConfig,
+        ): Boolean {
+            if (quote.first() == '\'' && !config.allowEscapedQuotesInLiteralStrings) {
+                return false
+            }
+
             var slashCount = 0
             var idx = quoteIndex - 1
             while (idx >= 0 && value[idx] == '\\') {
@@ -213,6 +227,14 @@ public class TomlArray internal constructor(
                 idx--
             }
             return slashCount % 2 == 1
+        }
+
+        private fun String.countQuoteRun(startIndex: Int, quote: Char): Int {
+            var endIndex = startIndex
+            while (endIndex < length && this[endIndex] == quote) {
+                endIndex++
+            }
+            return endIndex - startIndex
         }
     }
 }
