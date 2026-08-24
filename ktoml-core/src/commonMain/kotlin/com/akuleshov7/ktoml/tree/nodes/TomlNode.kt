@@ -14,6 +14,7 @@ import com.akuleshov7.ktoml.tree.nodes.pairs.keys.TomlKey
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlValue
 import com.akuleshov7.ktoml.writers.TomlEmitter
 
+@InternalKtomlApi
 public const val EMPTY_TECHNICAL_NODE: String = "technical_node"
 
 /**

@@ -3,6 +3,7 @@ package com.akuleshov7.ktoml.source
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 
 import okio.Source
 
@@ -21,6 +22,7 @@ import kotlinx.serialization.serializer
  * @property serializersModule
  */
 @OptIn(ExperimentalSerializationApi::class)
+@SubclassOptInRequired(InternalKtomlApi::class)
 public open class TomlSourceReader(
     inputConfig: TomlInputConfig = TomlInputConfig(),
     outputConfig: TomlOutputConfig = TomlOutputConfig(),
