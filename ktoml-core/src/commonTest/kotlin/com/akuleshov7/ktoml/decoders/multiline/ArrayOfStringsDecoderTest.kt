@@ -1,11 +1,14 @@
 package com.akuleshov7.ktoml.decoders.multiline
 
 import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.decoders.structures.NestedArrayOfStrings
 import com.akuleshov7.ktoml.decoders.structures.SimpleStringArray
+import com.akuleshov7.ktoml.exceptions.ParseException
 import kotlinx.serialization.decodeFromString
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class ArrayOfStringsDecoderTest {
     private val tripleQuotes = "\"\"\""
@@ -152,5 +155,45 @@ class ArrayOfStringsDecoderTest {
             SimpleStringArray(listOf(" \" ")),
             Toml.decodeFromString(test),
         )
+    }
+
+    @Test
+    fun testMultilineLiteralInArrayWithApostropheAndHash() {
+        val test = "a = ['''\nrandom quote ' is here\n# this is not a comment\n''']"
+
+        assertEquals(
+            SimpleStringArray(listOf("random quote ' is here\n# this is not a comment\n")),
+            Toml.decodeFromString(test),
+        )
+    }
+
+    @Test
+    fun testQuoteRunsAtEndOfMultilineStrings() {
+        val literal = "a = [''''That,' she said, 'is still pointless.'''', 'ok']"
+        val basic = "a = [$tripleQuotes" + "a \\\"\"\" b" + tripleQuotes + ", \"ok\"]"
+
+        assertEquals(
+            SimpleStringArray(listOf("'That,' she said, 'is still pointless.'", "ok")),
+            Toml.decodeFromString(literal),
+        )
+        assertEquals(
+            SimpleStringArray(listOf("a \"\"\" b", "ok")),
+            Toml.decodeFromString(basic),
+        )
+    }
+
+    @Test
+    fun testEscapedQuoteInLiteralArrayElement() {
+        val test = "a = ['it\\'s, still one value', 'ok']"
+
+        assertEquals(
+            SimpleStringArray(listOf("it's, still one value", "ok")),
+            Toml.decodeFromString(test),
+        )
+        assertFailsWith<ParseException> {
+            Toml(
+                TomlInputConfig(allowEscapedQuotesInLiteralStrings = false)
+            ).decodeFromString<SimpleStringArray>(test)
+        }
     }
 }
