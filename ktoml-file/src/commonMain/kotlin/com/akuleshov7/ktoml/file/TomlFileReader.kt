@@ -3,6 +3,7 @@ package com.akuleshov7.ktoml.file
 
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.source.TomlSourceReader
 
 import kotlin.native.concurrent.ThreadLocal
@@ -19,6 +20,7 @@ import kotlinx.serialization.serializer
  * @param inputConfig
  * @param outputConfig
  */
+@SubclassOptInRequired(InternalKtomlApi::class)
 public open class TomlFileReader public constructor(
     inputConfig: TomlInputConfig = TomlInputConfig(),
     outputConfig: TomlOutputConfig = TomlOutputConfig(),
