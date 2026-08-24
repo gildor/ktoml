@@ -3,6 +3,7 @@ package com.akuleshov7.ktoml.file
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.okio.encodeToBufferedSink
 
 import okio.use
@@ -20,6 +21,7 @@ import kotlinx.serialization.modules.SerializersModule
             "ktoml-kotlinx-io extension APIs. This class remains available for compatibility."
 )
 @Suppress("SINGLE_CONSTRUCTOR_SHOULD_BE_PRIMARY")
+@SubclassOptInRequired(InternalKtomlApi::class)
 public open class TomlFileWriter : Toml {
     public constructor(
         inputConfig: TomlInputConfig = TomlInputConfig(),
