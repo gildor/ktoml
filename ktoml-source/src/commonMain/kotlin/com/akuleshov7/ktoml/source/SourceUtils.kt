@@ -14,6 +14,10 @@ import okio.use
  * @param decoder
  * @return decoded lines
  */
+@Deprecated(
+    "Use a BufferedSource with the ktoml-okio extensions. " +
+            "This compatibility helper closes the source after decoding."
+)
 public inline fun <T> Source.useLines(decoder: (Sequence<String>) -> T): T = buffer().use { source ->
     decoder(generateSequence { source.readUtf8Line() })
 }

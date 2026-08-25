@@ -84,7 +84,7 @@ We are still developing and testing this library, so it has several limitations:
 ## Dependency
 The fork is hosted on [Maven Central](https://central.sonatype.com/artifact/app.gildor/ktoml-core)
 under the `app.gildor` group. Kotlin package imports remain `com.akuleshov7.ktoml.*`.
-To import `ktoml` library you need to add following dependencies to your code:
+Add `ktoml-core` plus one optional I/O adapter when your application needs it:
 <details>
 <summary>Maven</summary>
 
@@ -92,22 +92,25 @@ To import `ktoml` library you need to add following dependencies to your code:
 <dependency>
   <groupId>app.gildor</groupId>
   <artifactId>ktoml-core</artifactId>
-  <version>0.9.0</version>
+  <version>&lt;version&gt;</version>
 </dependency>
 <dependency>
   <groupId>app.gildor</groupId>
-  <artifactId>ktoml-file</artifactId>
-  <version>0.9.0</version>
+  <artifactId>ktoml-okio</artifactId>
+  <version>&lt;version&gt;</version>
 </dependency>
 ```
+
+Use `ktoml-kotlinx-io` instead of `ktoml-okio` when your application uses kotlinx-io.
 </details>
 
 <details>
 <summary>Gradle Groovy</summary>
 
 ```groovy
-implementation 'app.gildor:ktoml-core:0.9.0'
-implementation 'app.gildor:ktoml-file:0.9.0'
+implementation 'app.gildor:ktoml-core:<version>'
+implementation 'app.gildor:ktoml-okio:<version>' // optional
+// implementation 'app.gildor:ktoml-kotlinx-io:<version>' // optional alternative
 ```
 </details>
 
@@ -115,10 +118,15 @@ implementation 'app.gildor:ktoml-file:0.9.0'
 <summary>Gradle Kotlin</summary>
 
 ```kotlin
-implementation("app.gildor:ktoml-core:0.9.0")
-implementation("app.gildor:ktoml-file:0.9.0")
+implementation("app.gildor:ktoml-core:<version>")
+implementation("app.gildor:ktoml-okio:<version>") // optional
+// implementation("app.gildor:ktoml-kotlinx-io:<version>") // optional alternative
 ```
 </details>
+
+`ktoml-core` has no Okio or kotlinx-io dependency. `ktoml-kotlinx-io` is experimental and currently uses
+kotlinx-io 0.8.2, the newest release compatible with ktoml's Kotlin 2.2.0 Native toolchain. The old
+`ktoml-source` and `ktoml-file` artifacts remain available as deprecated, Okio-backed compatibility APIs.
 
 ### Date-times and `kotlinx-datetime` (opt-in)
 
@@ -139,11 +147,35 @@ recent version) — ktoml bridges to its serializers automatically.
 > date-times / strings) need no changes and no longer ship `kotlinx-datetime`.
 
 ## How to use
-:heavy_exclamation_mark: as TOML is a foremost language for config files, we have also supported the deserialization from file.
-However, we are using [okio](https://github.com/square/okio) to read the file, so it will be added as a dependency to your
-project if you will import [ktoml-file](https://central.sonatype.com/artifact/app.gildor/ktoml-file).
-Same about okio `Source` (for example if you need Streaming): [ktoml-source](https://central.sonatype.com/artifact/app.gildor/ktoml-source).
-For basic scenarios of decoding strings you can simply use [ktoml-core](https://central.sonatype.com/artifact/app.gildor/ktoml-core).
+For basic string encoding and decoding, use
+[ktoml-core](https://central.sonatype.com/artifact/app.gildor/ktoml-core). The optional adapters expose extensions
+on the configured `Toml` instance and leave caller-provided sources and sinks open:
+
+```kotlin
+// app.gildor:ktoml-okio
+@file:OptIn(com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class)
+
+import com.akuleshov7.ktoml.okio.decodeFromBufferedSource
+import com.akuleshov7.ktoml.okio.encodeToBufferedSink
+
+val config = Toml.decodeFromBufferedSource<MyConfig>(bufferedSource)
+Toml.encodeToBufferedSink(config, bufferedSink)
+```
+
+```kotlin
+// app.gildor:ktoml-kotlinx-io
+@file:OptIn(com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class)
+
+import com.akuleshov7.ktoml.io.decodeFromSource
+import com.akuleshov7.ktoml.io.encodeToSink
+
+val config = Toml.decodeFromSource<MyConfig>(source)
+Toml.encodeToSink(config, sink)
+```
+
+The adapters neither close nor flush handles. Open files through the `FileSystem` belonging to the I/O library your
+application already uses, and manage those handles with `use`. `ktoml-file` remains an Okio-backed compatibility
+convenience; it is not duplicated for kotlinx-io.
 
 :heavy_exclamation_mark: don't forget to add the serialization plugin `kotlin("plugin.serialization")` to your project.
 Otherwise, `@Serialization` annotation won't work properly.
@@ -220,11 +252,11 @@ val decoded = Toml.decodeFromTomlNode<Foobar>(server)
 </details>
 
 <details>
-<summary>Toml File deserialization</summary>
+<summary>Legacy Toml File deserialization</summary>
 
 ```kotlin
-// add app.gildor:ktoml-file to your project
-import com.akuleshov7.ktoml.file
+// deprecated compatibility API from app.gildor:ktoml-file
+import com.akuleshov7.ktoml.file.TomlFileReader
 
 val resultFromString = TomlFileReader.decodeFromFile<MyClass>(serializer(), /* file path to toml file */)
 val resultFromList = TomlFileReader.partiallyDecodeFromFile<MyClass>(serializer(),  /* file path to toml file */, /* table name */)
@@ -238,11 +270,11 @@ For this purpose we have prepared `toml-source` module and implemented an
 with java streams for JVM target.
 
 ```kotlin
-// add app.gildor:ktoml-source to your project
-import com.akuleshov7.ktoml.source
+// deprecated compatibility API from app.gildor:ktoml-source
+import com.akuleshov7.ktoml.source.TomlSourceReader
 
-val resultFromString = TomlFileReader.decodeFromSource<MyClass>(serializer(), /* your source */)
-val resultFromList = TomlFileReader.partiallyDecodeFromSource<MyClass>(serializer(),  /* your source */, /* table name */)
+val resultFromString = TomlSourceReader.decodeFromSource<MyClass>(serializer(), /* your source */)
+val resultFromList = TomlSourceReader.partiallyDecodeFromSource<MyClass>(serializer(),  /* your source */, /* table name */)
 ```
 </details>
 
@@ -264,13 +296,13 @@ val toml = Toml.encodeToString(MyClass(/* ... */))
 </details>
 
 <details>
-<summary>Toml File serialization</summary>
+<summary>Legacy Toml File serialization</summary>
 
 ```kotlin
-// add app.gildor:ktoml-file to your project
+// deprecated compatibility API from app.gildor:ktoml-file
 import com.akuleshov7.ktoml.file.TomlFileWriter
 
-TomlFileWriter.encodeToFile<MyClass>(serializer(), /* file path to toml file */)
+TomlFileWriter.encodeToFile(MyClass.serializer(), value, /* file path to toml file */)
 ```
 </details>
 
