@@ -43,10 +43,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":ktoml-core"))
-                api(project(":ktoml-source"))
-                implementation("com.squareup.okio:okio:${Versions.OKIO}")
+                api("org.jetbrains.kotlinx:kotlinx-io-core:${Versions.KOTLINX_IO}")
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.KOTLIN}")
-                implementation(project(":ktoml-okio"))
             }
         }
 
@@ -74,12 +72,4 @@ configureSigning()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
-}
-
-// ios tests on github are behaving differently than locally - as github moves resources to a different directory
-// so, as it is not critical, skipping them
-tasks.withType<org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest> {
-    if (this.name.contains("ios")) {
-        this.enabled = false
-    }
 }
