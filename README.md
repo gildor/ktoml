@@ -11,8 +11,8 @@ depends on the activity and availability of the upstream maintainer.
 
 **Compatibility:** Kotlin package names remain `com.akuleshov7.ktoml.*`, and Maven artifacts use
 `app.gildor`. **This fork is not fully binary compatible with upstream
-[v0.7.1](https://github.com/orchestr7/ktoml/releases/tag/v0.7.1).** Public signatures, including
-`TomlInputConfig` constructors, have changed. Recompile consumers when migrating and review the
+[v0.7.1](https://github.com/orchestr7/ktoml/releases/tag/v0.7.1).** Some AST and date-time emitter
+signatures have changed. Recompile consumers when migrating and review the
 [date-time dependency changes](#date-times-and-kotlinx-datetime-opt-in).
 
 ## <img src="/ktoml.png" width="300px"/>
