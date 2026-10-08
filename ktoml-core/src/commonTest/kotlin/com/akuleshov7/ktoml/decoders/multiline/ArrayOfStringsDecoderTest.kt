@@ -196,4 +196,60 @@ class ArrayOfStringsDecoderTest {
             ).decodeFromString<SimpleStringArray>(test)
         }
     }
+
+    @Test
+    fun testEscapedBackslashBeforeClosingQuote() {
+        // https://github.com/orchestr7/ktoml/issues/380#issuecomment-4835523816
+        val test = """key = ["\\"]"""
+
+        listOf(TomlInputConfig(), TomlInputConfig.compliant()).forEach { config ->
+            assertEquals(
+                mapOf("key" to listOf("\\")),
+                Toml(config).decodeFromString<Map<String, List<String>>>(test),
+            )
+        }
+    }
+
+    @Test
+    fun testEvenBackslashRunsBeforeClosingQuote() {
+        listOf(2, 4, 6, 8).forEach { backslashCount ->
+            val test = """a = ["${"\\".repeat(backslashCount)}", "next"]"""
+
+            listOf(TomlInputConfig(), TomlInputConfig.compliant()).forEach { config ->
+                assertEquals(
+                    SimpleStringArray(listOf("\\".repeat(backslashCount / 2), "next")),
+                    Toml(config).decodeFromString<SimpleStringArray>(test),
+                    "Backslash count: $backslashCount",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testOddBackslashRunsBeforeEscapedQuote() {
+        listOf(1, 3, 5, 7).forEach { backslashCount ->
+            val test = """a = ["${"\\".repeat(backslashCount)}"still, one string", "next"]"""
+
+            listOf(TomlInputConfig(), TomlInputConfig.compliant()).forEach { config ->
+                assertEquals(
+                    SimpleStringArray(listOf("\\".repeat(backslashCount / 2) + "\"still, one string", "next")),
+                    Toml(config).decodeFromString<SimpleStringArray>(test),
+                    "Backslash count: $backslashCount",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testOddBackslashRunsDoNotCloseString() {
+        listOf(1, 3, 5, 7).forEach { backslashCount ->
+            val test = """a = ["${"\\".repeat(backslashCount)}"]"""
+
+            listOf(TomlInputConfig(), TomlInputConfig.compliant()).forEach { config ->
+                assertFailsWith<ParseException>("Backslash count: $backslashCount") {
+                    Toml(config).decodeFromString<SimpleStringArray>(test)
+                }
+            }
+        }
+    }
 }
