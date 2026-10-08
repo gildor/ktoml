@@ -5,6 +5,9 @@
   APIs and binary-public declarations marked `@InternalKtomlApi`. If an intentional additive API
   change is missing, run `./gradlew apiDump`, review the diff, and commit it. Do not approve removed
   or changed signatures without an explicit compatibility and migration decision.
+* See [binary compatibility validation](BINARY_COMPATIBILITY.md) for baseline scope, platform limits,
+  and the independent published-artifact audit. The release workflow runs `apiCheck` before publishing
+  either a release or a snapshot.
 * Simply create a new git tag with format `v*` and push it. The GitHub workflow will perform the release automatically.
   
   For example:

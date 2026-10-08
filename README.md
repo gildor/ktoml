@@ -662,3 +662,10 @@ ktoml is tested against the [toml-lang/toml-test](https://github.com/toml-lang/t
 See [`TomlTestBaseline.kt`](ktoml-core/src/jvmTest/kotlin/com/akuleshov7/ktoml/compliance/TomlTestBaseline.kt) for the full baseline, failure categories, and linked issues.
 
 Related: [#32 — Integrate toml-test compliance suite](https://github.com/orchestr7/ktoml/issues/32)
+
+## API validation for contributors
+
+Run `./gradlew apiCheck` to verify the committed fork ABI baseline. See
+[binary compatibility validation](BINARY_COMPATIBILITY.md) for updating dumps, platform coverage,
+and the separate audit against upstream 0.7.1. A passing fork baseline check does not establish
+binary compatibility with upstream.

@@ -16,6 +16,8 @@ apiValidation {
     @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
     klib {
         enabled = true
+        strictValidation = providers.gradleProperty("apiStrictKlibValidation")
+            .map(String::toBoolean).getOrElse(false)
     }
 }
 
