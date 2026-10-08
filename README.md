@@ -1,4 +1,21 @@
- ## <img src="/ktoml.png" width="300px"/>
+# ktoml fork with full TOML 1.1 support
+
+**This is a fork of [orchestr7/ktoml](https://github.com/orchestr7/ktoml).** It supports all features of
+[TOML 1.1](https://toml.io/en/v1.1.0), with additional bug fixes and polishing. It passes every TOML 1.1
+parser compliance test in the [official `toml-lang/toml-test` suite](https://github.com/toml-lang/toml-test)
+included in this repository, using `TomlInputConfig.compliant()` and with no known failures or skipped
+compliance tests.
+
+The plan is to upstream all changes to `orchestr7/ktoml`. Whether and when those changes are merged
+depends on the activity and availability of the upstream maintainer.
+
+**Compatibility:** Kotlin package names remain `com.akuleshov7.ktoml.*`, and Maven artifacts use
+`app.gildor`. **This fork is not fully binary compatible with upstream
+[v0.7.1](https://github.com/orchestr7/ktoml/releases/tag/v0.7.1).** Public signatures, including
+`TomlInputConfig` constructors, have changed. Recompile consumers when migrating and review the
+[date-time dependency changes](#date-times-and-kotlinx-datetime-opt-in).
+
+## <img src="/ktoml.png" width="300px"/>
 
 [![Releases](https://img.shields.io/github/v/release/gildor/ktoml)](https://github.com/gildor/ktoml/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/app.gildor/ktoml-core)](https://central.sonatype.com/artifact/app.gildor/ktoml-core)
@@ -52,8 +69,8 @@ You can check types that are supported in TOML standard [here](https://toml.io/e
 However, in Ktoml, our goal is to comprehensively support all primitive types offered by Kotlin.
 
 **General** \
-We are still developing and testing this library, so it has several limitations: \
-:white_check_mark: deserialization (with some parsing limitations) \
+The parser supports TOML 1.1; mapping TOML values to Kotlin types has the considerations described below: \
+:white_check_mark: deserialization \
 :white_check_mark: serialization (with tree-related limitations)
 
 **Parsing and decoding** \
