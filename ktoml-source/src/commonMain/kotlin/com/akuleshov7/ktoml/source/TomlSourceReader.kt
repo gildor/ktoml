@@ -3,6 +3,7 @@ package com.akuleshov7.ktoml.source
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.okio.decodeFromBufferedSource
 import com.akuleshov7.ktoml.okio.partiallyDecodeFromBufferedSource
 
@@ -29,6 +30,7 @@ import kotlinx.serialization.serializer
     "Use extension APIs from the ktoml-okio artifact. " +
             "TomlSourceReader remains available for compatibility and closes caller-provided sources."
 )
+@SubclassOptInRequired(InternalKtomlApi::class)
 public open class TomlSourceReader(
     inputConfig: TomlInputConfig = TomlInputConfig(),
     outputConfig: TomlOutputConfig = TomlOutputConfig(),

@@ -1,6 +1,7 @@
 package com.akuleshov7.ktoml.writers
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.tree.nodes.TableType
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDate
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDateTime
@@ -17,6 +18,7 @@ import com.akuleshov7.ktoml.writers.IntegerRepresentation.GROUPED
  *
  * @param config
  */
+@InternalKtomlApi
 public abstract class TomlEmitter(config: TomlOutputConfig) {
     private val indentation = config.indentation.value
 

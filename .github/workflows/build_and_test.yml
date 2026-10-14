@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'toml-1.1'
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.welcome=never
@@ -53,6 +54,8 @@ jobs:
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
+      - name: Verify JVM and KLib API baseline
+        run: ./gradlew apiCheck -PapiStrictKlibValidation=true -Pkotlin.native.enableKlibsCrossCompilation=true
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v6

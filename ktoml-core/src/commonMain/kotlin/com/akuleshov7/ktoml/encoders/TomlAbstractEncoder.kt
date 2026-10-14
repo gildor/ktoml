@@ -1,6 +1,7 @@
 package com.akuleshov7.ktoml.encoders
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.InternalEncodingException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
 import com.akuleshov7.ktoml.exceptions.UnsupportedEncodingFeatureException
@@ -26,6 +27,7 @@ import kotlinx.serialization.modules.SerializersModule
  * @property serializersModule
  */
 @OptIn(ExperimentalSerializationApi::class)
+@InternalKtomlApi
 public abstract class TomlAbstractEncoder protected constructor(
     protected var elementIndex: Int,
     protected val attributes: TomlEncoderAttributes,
