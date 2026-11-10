@@ -4,7 +4,6 @@ import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.annotations.InternalKtomlApi
-import com.akuleshov7.ktoml.okio.encodeToBufferedSink
 
 import okio.use
 
@@ -38,8 +37,9 @@ public open class TomlFileWriter : Toml {
         value: T,
         tomlFilePath: String
     ) {
+        val content = encodeToString(serializer, value)
         openFileForWrite(tomlFilePath).use {
-            encodeToBufferedSink(serializer, value, it)
+            it.writeUtf8(content)
         }
     }
 }
