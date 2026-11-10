@@ -1,5 +1,28 @@
 # API and binary compatibility
 
+## Kotlin compiler compatibility
+
+Keep the consumer compiler requirement as old as the serialization runtime permits. Do not raise
+it just to follow a newer Kotlin compiler release; a serialization upgrade requiring newer
+metadata must be verified and documented before changing the consumer baseline.
+
+The library is built with upstream's Kotlin 2.4.21 and serialization 1.12.0. This does not mean
+every consumer needs compiler 2.4.21. `checkJvmConsumerCompatibility` independently resolves
+Kotlin **2.3.0** and its matching serialization compiler plugin, compiles a real application
+against the integrated JVM jar and its transitive runtime dependencies, and executes a TOML 1.1
+decode/encode round trip using its generated serializers. It runs as part of `check`/`build` and CI.
+
+```sh
+./gradlew checkJvmConsumerCompatibility
+```
+
+Kotlin 2.2.0 was also tested: it rejects serialization 1.12.0's JVM metadata version 2.4.0
+(the compiler accepts up to 2.3.0). Its Native compiler rejects the serialization-only control
+because that dependency has ABI version 2.4.0, whereas the compiler accepts up to 2.2.0.
+Reducing ktoml's build compiler alone cannot restore Kotlin 2.2 compatibility with this runtime.
+No metadata-version bypass flags are used. The JVM result is not a compatibility claim for older
+Native/JS/Wasm compilers; those must support the serialization runtime's KLib ABI.
+
 ## Integration and migration
 
 This TOML 1.1 integration retains the `com.akuleshov7` Maven group and Kotlin packages. It includes

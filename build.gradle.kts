@@ -54,6 +54,7 @@ allprojects {
 
 createDetektTask()
 installGitHooks()
+configureJvmConsumerCompatibility()
 
 // Create a convenient 'test' task alias for 'allTests'
 tasks.register("test") {
