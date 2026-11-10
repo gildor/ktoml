@@ -751,8 +751,9 @@ data class CoinsConfiguration(
 
 ## Compliance Testing
 
-ktoml is tested against the [toml-lang/toml-test](https://github.com/toml-lang/toml-test) suite (TOML 1.0). Known failures are tracked with upstream issues.
+ktoml is tested against the pinned [toml-lang/toml-test](https://github.com/toml-lang/toml-test)
+TOML 1.1 suite. All cases in that suite pass with strict parsing enabled.
 
-See [`TomlTestBaseline.kt`](ktoml-core/src/jvmTest/kotlin/com/akuleshov7/ktoml/compliance/TomlTestBaseline.kt) for the full baseline, failure categories, and linked issues.
-
-Related: [#32 — Integrate toml-test compliance suite](https://github.com/orchestr7/ktoml/issues/32)
+See [`TomlTestSuite.kt`](ktoml-core/src/jvmTest/kotlin/com/akuleshov7/ktoml/compliance/TomlTestSuite.kt)
+for the suite runner and [`TomlTestBaseline.kt`](ktoml-core/src/jvmTest/kotlin/com/akuleshov7/ktoml/compliance/TomlTestBaseline.kt)
+for the guard that keeps the known-failure baseline empty.

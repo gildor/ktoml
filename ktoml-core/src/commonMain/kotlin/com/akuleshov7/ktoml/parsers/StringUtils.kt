@@ -5,6 +5,7 @@
 package com.akuleshov7.ktoml.parsers
 
 import com.akuleshov7.ktoml.exceptions.ParseException
+import com.akuleshov7.ktoml.utils.validateIntegerSyntax
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
 
@@ -13,10 +14,6 @@ private const val TOML_DECIMAL_INTEGER_PATTERN = "(?:0|[1-9](?:_?[0-9])*)"
 private const val TOML_DIGITS_PATTERN = "[0-9](?:_?[0-9])*"
 private const val TOML_EXPONENT_PATTERN = "[eE][+-]?$TOML_DIGITS_PATTERN"
 
-private val tomlDecimalIntegerRegex = Regex("[+-]?$TOML_DECIMAL_INTEGER_PATTERN")
-private val tomlBinaryIntegerRegex = Regex("0b[01](?:_?[01])*")
-private val tomlOctalIntegerRegex = Regex("0o[0-7](?:_?[0-7])*")
-private val tomlHexIntegerRegex = Regex("0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*")
 private val tomlFloatRegex = Regex(
     "[+-]?(?:" +
             "$TOML_DECIMAL_INTEGER_PATTERN\\.$TOML_DIGITS_PATTERN(?:$TOML_EXPONENT_PATTERN)?|" +
@@ -233,14 +230,16 @@ internal fun String.trimBrackets(): String = trimSymbols(this, "[", "]")
 internal fun String.removeTrailingComma(): String = this.removeSuffix(",")
 
 /**
- * Checks whether this string is a TOML integer literal.
+ * Classifies integer candidates without preventing fallback to other TOML primitive types.
  *
- * @return true for valid decimal, binary, octal, or hexadecimal integer literals
+ * @return true when the shared integer syntax validator accepts this value
  */
-internal fun String.isValidTomlIntegerLiteral(): Boolean = tomlDecimalIntegerRegex.matches(this) ||
-        tomlBinaryIntegerRegex.matches(this) ||
-        tomlOctalIntegerRegex.matches(this) ||
-        tomlHexIntegerRegex.matches(this)
+internal fun String.isValidTomlIntegerLiteral(): Boolean = try {
+    validateIntegerSyntax(0)
+    true
+} catch (ex: ParseException) {
+    false
+}
 
 /**
  * Checks whether this string is a TOML float literal.
