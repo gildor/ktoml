@@ -13,7 +13,7 @@ package com.akuleshov7.ktoml.compliance
  * not of ktoml: ktoml-core decodes an already-decoded [String] (no bytes to validate), and
  * ktoml-file/ktoml-source follow okio's lenient UTF-8 reading by design.
  *
- * Related: [#32](https://github.com/orchestr7/ktoml/issues/32) (toml-test integration).
+ * The suite is pinned by the `toml-test` git submodule.
  */
 sealed interface KnownFailure {
     val issue: Int

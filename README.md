@@ -85,6 +85,9 @@ We are still developing and testing this library, so it has several limitations:
 :white_check_mark: Inline Array of Tables \
 :white_check_mark: Arrays of Different Types (parsed fine — every element keeps its own type in the AST, e.g. `x = [1, "a", true]`; they just can't map onto a single `List<E>`, so read the parsed AST directly or supply a custom `KSerializer` — see [`MixedTypeArrayDecodeTest`](ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/MixedTypeArrayDecodeTest.kt))
 
+See [API compatibility and migration](BINARY_COMPATIBILITY.md) before upgrading from 0.7.1,
+especially when using the AST, custom emitters, or `kotlinx-datetime`.
+
 ## Dependency
 ktoml is hosted on [Maven Central](https://central.sonatype.com/artifact/com.akuleshov7/ktoml-core)
 under the `com.akuleshov7` group. Kotlin package imports remain `com.akuleshov7.ktoml.*`.
@@ -227,6 +230,28 @@ val result = Toml.partiallyDecodeFromString<MyClassOnlyForTable>(serializer(), /
 </details>
 
 <details>
+<summary>Experimental parsed elements</summary>
+
+Parse a document once, retain a table handle, and decode it into a serializable type. `TomlElement`
+exposes `kind`, `keys()` and `tables()`; it keeps the mutable parser AST behind an experimental API.
+
+```kotlin
+@file:OptIn(com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class)
+
+import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.decodeFromTomlElement
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Server(val port: Int)
+
+val document = Toml.parseToTomlElement("[server]\nport = 8080")
+val server = Toml.decodeFromTomlElement<Server>(document.tables().getValue("server"))
+```
+
+</details>
+
+<details>
 <summary>Decoding an already-parsed node (parse once, decode many)</summary>
 
 `partiallyDecodeFromString` re-parses the whole input on every call. When you need to decode several
@@ -238,6 +263,15 @@ This is also the building block for binding a set of nested tables to a `Map` ke
 with full control):
 
 ```kotlin
+@file:OptIn(
+    com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class,
+    com.akuleshov7.ktoml.annotations.InternalKtomlApi::class,
+)
+
+import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.decodeFromTomlNode
+import kotlinx.serialization.Serializable
+
 @Serializable
 data class Foobar(val foo: String, val bar: String)
 

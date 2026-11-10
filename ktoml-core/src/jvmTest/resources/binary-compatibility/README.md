@@ -2,8 +2,8 @@
 
 These fixtures exercise calls from consumers compiled against the published
 `com.akuleshov7:ktoml-core-jvm:0.7.1` artifact. The binary compatibility tests load their bytecode
-with the fork's `TomlInputConfig` class, without putting the upstream jar on the test classpath.
-Keeping the bytecode prevents recompilation against the fork from silently selecting newer APIs.
+with the integrated library's `TomlInputConfig` class, without putting the upstream jar on the test classpath.
+Keeping the bytecode prevents recompilation against the integrated source from silently selecting newer APIs.
 The small Java 8 class files are stored as Base64 text resources alongside their sources.
 
 The adjacent Java and Kotlin sources produce the `.class.base64` resources. Java calls the original
