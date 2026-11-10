@@ -195,7 +195,7 @@ public open class Toml(
             this,
         ).decodeSerializableValue(deserializer)
     } else {
-        decode(deserializer, element.asFileNode(), inputConfig)
+        decode(deserializer, element.asFileNode(), inputConfig, element.node)
     }
 
     /**
@@ -227,6 +227,7 @@ public open class Toml(
         deserializer: DeserializationStrategy<T>,
         parsedToml: TomlFile,
         config: TomlInputConfig,
+        exposedRootNode: TomlNode = parsedToml,
     ): T {
         val decodingToml = tomlFor(config)
         return when (deserializer.descriptor.kind) {
@@ -237,7 +238,7 @@ public open class Toml(
                 decodingToml,
             )
             StructureKind.MAP -> TomlMapDecoder.decode(deserializer, parsedToml, config, decodingToml)
-            else -> TomlMainDecoder.decode(deserializer, parsedToml, config, decodingToml)
+            else -> TomlMainDecoder.decode(deserializer, parsedToml, config, decodingToml, exposedRootNode)
         }
     }
 
