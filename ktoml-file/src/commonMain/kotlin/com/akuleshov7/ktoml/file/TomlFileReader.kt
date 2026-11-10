@@ -19,6 +19,11 @@ import kotlinx.serialization.serializer
  * @param inputConfig
  * @param outputConfig
  */
+@Deprecated(
+    "Open a source with your chosen filesystem and use the ktoml-okio or " +
+            "ktoml-kotlinx-io extension APIs. This class remains available for compatibility."
+)
+@Suppress("DEPRECATION")
 public open class TomlFileReader public constructor(
     inputConfig: TomlInputConfig = TomlInputConfig(),
     outputConfig: TomlOutputConfig = TomlOutputConfig(),

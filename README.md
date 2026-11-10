@@ -44,14 +44,20 @@ Other platforms could be added later on the demand (just create a corresponding 
 
 :globe_with_meridians: ktoml supports Kotlin 2.4.21
 
+## TOML support
+
+The parser supports TOML 1.1, including multiline inline tables with trailing commas, `\xHH` and
+`\e` string escapes, and times with omitted seconds. Use `TomlInputConfig.compliant()` for strict
+TOML validation; the default configuration retains ktoml’s lenient extensions.
+
 ## Current limitations
 :heavy_exclamation_mark: Please note, that TOML standard does not define Java-like types: `Char`, `Short`, etc. 
-You can check types that are supported in TOML standard [here](https://toml.io/en/v1.0.0#string).
+You can check types that are supported in TOML standard [here](https://toml.io/en/v1.1.0#string).
 However, in Ktoml, our goal is to comprehensively support all primitive types offered by Kotlin.
 
 **General** \
 We are still developing and testing this library, so it has several limitations: \
-:white_check_mark: deserialization (with some parsing limitations) \
+:white_check_mark: deserialization \
 :white_check_mark: serialization (with tree-related limitations)
 
 **Parsing and decoding** \
@@ -67,21 +73,22 @@ We are still developing and testing this library, so it has several limitations:
 :white_check_mark: Simple Arrays \
 :white_check_mark: Comments \
 :white_check_mark: Inline Tables \
-:white_check_mark: Offset Date-Time (to `Instant` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Date-Time (to `LocalDateTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Date (to `LocalDate` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
-:white_check_mark: Local Time (to `LocalTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)) \
+:white_check_mark: Offset Date-Time (to the stdlib `kotlin.time.Instant`, or `String` — no extra dependency) \
+:white_check_mark: Local Date-Time (to `LocalDateTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
+:white_check_mark: Local Date (to `LocalDate` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
+:white_check_mark: Local Time (to `LocalTime` of [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime), or `String`) \
 :white_check_mark: Multiline Strings \
 :white_check_mark: Arrays (including multiline and nested arrays) \
 :white_check_mark: Maps (for anonymous key-value pairs) \
 :white_check_mark: Nested Inline Tables \
 :white_check_mark: Array of Tables \
 :white_check_mark: Inline Array of Tables \
-:x: Arrays: of Different Types
+:white_check_mark: Arrays of Different Types (parsed fine — every element keeps its own type in the AST, e.g. `x = [1, "a", true]`; they just can't map onto a single `List<E>`, so read the parsed AST directly or supply a custom `KSerializer` — see [`MixedTypeArrayDecodeTest`](ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/MixedTypeArrayDecodeTest.kt))
 
 ## Dependency
-The library is hosted on the [Maven Central](https://search.maven.org/artifact/com.akuleshov7/ktoml-core).
-To import `ktoml` library you need to add following dependencies to your code:
+ktoml is hosted on [Maven Central](https://central.sonatype.com/artifact/com.akuleshov7/ktoml-core)
+under the `com.akuleshov7` group. Kotlin package imports remain `com.akuleshov7.ktoml.*`.
+Add `ktoml-core` plus one optional I/O adapter when your application needs it:
 <details>
 <summary>Maven</summary>
 
@@ -89,22 +96,25 @@ To import `ktoml` library you need to add following dependencies to your code:
 <dependency>
   <groupId>com.akuleshov7</groupId>
   <artifactId>ktoml-core</artifactId>
-  <version>0.7.1</version>
+  <version>&lt;version&gt;</version>
 </dependency>
 <dependency>
   <groupId>com.akuleshov7</groupId>
-  <artifactId>ktoml-file</artifactId>
-  <version>0.7.1</version>
+  <artifactId>ktoml-okio</artifactId>
+  <version>&lt;version&gt;</version>
 </dependency>
 ```
+
+Use `ktoml-kotlinx-io` instead of `ktoml-okio` when your application uses kotlinx-io.
 </details>
 
 <details>
 <summary>Gradle Groovy</summary>
 
 ```groovy
-implementation 'com.akuleshov7:ktoml-core:0.7.1'
-implementation 'com.akuleshov7:ktoml-file:0.7.1'
+implementation 'com.akuleshov7:ktoml-core:<version>'
+implementation 'com.akuleshov7:ktoml-okio:<version>' // optional
+// implementation 'com.akuleshov7:ktoml-kotlinx-io:<version>' // optional alternative
 ```
 </details>
 
@@ -112,17 +122,64 @@ implementation 'com.akuleshov7:ktoml-file:0.7.1'
 <summary>Gradle Kotlin</summary>
 
 ```kotlin
-implementation("com.akuleshov7:ktoml-core:0.7.1")
-implementation("com.akuleshov7:ktoml-file:0.7.1")
+implementation("com.akuleshov7:ktoml-core:<version>")
+implementation("com.akuleshov7:ktoml-okio:<version>") // optional
+// implementation("com.akuleshov7:ktoml-kotlinx-io:<version>") // optional alternative
 ```
 </details>
 
+`ktoml-core` has no Okio or kotlinx-io dependency. `ktoml-kotlinx-io` is experimental and currently uses
+kotlinx-io 0.8.2. The old
+`ktoml-source` and `ktoml-file` artifacts remain available as deprecated, Okio-backed compatibility APIs.
+
+### Date-times and `kotlinx-datetime` (opt-in)
+
+`ktoml-core` parses and validates all TOML date-times itself and does **not** depend on a date library.
+Out of the box:
+
+* **offset date-times** deserialize to the stdlib `kotlin.time.Instant`;
+* **any** date-time (offset, local date-time, local date, local time) can be deserialized into a `String`.
+
+To deserialize a **local** value into a `kotlinx.datetime` type (`LocalDate`, `LocalDateTime`,
+`LocalTime`), depend on [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime) directly (any
+recent version) — ktoml bridges to its serializers automatically.
+
+> **Migrating from earlier ktoml:** `ktoml-core` used to bring `kotlinx-datetime` in transitively;
+> now you depend on it explicitly only if you need it. If you have a `LocalDate`/`LocalDateTime`/
+> `LocalTime` field, your code will now fail to compile with `unresolved reference: LocalDate` until you
+> add `kotlinx-datetime` to your own dependencies. Projects with no date-times (or only offset
+> date-times / strings) need no changes and no longer ship `kotlinx-datetime`.
+
 ## How to use
-:heavy_exclamation_mark: as TOML is a foremost language for config files, we have also supported the deserialization from file.
-However, we are using [okio](https://github.com/square/okio) to read the file, so it will be added as a dependency to your
-project if you will import [ktoml-file](https://search.maven.org/artifact/com.akuleshov7/ktoml-file). 
-Same about okio `Source` (for example if you need Streaming): [ktoml-source](https://search.maven.org/artifact/com.akuleshov7/ktoml-source).
-For basic scenarios of decoding strings you can simply use [ktoml-core](https://search.maven.org/artifact/com.akuleshov7/ktoml-core).
+For basic string encoding and decoding, use
+[ktoml-core](https://central.sonatype.com/artifact/com.akuleshov7/ktoml-core). The optional adapters expose extensions
+on the configured `Toml` instance and leave caller-provided sources and sinks open:
+
+```kotlin
+// com.akuleshov7:ktoml-okio
+@file:OptIn(com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class)
+
+import com.akuleshov7.ktoml.okio.decodeFromBufferedSource
+import com.akuleshov7.ktoml.okio.encodeToBufferedSink
+
+val config = Toml.decodeFromBufferedSource<MyConfig>(bufferedSource)
+Toml.encodeToBufferedSink(config, bufferedSink)
+```
+
+```kotlin
+// com.akuleshov7:ktoml-kotlinx-io
+@file:OptIn(com.akuleshov7.ktoml.annotations.ExperimentalKtomlApi::class)
+
+import com.akuleshov7.ktoml.io.decodeFromSource
+import com.akuleshov7.ktoml.io.encodeToSink
+
+val config = Toml.decodeFromSource<MyConfig>(source)
+Toml.encodeToSink(config, sink)
+```
+
+The adapters neither close nor flush handles. Open files through the `FileSystem` belonging to the I/O library your
+application already uses, and manage those handles with `use`. `ktoml-file` remains an Okio-backed compatibility
+convenience; it is not duplicated for kotlinx-io.
 
 :heavy_exclamation_mark: don't forget to add the serialization plugin `kotlin("plugin.serialization")` to your project.
 Otherwise, `@Serialization` annotation won't work properly.
@@ -170,11 +227,40 @@ val result = Toml.partiallyDecodeFromString<MyClassOnlyForTable>(serializer(), /
 </details>
 
 <details>
-<summary>Toml File deserialization</summary>
+<summary>Decoding an already-parsed node (parse once, decode many)</summary>
+
+`partiallyDecodeFromString` re-parses the whole input on every call. When you need to decode several
+tables from the same document, parse it **once** with `tomlParser`, traverse the resulting AST, and
+decode the nodes you care about with `decodeFromTomlNode` — no re-parsing per node.
+
+This is also the building block for binding a set of nested tables to a `Map` keyed by the table path
+(TOML's data model is nested, so ktoml does not invent a flat path-keyed map — you compose it yourself
+with full control):
 
 ```kotlin
-// add com.akuleshov7:ktoml-file to your project
-import com.akuleshov7.ktoml.file
+@Serializable
+data class Foobar(val foo: String, val bar: String)
+
+// [a]          -> "a"
+// [b.a], [b.b] -> "b.a", "b.b"
+// [x.y.z]      -> "x.y.z"
+val file = Toml.tomlParser.parseString(/* string with a toml input */)   // a single parse
+val byPath: Map<String, Foobar> = file.getRealTomlTables().associate { table ->
+    table.fullTableKey.toString() to Toml.decodeFromTomlNode<Foobar>(table)
+}
+
+// or decode a single, already-picked table/file node:
+val server = file.findTableInAstByName("server")!!
+val decoded = Toml.decodeFromTomlNode<Foobar>(server)
+```
+</details>
+
+<details>
+<summary>Legacy Toml File deserialization</summary>
+
+```kotlin
+// deprecated compatibility API from com.akuleshov7:ktoml-file
+import com.akuleshov7.ktoml.file.TomlFileReader
 
 val resultFromString = TomlFileReader.decodeFromFile<MyClass>(serializer(), /* file path to toml file */)
 val resultFromList = TomlFileReader.partiallyDecodeFromFile<MyClass>(serializer(),  /* file path to toml file */, /* table name */)
@@ -184,16 +270,43 @@ val resultFromList = TomlFileReader.partiallyDecodeFromFile<MyClass>(serializer(
 For your particular case you can implement your own source provider based on
 [okio.Source](https://github.com/square/okio/blob/1d86391ca0ee8e5730fd0bbb6bee94c4a41ad945/okio/src/commonMain/kotlin/okio/Source.kt#L8).
 For this purpose we have prepared `toml-source` module and implemented an 
-[example](https://github.com/akuleshov7/ktoml/blob/main/ktoml-source/src/jvmMain/kotlin/com/akuleshov7/ktoml/source/JvmStreams.kt) 
+[example](https://github.com/orchestr7/ktoml/blob/main/ktoml-source/src/jvmMain/kotlin/com/akuleshov7/ktoml/source/JvmStreams.kt)
 with java streams for JVM target.
 
 ```kotlin
-// add com.akuleshov7:ktoml-source to your project
-import com.akuleshov7.ktoml.source
+// deprecated compatibility API from com.akuleshov7:ktoml-source
+import com.akuleshov7.ktoml.source.TomlSourceReader
 
-val resultFromString = TomlFileReader.decodeFromSource<MyClass>(serializer(), /* your source */)
-val resultFromList = TomlFileReader.partiallyDecodeFromSource<MyClass>(serializer(),  /* your source */, /* table name */)
+val resultFromString = TomlSourceReader.decodeFromSource<MyClass>(serializer(), /* your source */)
+val resultFromList = TomlSourceReader.partiallyDecodeFromSource<MyClass>(serializer(),  /* your source */, /* table name */)
 ```
+</details>
+
+<details>
+<summary>Decoding a real-world config file (e.g. Gradle <code>libs.versions.toml</code>)</summary>
+
+Any existing TOML config is just a TOML file, so ktoml can decode it straight into your own
+`@Serializable` classes — no special support needed. A Gradle version catalog is a good example:
+it uses maps of version / library / plugin declarations, `[bundles]`, inline `version = { ... }`
+objects, and the dotted `version.ref` key.
+
+```kotlin
+@Serializable
+data class GradleVersionCatalog(
+    val versions: Map<String, VersionDeclaration> = emptyMap(),
+    val libraries: Map<String, LibraryDeclaration> = emptyMap(),
+    val bundles: Map<String, List<String>> = emptyMap(),
+    val plugins: Map<String, PluginDeclaration> = emptyMap(),
+)
+// LibraryDeclaration has e.g. `module`, an inline `@SerialName("version")` object,
+// and the dotted `@SerialName("version.ref")` key.
+
+val catalog = Toml(inputConfig = TomlInputConfig(ignoreUnknownNames = true))
+    .decodeFromString<GradleVersionCatalog>(/* contents of libs.versions.toml */)
+```
+
+See [`GradleVersionCatalogTest`](ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/structures/GradleVersionCatalogTest.kt)
+for a complete, runnable example (including the `version.ref` and inline-table cases).
 </details>
 
 <details>
@@ -241,13 +354,13 @@ val toml = Toml.encodeToString(MyClass(/* ... */))
 </details>
 
 <details>
-<summary>Toml File serialization</summary>
+<summary>Legacy Toml File serialization</summary>
 
 ```kotlin
-// add com.akuleshov7:ktoml-file to your project
+// deprecated compatibility API from com.akuleshov7:ktoml-file
 import com.akuleshov7.ktoml.file.TomlFileWriter
 
-TomlFileWriter.encodeToFile<MyClass>(serializer(), /* file path to toml file */)
+TomlFileWriter.encodeToFile(MyClass.serializer(), value, /* file path to toml file */)
 ```
 </details>
 
@@ -295,7 +408,7 @@ Toml(
 ```
 
 ## How ktoml works: examples
-:heavy_exclamation_mark: You can check how below examples work in [decoding ReadMeExampleTest](https://github.com/akuleshov7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/ReadMeExampleTest.kt) and [encoding ReadMeExampleTest](https://github.com/akuleshov7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/encoders/ReadMeExampleTest.kt).
+:heavy_exclamation_mark: You can check how below examples work in [decoding ReadMeExampleTest](https://github.com/orchestr7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/decoders/ReadMeExampleTest.kt) and [encoding ReadMeExampleTest](https://github.com/orchestr7/ktoml/blob/main/ktoml-core/src/commonTest/kotlin/com/akuleshov7/ktoml/encoders/ReadMeExampleTest.kt).
 
 <details>
 <summary>Deserialization</summary>
