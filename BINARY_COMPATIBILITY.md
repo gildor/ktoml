@@ -11,7 +11,8 @@ Recompile consumers, including libraries that expose or use ktoml types, and rev
   `kotlin.time.Instant`; strings can represent all four TOML date-time kinds.
 * The AST preserves date-time text in `TomlOffsetDateTime`, `TomlLocalDateTime`, `TomlLocalDate`
   and `TomlLocalTime`. `TomlDateTime.content` and `TomlEmitter.emitValue` use these representations.
-  Old emitter overloads accepting `kotlinx.datetime` types are no longer present.
+  Emitter overloads accepting concrete date/time types are replaced by these wrappers, including
+  the `kotlin.time.Instant` overload present on current upstream main.
 * AST/parser/encoder utilities marked `@InternalKtomlApi` now require explicit opt-in. These
   signatures are not stable contracts. Subclassing `Toml`, `TomlEmitter` or `TomlWriter` also
   requires internal opt-in. `TomlElement`, node/element decoding and the new I/O
@@ -100,3 +101,8 @@ Temporarily change `TomlInputConfig.ignoreUnknownNames` from `public val` to `in
 The library must compile but both JVM and KLib API checks must fail on the removed public
 getter/property. Restore the source without regenerating dumps and rerun strict `apiCheck`.
 This tests signature detection independently of a deliberately corrupted golden file.
+
+During integration, both published upstream audits produced signature diffs. The same diagnostics
+passed when pointed at the integrated JVM jar and JS KLib themselves. Removing the public
+`ignoreUnknownNames` getter compiled successfully and failed both JVM and KLib API checks; the
+source was restored with all ten baseline file hashes unchanged.
