@@ -5,6 +5,7 @@
 package com.akuleshov7.ktoml.parsers
 
 import com.akuleshov7.ktoml.exceptions.ParseException
+import com.akuleshov7.ktoml.utils.validateIntegerSyntax
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
 
@@ -227,6 +228,18 @@ internal fun String.trimBrackets(): String = trimSymbols(this, "[", "]")
  * @return string with the result
  */
 internal fun String.removeTrailingComma(): String = this.removeSuffix(",")
+
+/**
+ * Classifies integer candidates without preventing fallback to other TOML primitive types.
+ *
+ * @return true when the shared integer syntax validator accepts this value
+ */
+internal fun String.isValidTomlIntegerLiteral(): Boolean = try {
+    validateIntegerSyntax(0)
+    true
+} catch (ex: ParseException) {
+    false
+}
 
 /**
  * Checks whether this string is a TOML float literal.
