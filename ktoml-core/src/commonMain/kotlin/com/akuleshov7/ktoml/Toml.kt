@@ -42,6 +42,7 @@ public open class Toml(
     // the number of created parsers and writers for each toml
     @InternalKtomlApi
     public val tomlParser: TomlParser = TomlParser(inputConfig)
+
     @InternalKtomlApi
     public val tomlWriter: TomlWriter = TomlWriter(outputConfig)
 
