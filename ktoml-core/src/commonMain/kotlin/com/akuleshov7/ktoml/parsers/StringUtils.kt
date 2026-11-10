@@ -5,9 +5,9 @@
 package com.akuleshov7.ktoml.parsers
 
 import com.akuleshov7.ktoml.exceptions.ParseException
-import com.akuleshov7.ktoml.utils.validateIntegerSyntax
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
+import com.akuleshov7.ktoml.utils.validateIntegerSyntax
 
 private const val MULTILINE_STRING_QUOTE_LENGTH = 3
 private const val TOML_DECIMAL_INTEGER_PATTERN = "(?:0|[1-9](?:_?[0-9])*)"
