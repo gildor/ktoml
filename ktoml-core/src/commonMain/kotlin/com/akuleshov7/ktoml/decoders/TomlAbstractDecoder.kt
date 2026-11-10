@@ -4,9 +4,14 @@ import com.akuleshov7.ktoml.exceptions.IllegalTypeException
 import com.akuleshov7.ktoml.exceptions.InternalDecodingException
 import com.akuleshov7.ktoml.tree.nodes.TomlKeyValue
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlBasicString
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlDateTime
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlDouble
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLiteralString
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDate
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalDateTime
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLocalTime
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlLong
+import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlOffsetDateTime
 import com.akuleshov7.ktoml.tree.nodes.pairs.values.TomlUnsignedLong
 import com.akuleshov7.ktoml.utils.FloatingPointLimitsEnum
 import com.akuleshov7.ktoml.utils.FloatingPointLimitsEnum.*
@@ -15,11 +20,6 @@ import com.akuleshov7.ktoml.utils.IntegerLimitsEnum.*
 import com.akuleshov7.ktoml.utils.UnsignedIntegerLimitsEnum
 import com.akuleshov7.ktoml.utils.UnsignedIntegerLimitsEnum.*
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
-
-import kotlin.time.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.serializer
@@ -31,12 +31,7 @@ import kotlinx.serialization.encoding.AbstractDecoder
  * It serves one aim: to define decoders for primitive types that are allowed in TOML.
  */
 @ExperimentalSerializationApi
-@OptIn(kotlin.time.ExperimentalTime::class)
 public abstract class TomlAbstractDecoder : AbstractDecoder() {
-    private val instantSerializer = Instant.serializer()
-    private val localDateTimeSerializer = LocalDateTime.serializer()
-    private val localDateSerializer = LocalDate.serializer()
-    private val localTimeSerializer = LocalTime.serializer()
     private val unsignedByteSerializer = UByte.serializer()
     private val unsignedShortSerializer = UShort.serializer()
     private val unsignedIntSerializer = UInt.serializer()
@@ -92,10 +87,7 @@ public abstract class TomlAbstractDecoder : AbstractDecoder() {
     override fun decodeString(): String = decodePrimitiveType()
 
     protected fun DeserializationStrategy<*>.isDateTime(): Boolean =
-        descriptor == instantSerializer.descriptor ||
-                descriptor == localDateTimeSerializer.descriptor ||
-                descriptor == localDateSerializer.descriptor ||
-                descriptor == localTimeSerializer.descriptor
+        descriptor.serialName in dateTimeSerialNames
 
     protected fun DeserializationStrategy<*>.isUnsigned(): Boolean =
         descriptor == unsignedByteSerializer.descriptor ||
@@ -106,15 +98,14 @@ public abstract class TomlAbstractDecoder : AbstractDecoder() {
     @Suppress("UNCHECKED_CAST")
     override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T =
         when (deserializer.descriptor) {
-            instantSerializer.descriptor -> decodePrimitiveType<Instant>() as T
-            localDateTimeSerializer.descriptor -> decodePrimitiveType<LocalDateTime>() as T
-            localDateSerializer.descriptor -> decodePrimitiveType<LocalDate>() as T
-            localTimeSerializer.descriptor -> decodePrimitiveType<LocalTime>() as T
-
             unsignedByteSerializer.descriptor -> decodeUnsignedPrimitiveType<UByte>() as T
             unsignedShortSerializer.descriptor -> decodeUnsignedPrimitiveType<UShort>() as T
             unsignedIntSerializer.descriptor -> decodeUnsignedPrimitiveType<UInt>() as T
             unsignedLongSerializer.descriptor -> decodeUnsignedPrimitiveType<ULong>() as T
+            // Date-time types (kotlin.time.Instant, kotlinx.datetime.Local*) are not handled here:
+            // their serializers are primitive strings, so they fall through to the type's own
+            // serializer via super, and `decodeString()` below hands it the raw literal to parse.
+            // This is what keeps ktoml-core independent of any date library.
             else -> if (deserializer.descriptor.kind == SerialKind.CONTEXTUAL) {
                 deserializer.deserialize(this)
             } else {
@@ -131,6 +122,9 @@ public abstract class TomlAbstractDecoder : AbstractDecoder() {
      * >>> stored in Toml Tree: TomlString("5")
      * >>> expected by user: data class A(val a: Int)
      * >>> TomlString cannot be cast to Int, user made a mistake -> IllegalTypeException
+     *
+     * Date-time literals are kept as raw text in the AST; when a date-time serializer (or a `String`
+     * field) asks for [decodeString], we return that raw text and let the serializer parse it.
      */
     private inline fun <reified T> decodePrimitiveType(): T {
         val keyValue = decodeKeyValue()
@@ -138,7 +132,13 @@ public abstract class TomlAbstractDecoder : AbstractDecoder() {
             return when (val value = keyValue.value) {
                 is TomlLong -> decodeInteger(value.content as Long, keyValue.lineNo)
                 is TomlDouble -> decodeFloatingPoint(value.content as Double, keyValue.lineNo)
-                else -> keyValue.value.content as T
+                else -> when (val content = value.content) {
+                    is TomlOffsetDateTime -> content.raw as T
+                    is TomlLocalDateTime -> content.raw as T
+                    is TomlLocalDate -> content.raw as T
+                    is TomlLocalTime -> content.raw as T
+                    else -> content as T
+                }
             }
         } catch (e: ClassCastException) {
             throw IllegalTypeException(
@@ -287,6 +287,20 @@ public abstract class TomlAbstractDecoder : AbstractDecoder() {
             "<$typeName> type is not allowed by toml specification," +
                     " use <$requiredType> instead" +
                     " (key = ${keyValue.key.last()}; value = ${keyValue.value.content})", keyValue.lineNo
+        )
+    }
+
+    private companion object {
+        /**
+         * Serial names of the date-time serializers ktoml supports. Matching by serial name (rather than
+         * by descriptor identity) lets ktoml-core recognize `kotlinx.datetime.Local*` types without
+         * depending on kotlinx-datetime.
+         */
+        private val dateTimeSerialNames = setOf(
+            TomlDateTime.INSTANT_SERIAL_NAME,
+            TomlDateTime.LOCAL_DATE_TIME_SERIAL_NAME,
+            TomlDateTime.LOCAL_DATE_SERIAL_NAME,
+            TomlDateTime.LOCAL_TIME_SERIAL_NAME,
         )
     }
 }

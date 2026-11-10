@@ -1,11 +1,11 @@
 package com.akuleshov7.ktoml.decoders.primitives
 
 import com.akuleshov7.ktoml.Toml
-import com.akuleshov7.ktoml.exceptions.ParseException
-import kotlin.time.Instant
+import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -74,16 +74,17 @@ class DateTimeDecoderTest {
 
     @Test
     fun testInvalidData() {
-        assertFailsWith<ParseException> {
+        // ParseException is internal to ktoml-core; from another module assert its public supertype.
+        assertFailsWith<TomlDecodingException> {
             Toml.decodeFromString<InvalidInstant>("instant=1979-05-27T07:32:00INVALID")
         }
-        assertFailsWith<ParseException> {
+        assertFailsWith<TomlDecodingException> {
             Toml.decodeFromString<InvalidDateTime>("dateTime=1979/05/27T07:32:00")
         }
-        assertFailsWith<ParseException> {
+        assertFailsWith<TomlDecodingException> {
             Toml.decodeFromString<InvalidDate>("date=1979/05/27")
         }
-        assertFailsWith<ParseException> {
+        assertFailsWith<TomlDecodingException> {
             Toml.decodeFromString<InvalidTime>("time=07/35/12")
         }
     }

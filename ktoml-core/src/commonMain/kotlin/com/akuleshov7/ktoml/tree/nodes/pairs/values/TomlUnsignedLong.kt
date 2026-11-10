@@ -1,8 +1,11 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
+import com.akuleshov7.ktoml.exceptions.IllegalTypeException
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.utils.BIN_RADIX
+import com.akuleshov7.ktoml.utils.DEC_RADIX
 import com.akuleshov7.ktoml.utils.HEX_RADIX
 import com.akuleshov7.ktoml.utils.OCT_RADIX
 import com.akuleshov7.ktoml.utils.validateIntegerSyntax
@@ -16,6 +19,7 @@ import com.akuleshov7.ktoml.writers.TomlEmitter
  * @property content
  * @property representation The representation of the integer.
  */
+@InternalKtomlApi
 public class TomlUnsignedLong internal constructor(
     override var content: Any,
     public var representation: IntegerRepresentation = DECIMAL
@@ -41,19 +45,29 @@ public class TomlUnsignedLong internal constructor(
                 val (prefix, digits) = value
 
                 when (prefix) {
-                    "0b" -> digits.toULong(BIN_RADIX) to BINARY
-                    "0o" -> digits.toULong(OCT_RADIX) to OCTAL
-                    "0x" -> digits.toULong(HEX_RADIX) to HEX
+                    "0b" -> digits.parse(BIN_RADIX, BINARY, lineNo)
+                    "0o" -> digits.parse(OCT_RADIX, OCTAL, lineNo)
+                    "0x" -> digits.parse(HEX_RADIX, HEX, lineNo)
                     else -> throw ParseException(
                         "Invalid radix prefix for ULong number <$this> $prefix: expected \"0b\", \"0o\", or \"0x\".",
                         lineNo
                     )
                 }
             } else {
-                value.first().toULong() to DECIMAL
+                value.first().removePrefix("+").parse(DEC_RADIX, DECIMAL, lineNo)
             }
             validateIntegerSyntax(lineNo)
             return parsed
+        }
+
+        private fun String.parse(
+            radix: Int,
+            representation: IntegerRepresentation,
+            lineNo: Int
+        ): Pair<ULong, IntegerRepresentation> = try {
+            toULong(radix) to representation
+        } catch (e: NumberFormatException) {
+            throw IllegalTypeException("Integer <$this> is outside the unsigned Long range.", lineNo)
         }
     }
 }

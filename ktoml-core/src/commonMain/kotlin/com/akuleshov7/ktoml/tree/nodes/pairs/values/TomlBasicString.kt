@@ -1,11 +1,13 @@
 package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.convertLineEndingBackslash
 import com.akuleshov7.ktoml.parsers.getCountOfOccurrencesOfSubstring
 import com.akuleshov7.ktoml.parsers.trimMultilineQuotes
 import com.akuleshov7.ktoml.parsers.trimQuotes
+import com.akuleshov7.ktoml.utils.checkNoTomlControlChars
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.escapeSpecialCharacters
 import com.akuleshov7.ktoml.writers.TomlEmitter
@@ -15,6 +17,7 @@ import com.akuleshov7.ktoml.writers.TomlEmitter
  * @property content
  * @property multiline Whether the string is multiline.
  */
+@InternalKtomlApi
 public class TomlBasicString internal constructor(
     override var content: Any,
     public var multiline: Boolean = false
@@ -45,6 +48,7 @@ public class TomlBasicString internal constructor(
                     // please note that for a better user experience we will also trim spaces for a standalone closing quotes
                     trimMultilineQuotes()
                         .checkCountOfOtherUnescapedQuotes(lineNo)
+                        .checkNoTomlControlChars(lineNo, allowLineFeed = true)
                         .convertLineEndingBackslash()
                         .convertSpecialCharacters(lineNo)
 
@@ -52,6 +56,7 @@ public class TomlBasicString internal constructor(
                 startsWith("\"") && endsWith("\"") ->
                     trimQuotes()
                         .checkOtherQuotesAreEscaped(lineNo)
+                        .checkNoTomlControlChars(lineNo)
                         .convertSpecialCharacters(lineNo)
 
                 // ============= other ===========

@@ -2,12 +2,13 @@ package com.akuleshov7.ktoml.tree.nodes.pairs.values
 
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.exceptions.TomlWritingException
-import com.akuleshov7.ktoml.parsers.convertLineEndingBackslash
 import com.akuleshov7.ktoml.parsers.getCountOfOccurrencesOfSubstring
 import com.akuleshov7.ktoml.parsers.trimMultilineLiteralQuotes
 import com.akuleshov7.ktoml.parsers.trimSingleQuotes
+import com.akuleshov7.ktoml.utils.checkNoTomlControlChars
 import com.akuleshov7.ktoml.utils.isControlChar
 import com.akuleshov7.ktoml.utils.isMultilineControlChar
 import com.akuleshov7.ktoml.utils.newLineChar
@@ -20,6 +21,7 @@ import com.akuleshov7.ktoml.writers.TomlEmitter
  * @property content
  * @property multiline Whether the string is multiline.
  */
+@InternalKtomlApi
 public class TomlLiteralString internal constructor(
     override var content: Any,
     public var multiline: Boolean = false
@@ -50,16 +52,18 @@ public class TomlLiteralString internal constructor(
                 startsWith("'''") && endsWith("'''") -> {
                     val contentString = trimMultilineLiteralQuotes()
                         .checkCountOfOtherQuotes(lineNo)
+                        .checkNoTomlControlChars(lineNo, allowLineFeed = true)
                     val rawContent = if (config.allowEscapedQuotesInLiteralStrings) {
                         contentString.convertSingleQuotes()
                     } else {
                         contentString
                     }
-                    rawContent.convertLineEndingBackslash()
+                    rawContent
                 }
                 // ====== basic literal string (') =======
                 startsWith("'") && endsWith("'") -> {
                     val contentString = trimSingleQuotes()
+                        .checkNoTomlControlChars(lineNo)
                     if (config.allowEscapedQuotesInLiteralStrings) contentString.convertSingleQuotes() else contentString
                 }
                 else ->

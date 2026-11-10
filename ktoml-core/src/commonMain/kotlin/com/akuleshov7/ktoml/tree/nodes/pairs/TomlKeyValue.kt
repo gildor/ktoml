@@ -2,6 +2,7 @@ package com.akuleshov7.ktoml.tree.nodes
 
 import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.indexOfNextOutsideQuotes
 import com.akuleshov7.ktoml.parsers.takeBeforeComment
@@ -34,8 +35,10 @@ internal interface TomlKeyValue {
     fun createTomlTableFromDottedKey(parentNode: TomlNode): TomlTable {
         // for a key: a.b.c it will be [a, b]
         val syntheticTablePrefix = this.key.keyParts.dropLast(1)
-        // creating new key with the last dot-separated fragment
-        val realKeyWithoutDottedPrefix = TomlKey(key.last(), lineNo)
+        // creating new key from the last dot-separated fragment. We reuse the original raw token
+        // (e.g. the quoted "google.com") instead of re-parsing key.last(), which would unquote and
+        // then wrongly re-split a quoted dot back into several tokens.
+        val realKeyWithoutDottedPrefix = TomlKey(listOf(key.keyParts.last()))
         // updating current KeyValue with this key
         this.key = realKeyWithoutDottedPrefix
         // tables should contain fully qualified name, so we need to add parental name
@@ -77,6 +80,7 @@ internal interface TomlKeyValue {
  * @param config
  * @return an object of type Array that was parsed from string
  */
+@InternalKtomlApi
 public fun String.parseList(lineNo: Int, config: TomlInputConfig): TomlArray = TomlArray(this, lineNo, config)
 
 /**
@@ -87,6 +91,7 @@ public fun String.parseList(lineNo: Int, config: TomlInputConfig): TomlArray = T
  * @return a resulted key-value pair
  * @throws ParseException
  */
+@InternalKtomlApi
 public fun String.splitKeyValue(lineNo: Int, config: TomlInputConfig = TomlInputConfig()): Pair<String, String> {
     val pair = takeBeforeComment(config.allowEscapedQuotesInLiteralStrings)
 
@@ -121,11 +126,12 @@ public fun String.splitKeyValue(lineNo: Int, config: TomlInputConfig = TomlInput
  * @param config
  * @return parsed TomlNode value
  */
+@InternalKtomlApi
 public fun String.parseValue(lineNo: Int, config: TomlInputConfig): TomlValue = when (this) {
     // ===== special values
     "+inf", "inf" -> TomlDouble(Double.POSITIVE_INFINITY)
     "-inf" -> TomlDouble(Double.NEGATIVE_INFINITY)
-    "-nan", "+nan", "nan", "-NaN", "+NaN", "NaN" -> TomlDouble(Double.NaN)
+    "-nan", "+nan", "nan" -> TomlDouble(Double.NaN)
     // ===== null values
     "null", "nil", "NULL", "NIL", "" -> if (config.allowNullValues) {
         TomlNull()

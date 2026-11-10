@@ -5,6 +5,7 @@
 package com.akuleshov7.ktoml.tree.nodes
 
 import com.akuleshov7.ktoml.TomlOutputConfig
+import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.parsers.parseKeyName
 import com.akuleshov7.ktoml.parsers.takeBeforeComment
@@ -27,6 +28,7 @@ import kotlin.jvm.JvmStatic
  * there is no such table in the input
  */
 @Suppress("COMMENT_WHITE_SPACE")
+@InternalKtomlApi
 public class TomlTable(
     public var fullTableKey: TomlKey,
     override val lineNo: Int,
@@ -44,6 +46,13 @@ public class TomlTable(
 
     // short table name (only the name without parental prefix, like a - it is used in decoder and encoder)
     public override val name: String = fullTableKey.keyParts.last().parseKeyName(lineNo)
+
+    /**
+     * How this table node came into existence. Used by table-tree validation to reject
+     * redefinitions that the TOML spec forbids (e.g. defining the same `[table]` header twice,
+     * or appending to an explicitly-defined table with dotted keys).
+     */
+    internal var provenance: TableProvenance = TableProvenance.EXPLICIT_HEADER
 
     public constructor(
         content: String,
@@ -276,11 +285,33 @@ public class TomlTable(
  * @property open The header opening sequence.
  * @property close The header closing sequence.
  */
+@InternalKtomlApi
 public enum class TableType(
     internal val open: String,
     internal val close: String
 ) {
     ARRAY("[[", "]]"),
     PRIMITIVE("[", "]"),
+    ;
+}
+
+/**
+ * Describes how a [TomlTable] node was introduced into the AST. This drives redefinition
+ * validation: the TOML spec allows implicit super-tables to later be made explicit, but forbids
+ * redefining an already-explicit table, redefining a dotted-key table with a header, or appending
+ * to an explicitly-closed table via dotted keys.
+ *
+ * @property EXPLICIT_HEADER created by an explicit `[table]` / `[[array]]` header
+ * @property IMPLICIT_SUPER created as a synthetic super-table for a deeper header (e.g. `a`, `a.b`
+ *   when only `[a.b.c]` was written) — may still be made explicit later
+ * @property DOTTED_KEY created as a synthetic table for a dotted key (e.g. `a.b` from `a.b.c = 1`)
+ * @property INLINE_TABLE created from an inline table value (e.g. `a = { b = 1 }`) — fully closed,
+ *   may not be extended or redefined afterwards
+ */
+internal enum class TableProvenance {
+    DOTTED_KEY,
+    EXPLICIT_HEADER,
+    IMPLICIT_SUPER,
+    INLINE_TABLE,
     ;
 }
