@@ -4,11 +4,11 @@ import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.annotations.InternalKtomlApi
 import com.akuleshov7.ktoml.exceptions.IllegalTypeException
 import com.akuleshov7.ktoml.exceptions.ParseException
+import com.akuleshov7.ktoml.parsers.isValidTomlIntegerLiteral
 import com.akuleshov7.ktoml.utils.BIN_RADIX
 import com.akuleshov7.ktoml.utils.DEC_RADIX
 import com.akuleshov7.ktoml.utils.HEX_RADIX
 import com.akuleshov7.ktoml.utils.OCT_RADIX
-import com.akuleshov7.ktoml.utils.validateIntegerSyntax
 import com.akuleshov7.ktoml.writers.IntegerRepresentation
 import com.akuleshov7.ktoml.writers.IntegerRepresentation.*
 import com.akuleshov7.ktoml.writers.TomlEmitter
@@ -39,9 +39,13 @@ public class TomlUnsignedLong internal constructor(
         private val prefixRegex = "(?<=0[box])".toRegex()
 
         private fun String.parse(lineNo: Int): Pair<ULong, IntegerRepresentation> {
+            if (!isValidTomlIntegerLiteral()) {
+                throw NumberFormatException("Invalid TOML integer literal <$this>")
+            }
+
             val value = replace("_", "").split(prefixRegex, limit = 2)
 
-            val parsed = if (value.size == 2) {
+            return if (value.size == 2) {
                 val (prefix, digits) = value
 
                 when (prefix) {
@@ -56,8 +60,6 @@ public class TomlUnsignedLong internal constructor(
             } else {
                 value.first().removePrefix("+").parse(DEC_RADIX, DECIMAL, lineNo)
             }
-            validateIntegerSyntax(lineNo)
-            return parsed
         }
 
         private fun String.parse(
