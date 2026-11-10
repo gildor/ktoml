@@ -170,4 +170,59 @@ class TomlElementTest {
             Toml.decodeFromTomlElement<List<Known>>(servers),
         )
     }
+
+    private object RetainedElementSerializer : KSerializer<TomlElement> {
+        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("RetainedElement", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): TomlElement = (decoder as TomlDecoder).decodeTomlElement()
+
+        override fun serialize(encoder: Encoder, value: TomlElement): Nothing = error("Decode-only test serializer")
+    }
+
+    private object ElementKindSerializer : KSerializer<TomlElementKind> {
+        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ElementKind", PrimitiveKind.STRING)
+
+        override fun deserialize(decoder: Decoder): TomlElementKind = (decoder as TomlDecoder).decodeTomlElement().kind
+
+        override fun serialize(encoder: Encoder, value: TomlElementKind): Nothing = error("Decode-only test serializer")
+    }
+
+    @Serializable
+    private data class RetainedValue(@Serializable(with = RetainedElementSerializer::class) val value: TomlElement)
+
+    @Test
+    fun preservesRetainedValueKindForCustomSerializers() {
+        val values = mapOf(
+            "\"one\"" to TomlElementKind.STRING,
+            "42" to TomlElementKind.INTEGER,
+            "1.5" to TomlElementKind.FLOAT,
+            "true" to TomlElementKind.BOOLEAN,
+            "1979-05-27" to TomlElementKind.DATE_TIME,
+            "[1, 2]" to TomlElementKind.ARRAY,
+        )
+        for ((source, kind) in values) {
+            val retained = Toml.decodeFromString(RetainedValue.serializer(), "value = $source").value
+            assertEquals(kind, retained.kind)
+            assertEquals(kind, Toml.decodeFromTomlElement(ElementKindSerializer, retained))
+        }
+    }
+
+    @Serializable
+    private data class TwoFields(val first: String, val second: String)
+
+    @Test
+    fun repeatedlyDecodesRetainedTablesAsMapsAndClasses() {
+        val source = "first = \"one\"\nsecond = \"two\""
+        val elements = listOf(
+            Toml.parseToTomlElement(source),
+            Toml.parseToTomlElement("[section]\n$source").tables().getValue("section"),
+        )
+        for (element in elements) {
+            repeat(3) {
+                assertEquals(mapOf("first" to "one", "second" to "two"), Toml.decodeFromTomlElement(element))
+                assertEquals(TwoFields("one", "two"), Toml.decodeFromTomlElement(element))
+                assertEquals(setOf("first", "second"), element.keys())
+            }
+        }
+    }
 }

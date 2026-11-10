@@ -190,8 +190,7 @@ public class TomlMapDecoder private constructor(
         decodeSerializableValue(deserializer)
     } else {
         // To have a type check, delegate decoding to TomlMainDecoder
-        var rootNode = TomlFile()
-        rootNode.appendChild(processedNode)
+        val rootNode = TomlElement(processedNode).asFileNode()
         TomlMainDecoder.decode(deserializer, rootNode, config, toml, processedNode)
     }
 
